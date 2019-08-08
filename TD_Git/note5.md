@@ -16,7 +16,18 @@
 to do with processes “F”
 
 
--**`df -h`** Show free space on partitions in a readable format
+-**`df `** 
+
+> Disk Free reports file system disk space usage
+
+1. `-h` Show free space on partitions in a readable format
+2. `-m` Display in MB
+3. `-i` Display in Inode
+4. `-T` To display file system type
+5. `-t (format)` Display in specific file type
+6. `-x (format)` Display exclude a specific file type
+7. `-hT (directory)` Display space available for a directory
+
 
 -**`free -g`** Show RAM usage in gigabytes 
 
