@@ -20,7 +20,7 @@ to do with processes “F”
 
 -**`df `** 
 
-> Disk Free reports file system disk space usage
+> Disk Free reports file system disk space available
 
 1. `-h` Show free space on partitions in a readable format
 2. `-m` Display in MB
@@ -29,6 +29,16 @@ to do with processes “F”
 5. `-t (format)` Display in specific file type
 6. `-x (format)` Display exclude a specific file type
 7. `-hT (directory)` Display space available for a directory
+
+-**`du `** 
+
+> Disk Usage reports file system disk space usage
+
+1. `du` By default, it display the disk usage of the current directory
+2. `FILE` Display the disk usage of FILE
+3. `--apparent-size FILE` Display the actual size of the file in system
+4. `wc -c FILE` has the same function as `--apparent-size FILE`
+
 
 -**`free -g`** Show RAM usage in gigabytes 
 
