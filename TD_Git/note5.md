@@ -40,8 +40,7 @@ to do with processes “F”
 4. `--apparent-size FILE` Display the actual size of the file in system
 5. `wc -c FILE` has the same function as `--apparent-size FILE`
 6. `du -B SIZE FILE` or `du --block-size=SIZE FILE` calculate usage size by SIZE
-
-=> `-h` Display usage size in human-readable f
+7. `du -c -h --apparent-size FILE1 FILE2` Display total usage actual size 
 
 
 -**`free -g`** Show RAM usage in gigabytes 
