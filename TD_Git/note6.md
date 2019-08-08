@@ -61,16 +61,16 @@
 		
 		*check errors, just display errors on stdo
 
-*1. `-a` Used for checking all filesystems. The list is taken from /etc/fstab/
-*2. `-c` Show progress bar
-*3. `-l` Locks the device to guarantee no other program will try to use the partition during the check
-*4. `-M` Do not check mounted filesystems
-*5. `-N` Only show what would be done – no actual changes are made
-*6. `-p` To check filesystems in parallel, including root
-*7. `-R` Do not check root filesystem
-*8. `-r` Provide statistics for each device that is being checked
-*9. `-T` Doesnt show the title
-*10. `-V` Provide description what is being done
+1. `-a` Used for checking all filesystems. The list is taken from /etc/fstab/
+2. `-c` Show progress bar
+3. `-l` Locks the device to guarantee no other program will try to use the partition during the check
+4. `-M` Do not check mounted filesystems
+5. `-N` Only show what would be done – no actual changes are made
+6. `-p` To check filesystems in parallel, including root
+7. `-R` Do not check root filesystem
+8. `-r` Provide statistics for each device that is being checked
+9. `-T` Doesnt show the title
+10. `-V` Provide description what is being done
 
 
 	
