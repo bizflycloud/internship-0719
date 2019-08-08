@@ -19,13 +19,17 @@
  -So với `ext4`, `btrfs` hoạt động ổn định, tin cậy và dễ quản lí hơn. `btrfs` file system thích hợp cho các server doanh nghiệp,do hiệu suất cao, tạo snapshot nhanh chóng và nhiều tính năng khác.
  
  **lệnh `fsck`**
+ 
 -Là lệnh dùng để kiểm tra tùy chọn sửa chữa một hoặc nhiều hệ thông tập tin
 cso ba chế độ hđ của `fsck` :là kiểm tra lỗi và nhắc người dùng tương tác để quyết định các vấn đề riêng lẻ 
 - kiểm tra lỗi và cố gắng tự động sửa bất kì lỗi nào 
 - kiểm tra lỗi và không cố gắng sửa chúng nhưng hiển thị các lỗi trên đầu ra tiêu chuẩn 
 lệnh`fsck`cần được chạy với quyền superuser hoặc root
-**cú pháp** `fsck [option] [file]
+
+**cú pháp** `fsck [option] [file]`
+
 **tùy chon**
+
 -`-A` đc sử dụng để kiểm tra tấtc ả các hệ thống tập tin
 -`-c` hiển thị thanh tiến trình 
 -`-l` khóa thiết bị để đảm bảo không có chương trình nào khác cố gắng sử dụng phân vùng trong quá trình kiểm tra
@@ -36,21 +40,26 @@ lệnh`fsck`cần được chạy với quyền superuser hoặc root
 **lệnh `df`**
 - là lệnh dùng để hiển thị dung lượng của hệ thống và được sử dụng bao nhiêu trong linux
 
-**cú phap** `df [option] [file]`
+**cú ph** `df [option] [file]`
 
 **tùy chon**
+
 -`-h` in tất cả các hệ thống tập tin
 -`-m` có thể được dùng để hiển thị thông tin dung lượng MB
 -`-k` có thể hiển thị thông tin dung lượng bằng KB
 -`-T` cho biết loại file của hệ thống
+
 **lệnh `du`**
+
 là lệnh dùng để kiểm tra dung lượng đã dùng trên hệ thống
  
 **cú pháp**  `du [option] [file]`
+
 **tùy chọn**
 -`-m` có thể được dùng để hiển thị thông tin dung lượng MB
 -`-k` có thể hiển thị thông tin dung lượng bằng KB
 -`-b` hiển thị thông tin dung lượng đã dùng bầng B
+
 **lệnh `mkfs`**
 - là lệnh được dùng để  xây dựng một file hệ thống trên l
 
