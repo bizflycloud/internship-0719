@@ -12,12 +12,10 @@
 
 > show system’s resources usage and processes that consume resources 
 
-
 -**`htop`** 
 
 > an improved “top”, give n easier-to-understand GUI, and action keys 
 to do with processes “F”
-
 
 
 -**`df `** 
@@ -32,18 +30,13 @@ to do with processes “F”
 6. `-x (format)` Display exclude a specific file type
 7. `-hT (directory)` Display space available for a directory
 
-
 -**`free -g`** Show RAM usage in gigabytes 
-
 
 -**`pid (process name)`** to find the pid of a process
 
-
 -**`nice -n ”number” (process name)`** set the nice number for a process 
 
-
 -**`renice “number” -p (process number)”`** reset the nice number of a process that already started
-
 
 -**`ps`**
 
@@ -61,7 +54,6 @@ to do with processes “F”
 10. `ps -g` select by EGID
 11. `ps w > ps.txt`  you can then examine the output file in a text that support widelines
 12. `ps -aux`  show all processes owned by user “x”
-
 
 
 -**Kill Process** There’re manyways to kill processes:
