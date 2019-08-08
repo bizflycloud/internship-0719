@@ -61,7 +61,7 @@
 		
 		*check errors, just display errors on stdo
 
-1. `-a` Used for checking all filesystems. The list is taken from /etc/fstab/
+1. `-a` Used for checking all filesystems. The list is taken from `/etc/fstab/`
 2. `-c` Show progress bar
 3. `-l` Locks the device to guarantee no other program will try to use the partition during the check
 4. `-M` Do not check mounted filesystems
