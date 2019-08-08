@@ -36,8 +36,12 @@ to do with processes “F”
 
 1. `du` By default, it display the disk usage of the current directory
 2. `FILE` Display the disk usage of FILE
-3. `--apparent-size FILE` Display the actual size of the file in system
-4. `wc -c FILE` has the same function as `--apparent-size FILE`
+3. `-sh Directory` Display total size of the directory
+4. `--apparent-size FILE` Display the actual size of the file in system
+5. `wc -c FILE` has the same function as `--apparent-size FILE`
+6. `du -B SIZE FILE` or `du --block-size=SIZE FILE` calculate usage size by SIZE
+
+=> `-h` Display usage size in human-readable f
 
 
 -**`free -g`** Show RAM usage in gigabytes 
