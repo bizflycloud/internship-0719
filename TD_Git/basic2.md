@@ -19,13 +19,15 @@ __Standard__
 
 __Redirect__
 > is  that you choose whether the stdi or stdo in a program to be put in 
-another program or file
-
-using PIPES: 
->	etc: echo “Script Errpr: This is an error message!” >&1
+another program or file;	etc: echo “Script Errpr: This is an error message!” >&1
 
 	=> this means you sent the error msg to a standard error channel
 
+__using PIPES:__
+
+>	etc : cat file | less
+
+=> pipe the output of the 'cat' command to 'less' which will show you only one scroll length of content at a time.
 
 	
 
