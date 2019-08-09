@@ -27,7 +27,7 @@ etc: `echo “Script Errpr: This is an error message!” >&1`
 
 __using PIPES:__
 
->	etc : cat file | less
+etc : `cat file | less`
 
 => pipe the output of the 'cat' command to 'less' which will show you only one scroll length of content at a time.
 
