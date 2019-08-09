@@ -38,9 +38,9 @@ lệnh`fsck`cần được chạy với quyền superuser hoặc root
 -`-R` không kiẻm tra hệ thống tập tin gốc 
 
 **lệnh `df`**
-- là lệnh dùng để hiển thị dung lượng của hệ thống và được sử dụng bao nhiêu trong linux
+- là lệnh dùng để hiển thị dung lượng của hệ thống và còn đc sử dụng bao nhiêu trong linux
 
-**cú ph** `df [option] [file]`
+**cú pháp** `df [option] [file]`
 
 **tùy chon**
 
@@ -61,5 +61,9 @@ là lệnh dùng để kiểm tra dung lượng đã dùng trên hệ thống
 -`-b` hiển thị thông tin dung lượng đã dùng bầng B
 
 **lệnh `mkfs`**
-- là lệnh được dùng để  xây dựng một file hệ thống trên l
+- là lệnh được dùng để  xây dựng một file hệ thống trên linux
 
+** Cú pháp **`mkfs [options] [-t type fs-options] device [size]`
+** Tùy chọn**
+ -`-t`: chỉ định laoị hệ thống tập tin sẽ đc xây dựng nếu không đc chỉ định loại hệ thống tệp mặc định sẽ đc sử dụng
+ -`-fs`: là các tùy chọn cho hệ thống đc chuyển đến trình tạo hệ thống tệp thực
