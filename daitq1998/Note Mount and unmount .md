@@ -1,3 +1,9 @@
+**Lệnh `Mount`**
+
+- Lệnh mount gắn một hệ thống tệp, nằm trên một số thiết bị hoặc thiết bị khác, vào cây tệp.
+
+**Cú pháp**`mount [option] <tên thiết bị> <điểm mount>`
+
 **Tùy chọn của `mount`** 
 - `` mount -t (type) ``  cho biết loại hệ thống tập tin nào bị mount
 - `` mount -a `` Gắn tất cả các file hệ thống (tất cả các file đã cho đc đề cập đến fstab. Các hệ thống tập tin đc gán theo thứ tự trong tập tin
