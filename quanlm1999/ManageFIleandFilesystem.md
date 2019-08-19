@@ -78,5 +78,95 @@ mkfs.ext4 /dev/sda1
 
 mke2fs -t ext4 /dev/sda1
 
-**Mounting and Unmounting Filesystems: ‘mount’, ‘umount’**
+#### Mounting and Unmounting Filesystems: ‘mount’, ‘umount’
+**Mount** là lệnh gắn 1 thiết bị lưu trữ hoặc hệ thống file vào thư mục  đã có . Thư mục đó được gọi là điểm  gắn kết 
+**Câu lệnh** mount [option] <tên thiết bị> <điểm gắn két> 
+**Option**
+* mount xem tất cả các file dã gắn kết 
+* mount -t [type] [source] [dest] to mount a device file to a directory in a file system we want to mount
+* mount -a [source] [dest] try to mount using all supported file system types
+* mount -o [option or options] specified more mount options
+* mount -o loop [filename.iso] [mount point] mount an iso image
+* mount -U uuid mount the partition that have the universal unique id "uuid"
+
+**Mount** khi boot hệ thống, chỉnh sửa file /etc/fstab theo lệnh sau: 
+**<file system> <mount point>   <type>  <options>       <dump>  <pass>**
+
+
+**Unmount** là ngắt kết nối tập tin đã gắn ra khỏi hệ thống của bạn 
+**câu lệnh** unmount <tên thiết bị> hoặc <điểm gắn kết > 
+
+#### Partitioning Disks: Understanding Partitions, Creating Partitions ‘fdisk’, Understanding RAID, ‘mdadm, Understanding LVM, create/resize/delete lvm, pv, pg.
+
+**Understanding Partitions** 
+* Partition là những phân vùng nhỏ (phân vùng logic) được chia ra từ 1 ổ cứng vật lý. Một ổ cứng có thể có 1 hoặc nhiều partition.
+* Dữ liệu trên 1 partition A sẽ được phân tách với dữ liệu trên partition B,
+* Hiện có 3 loại partition chính là: primary, extended và logical.
+  - Primary partition: đây là những phân vùng có thể được dùng để boot hệ điều hành
+  - Extended partition: là vùng dữ liệu còn lại khi ta đã phân chia ra các primary partition, extended partition chứa các logical partition trong đó. Mỗi một ổ đĩa chỉ có thể chứa 1 extended edition.
+  - Logical partition: các phân vùng nhỏ nằm trong extended partition, thường dùng để chứa dữ liệu.
+
+**Creating Partitions ‘fdisk’** 
+Fdisk là một tiện ích text-based được sử dụng để xem và quản lý các phân vùng ổ cứng trên Linux.
+**Câu lệnh** 
+sudo fdisk -l: Hiển thi danh sách phân vùng tất cả ổ đĩa 
+sudo fdisk <disk>: Vào chế độ command của ổ  đĩa đã chọn 
+* m để hiện thỉ hướng dẫn 
+* d để xóa phân vùng
+* n để tạo phân vùng mới 
+* w để lưu thay đổi
+* q để thoát mà k làm thay đổi
+
+**Understanding RAID**
+Raid là hình thức ghép nhiều ổ cứng vật lý thành một hệ ổ cứng có chức năng gia tăng tốc độ đọc/ghi dữ liệu hoặc nhằm tăng thêm sự an toàn của dữ liệu chứa trên hệ thống đĩa hoặc kết hợp cả hai yếu tố trên.
+Các loại RAID phổ biến: 
+* Raid 0 Là raid đòi hỏi tối thiểu 2 đĩa cứng và ghi dữ liệu theo phương pháp striping raid 0 truy xuất dữ liêu lớn tốc độ đọc rất nhanh.
+* Raid 1 Là raid tương tự như raid 0 nhưng ghi dữ liệu theo phương pháp mirroring :raid 1 là raid cơ bản nhất có khả năng đảm bảo an toàn dữ liệu. Dữ liệu được ghi trên 2 đĩa giống hệt nhau. Trong trường hợp dữ liệu ở đĩa 1 gặp sự cố thì dữ liệu ở đĩa 2 sẽ tiếp tục hoạt động bình thường.
+* Raid 5:được sử dụng ở cấp doanh nghiệp. RAID5 hoạt động theo phương pháp parity. Thông tin chẵn lẻ sẽ được sử dụng để xây dựng lại dữ liệu. Nó xây dựng lại từ thông tin còn lại trên các ổ đĩa tốt còn lại. Điều này sẽ bảo vệ dữ liệu của chúng ta khi ổ đĩa bị lỗi. Dử liệu trên RAID5 có thể tồn tại sau một lỗi ổ đĩa duy nhất, nếu các ổ đĩa bị lỗi nhiều hơn 1 sẽ gây mất dữ liệu.
+* Raid 6: giống như RAID5 hoạt động theo phương pháp parity. Chủ yếu được sử dụng trong một số lượng lớn các mảng. Chúng ta cần tối thiểu 4 ổ đĩa, khi có 2 ổ đĩa bị lỗi, chúng ta có thể xây dựng lại dữ liệu trong khi thay thế các ổ đĩa mới.
+* Raid 10: có thể được gọi là RAID1 + RAID0 hoặc RAID0 + RAID1. RAID10 sẽ làm cả hai công việc của Mirror và Striping. Mirror sẽ là đầu tiên và Stripe sẽ là thứ hai trong RAID10. Stripe sẽ là đầu tiên và mirror sẽ là thứ hai trong RAID01. RAID10 tốt hơn so với RAID01. 
+
+**mdadm** 
+mdadm là công cụ quản lý chuẩn để tạo RAID có thể tìm thấy trong hầu hết các bản phân phối hiện nay.
+mdadm có bảy chức năng.
+
+  * Create: Tạo một thiết bị RAID mới
+  *  Assemble: Tập hợp các thiết bị để tạo RAID.
+  * Monitor: theo dõi thiết bị RAID. RAID0 hay Linear không never have missing, spare, hay các ổ đĩa hỏng.
+  * Build
+  * Grow : thay đổi kích thước của mảng. Hiện tại nó hỗ trợ thay đổi kích thước cho RAID 1/4/5/6 và thay đổi số thiết bị trong RAID1.
+  *  Manage: thực hiện các thao tác với các thành phần của mảng như là thêm ổ đĩa và gỡ bỏ thiết bị sai hỏng.
+  *  Misc: thực hiện các thao tác khác như tẩy xóa các superblock cũ, thu thập thông tin.
+
+**Câu lệnh** 
+$ mdadm --create /dev/md0 <chế độ> <tùy chọn> <danh sách các thiết bị tham gia>.
+**ví dụ** 
+* raid 0 : $ mdadm --create --verbose /dev/md0 --level=stripe --raid-devices=2 /dev/sdb2 /dev/sdc2.
+* raid 1:
+$ mdadm --create --verbose /dev/md0 --level=mirror --raid-devices=2 /dev/sdb1 /dev/sdc1.
+$ mdadm --create --verbose /dev/md0 --level=mirror --raid-devices=2 /dev/sdb1 /dev/sdc1 --spare-devices=1 /dev/sdd1.
+--spare-devices: thiết bị dự phòng.
+* raid 5: mdadm --create --verbose /dev/md0 --level=5 --raid-devices=3 /dev/sdb1 /dev/sdc1 /dev/sdd1 --spare-devices=1 /dev/sde1.
+
+--level: chế độ raid.
+--raid-devices: số thiết bị tham gia raid.
+
+
+**Lưu lại thay đổi:** 
+$ mdadm --detail --scan >> /etc/mdadm/mdadm.conf.
+$ mdadm --detail --scan | tee /etc/mdadm.conf # chỉ dùng lần đầu.
+**Theo dõi** 
+$ mdadm --monitor /dev/md0.
+**Quản lý** 
+$ mdadm --manage/dev/md0.
+
+Xem các mảng đĩa:
+$ cat /proc/mdstat.
+Tắt một thiết bị RAID
+$ mdadm --stop /dev/md0.
+Bật lên
+$ mdadm --assemble /dev/md0 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1/.
+
+
+
 
