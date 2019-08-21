@@ -23,29 +23,34 @@ Options:
 Syslog configuration file stored in `/etc/rsyslog.conf`
 
 - syslog file has 2 parts:
-  - part 1: Log Sources
+  - part 1: Seletor
+    - Log Sources
   
-  |Sources| Meaning |
-  |--------------|---------|
-  |kernel | Logs created by kernel |
-  |auth or authpriv | Logs created by accounts authentication |
-  |mail | Mail logs |
-  |cron | Logs created by cron process |
-  |user | Logs created from user applications |
-  |lpr | Logs from printing |
-  |deamon | Logs created by background process |
-  |ftp | Logs created by ftp | 
-  |local 0 -> local 7 | Log generate in local |
+    |Sources| Meaning |
+    |--------------|---------|
+    |kernel | Logs created by kernel |
+    |auth or authpriv | Logs created by accounts authentication |
+    |mail | Mail logs |
+    |cron | Logs created by cron process |
+    |user | Logs created from user applications |
+    |lpr | Logs from printing |
+    |deamon | Logs created by background process |
+    |ftp | Logs created by ftp | 
+    |local 0 -> local 7 | Log generate in local |
 
-  - part 2: Level of Alert
+    - Level of Alert
 
-  | Alert Levels | Meaning |
-  |--------------|---------|
-  |emerg | Emergency |
-  |alert | Needs interfere right about time |
-  |crit | Critical situation |
-  |error | Errors Notifications |
-  |warn | Warning level |
-  |notice | Noticable to System |
-  |info | Info of the System |
-  |debug | Debugging of the System |
+    | Alert Levels | Meaning |
+    |--------------|---------|
+    |emerg | Emergency |
+    |alert | Needs interfere right about time |
+    |crit | Critical situation |
+    |error | Errors Notifications |
+    |warn | Warning level |
+    |notice | Noticable to System |
+    |info | Info of the System |
+    |debug | Debugging of the System |
+    
+ - part 2: Action shows the directory of where logs are saved
+  
+# Rotating L
