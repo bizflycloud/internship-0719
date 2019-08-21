@@ -53,4 +53,5 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
     
  - part 2: Action shows the directory of where logs are saved
   
-# Rotating L
+# Rotating Log
+
