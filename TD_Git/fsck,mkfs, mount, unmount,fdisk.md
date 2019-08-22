@@ -64,9 +64,12 @@ __fdisk__
 > Is an most commonly used command-line based disk manipulation utility. It can create a maximum of four new primary partition and number of logical (extended) partitions, based on size of the hard disk in system.
   
 *`fdisk -l` view all partition in system
+
 *`fdisk -l [hard disk]` specify a partition
+
 *`fdisk [h]` 
-    *choose `m` to view all available commands for the specified partition
-    *choose `d` to delete the partition you want, `w` to alter the partition table
-    *choose `n` to create new partition
+
+   *choose `m` to view all available commands for the specified partition
+   *choose `d` to delete the partition you want, `w` to alter the partition table
+   *choose `n` to create new partition
     
