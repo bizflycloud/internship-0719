@@ -90,13 +90,17 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
 5. Log compress
 
     5.1. Tùy chọn Compress: Logrotate sẽ nén tất cả các file log lại sau khi đã được rotate, mặc định bằng gzip. Nếu muốn sử dụng chương trình nén khác như bzip2, xz hoặc zip thì phải đặt tên chương trình đó thành biến sau giá trị cấu hình Compresscmd xz
+    
     5.2. Tham số Delaycompress sẽ hữu dụng trong trường hợp không muốn file log cũ phải nén ngay sau khi vừa được rotate. Thay vào đó, công việc nén sẽ được delay bằng việc sẽ nén file log cũ đó vào lần chạy rotate kế tiếp. 
+    
     5.3. Tùy chọn nocompress không sử dụng tính năng nén đối với file log cũ
   
 6. Log file permission
 
     6.1. Create a new log file with the same name over ride the older one. Syntax: `create 660 owner group`
+    
     6.2. To set the "no" option to auto-generate log file, type`nocreate`
+    
     6.3. To set datetime to be prefix of logfile names, type `Dateext`
     
 7. Execute commands before and after logrotate:
@@ -108,3 +112,11 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
 8. Debugging Logrotate
 
     Nếu muốn kiểm tra cấu hình chuẩn chưa, sử dụng tham số `-d` (debug) đối với các file cấu hình LogRotate riêng biệt.
+
+9. Mannually run Logrotate
+   
+   syntax_ex: `logrotate -vf /etc/logrotate.d/nginx`
+   
+   - `-v` verbose hiển thị thêm thông tin so với thông thường, có ích khi bạn muốn dò lỗi logrotate
+   - `-f` bắt buộc rotate ngay lập tức
+    
