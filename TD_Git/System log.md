@@ -1,6 +1,6 @@
 # System Log
 
-> Syslog is an software package in Linux system used to record "log" of the system like in kernel, deamon, cron, auth, http, dns, dhcp, ntp,..
+ Syslog is an software package in Linux system used to record "log" of the system like in kernel, deamon, cron, auth, http, dns, dhcp, ntp,..
 
 **_Log usage_**
 - Analyze the root of an event
@@ -55,3 +55,37 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
   
 # Rotating Log
 
+- Quản lý chu kỳ lặp của log, tạo log mới, nén log cũ, ...
+ 
+- Cấu hình Logrotate được lưu tại `/etc/logrotate.conf`, chứa thông tin thiết lập toàn bộ log files mà Logrotate quản lý, bao gồm chu kì lặp, dung lượng file log, nén file…
+
+- Thông tin cấu hình log file của từng ứng dụng cụ thể được lưu tại `/etc/logrotate.d/`
+
+- Để chỉ định cụ thể một hay nhiều file log với đường dẫn tuyệt đối của file log đó, phân biệt danh sách các log file cụ thể bằng khoảng trắng. ex: `/home/*/logs/access.log /home/*/logs/error.log /home/*/logs/nginx_error.log`
+
+1. Time Rotate
+    
+    1.1. Daily
+    1.2. Weekly
+    1.3. Monthly
+    1.4. Yearly
+
+2. Size rotate (K, M, G)
+
+    2.1. size ***k
+    2.2. size ***M
+    2.3. size ***G
+    
+3. Action with Empty log
+
+    3.1. missingok: nếu file log bị mất hoặc không tồn tại *.log thì logrotate sẽ tự động di chuyển tới phần cấu hình log của file log khác mà không cần phải xuất ra thông báo lỗi. Ngược lại sẽ là cấu hình nomissingok
+
+    3.2. Tham số Notifempty: không rotate log nếu file log này trống.
+    
+4. Rotate with numbers of log files
+
+  Quy định số lượng log file cũ đã được giữ lại sau khi rotate. Nếu đã đủ sẽ xóa file log cũ nhất đi dành chỗ cho log mới
+
+  Syntax: `rotate [number]`
+
+5. Log compress
