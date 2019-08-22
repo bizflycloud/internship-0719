@@ -51,7 +51,7 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
     |info | Info of the System |
     |debug | Debugging of the System |
     
- - part 2: Action shows the directory of where logs are saved
+  - part 2: Action shows the directory of where logs are saved
   
 # Rotating Log
 
