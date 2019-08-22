@@ -65,21 +65,20 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
 
 1. Time Rotate
     
-    1.1. Daily
-    1.2. Weekly
-    1.3. Monthly
+    1.1. Daily    
+    1.2. Weekly  
+    1.3. Monthly  
     1.4. Yearly
 
 2. Size rotate (K, M, G)
 
-    2.1. size ***k
-    2.2. size ***M
-    2.3. size ***G
+    2.1. size ...k 
+    2.2. size ...M    
+    2.3. size ...G
     
 3. Action with Empty log
 
-    3.1. missingok: nếu file log bị mất hoặc không tồn tại *.log thì logrotate sẽ tự động di chuyển tới phần cấu hình log của file log khác mà không cần phải xuất ra thông báo lỗi. Ngược lại sẽ là cấu hình nomissingok
-
+    3.1. missingok: nếu file log bị mất hoặc không tồn tại `*.log` thì logrotate sẽ tự động di chuyển tới phần cấu hình log của file log khác mà không cần phải xuất ra thông báo lỗi. Ngược lại sẽ là cấu hình nomissingok  
     3.2. Tham số Notifempty: không rotate log nếu file log này trống.
     
 4. Rotate with numbers of log files
@@ -89,3 +88,23 @@ Syslog configuration file stored in `/etc/rsyslog.conf`
   Syntax: `rotate [number]`
 
 5. Log compress
+
+    5.1. Tùy chọn Compress: Logrotate sẽ nén tất cả các file log lại sau khi đã được rotate, mặc định bằng gzip. Nếu muốn sử dụng chương trình nén khác như bzip2, xz hoặc zip thì phải đặt tên chương trình đó thành biến sau giá trị cấu hình Compresscmd xz
+    5.2. Tham số Delaycompress sẽ hữu dụng trong trường hợp không muốn file log cũ phải nén ngay sau khi vừa được rotate. Thay vào đó, công việc nén sẽ được delay bằng việc sẽ nén file log cũ đó vào lần chạy rotate kế tiếp. 
+    5.3. Tùy chọn nocompress không sử dụng tính năng nén đối với file log cũ
+  
+6. Log file permission
+
+    6.1. Create a new log file with the same name over ride the older one. Syntax: `create 660 owner group`
+    6.2. To set the "no" option to auto-generate log file, type`nocreate`
+    6.3. To set datetime to be prefix of logfile names, type `Dateext`
+    
+7. Execute commands before and after logrotate:
+    7.1. `prerotate` [command] `endscript`
+    7.2. `postrotate` [command] `endscript`
+   
+    > Tùy chọn `sharedscripts` Script postrotate sẽ được chạy sau khi toàn bộ các file logs được rotate. Nếu không có tùy chọn này, postrotate script sẽ được chạy sau mỗi log file được rotate.
+
+8. Debugging Logrotate
+
+    Nếu muốn kiểm tra cấu hình chuẩn chưa, sử dụng tham số `-d` (debug) đối với các file cấu hình LogRotate riêng biệt.
