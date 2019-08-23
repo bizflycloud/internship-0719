@@ -38,3 +38,42 @@
   **Copy folders from server to local**
 
    Syntax: `rsync -avzh root@[ip]:[source] [dest]`
+   
+  **Copy file from Remote server to Local through SSH**
+  
+   We provide the `-e` with method `SSH` to define that we get file through SSH method
+   
+   Syntax: `rsync -avzhe ssh root@[ip]:[source] [dest]`
+   
+  **Copy file from Local to Remote server through SSH**
+   
+   Use the likely Syntax: `rsync -avzhe ssh [file] root@[ip]:[dest]`
+   
+  **To show the transfer data process**
+   
+   Add this option: `--progress`
+   
+  **Add or not include options**
+   
+   Add these options: Ex `--include 'R*' --exclude '*'` means that you copy all files that have character "R" at the beginning of file name with out copying the rest of them
+   
+  **The delete option**
+    
+   While transfering, if there's any file that is created and not included in the source directory then adding option `--delete` will kill it
+   
+  **Set limitation of the capability**
+  
+   While transfering, adding `--max-zize='...'` will do it, "..." may be k, m, g
+   
+  **__Delete source after transfer process complete__**
+    
+   By adding `--remove-source-files` option
+   
+  **You can you this option to test the transfer process**
+  
+   by adding this option `--dry-run` ,this will not make anything changes but show you the result
+  
+  **To limit transfer bandwitdh**
+  
+  Add this: ` --bwlimit=...`
+   
