@@ -27,13 +27,11 @@
    
   **Copy folders in local**
     
-   Syntax: `rsync -avzh [source] [dest]`
-   > this command will allow copying every files from source folder to destination folder
+   Syntax: `rsync -avzh [source] [dest]`, this command will allow copying every files from source folder to destination folder
    
   **Copy folders from local to server**
     
-   Syntax: `rsync -avz [source] root@[ip]:[dest]`
-   > this command will allow copying every files from source folder to destination folder in server has ip address "ip"
+   Syntax: `rsync -avz [source] root@[ip]:[dest]`, this command will allow copying every files from source folder to destination folder in server has ip address "ip"
    
   **Copy folders from server to local**
 
@@ -77,3 +75,5 @@
   
   Add this: ` --bwlimit=...`
    
+
+ # T
