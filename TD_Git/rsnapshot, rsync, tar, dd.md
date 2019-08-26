@@ -106,3 +106,16 @@
    - `p`: perserve permission
    - `z`: uncompress
    - `f`: give it a filename
+
+
+ # DD
+    
+  `dd` - convert and copy a file
+  
+  Using `dd` to: 
+  
+   - To put an image to a a drive 
+   - To blank out a drive (using source is dev/zero)
+   - Transfer all files, folders in one disk drive to another
+   
+  Syntax: `dd if=<source> of=<dest> (bs=) (count)= [option]`
