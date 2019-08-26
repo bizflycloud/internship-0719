@@ -78,9 +78,11 @@
 
  # Tar
  
-  **Syntax:** `sudo tar -[option] [filename] [the directory you want to backup]`
+  **To create a tarball**
+  
+  Syntax: `sudo tar -[option] [filename] [the directory you want to backup]`
    
-   ex: `sudo tar -cvpzf backup.tar.gz --exclude=/mnt /` 
+   ex: `sudo tar -cvpzf backup.tar.gz --exclude=/mnt /` to backup root directory
    
    Options:
    
@@ -90,3 +92,17 @@
    - `z`: compress the files as small as possible    
    - `f`: give tar a filename
    - `--exclude`: exclude directory
+   
+   **To restore from a tarball**
+   
+   Syntax: `sudo tar -[option] [file to recover from] -C [directory to put recovered things] `
+   
+   ex: `sudo tar -xvpzf backup.tar.gz -C /recover`
+   
+   Options:
+   - `C`: change directory
+   - `x`: to extract information from a tarball
+   - `v`: verbose
+   - `p`: perserve permission
+   - `z`: uncompress
+   - `f`: give it a filename
