@@ -78,15 +78,15 @@
 
  # Tar
  
-  **Syntax: `sudo tar -[option] [filename] [the directory you want to backup]`
+  **Syntax:** `sudo tar -[option] [filename] [the directory you want to backup]`
    
    ex: `sudo tar -cvpzf backup.tar.gz --exclude=/mnt /` 
    
    Options:
    
-   -`c`: create or overwrite backup files
-   -`v`: verbose display the backup process
-   -`p`: to preserving permission 
-   -`z`: compress the files as small as possible    
-   -`f`: give tar a filename
-   -`--exclude`: exclude directory
+   - `c`: create or overwrite backup files
+   - `v`: verbose display the backup process
+   - `p`: to preserving permission 
+   - `z`: compress the files as small as possible    
+   - `f`: give tar a filename
+   - `--exclude`: exclude directory
