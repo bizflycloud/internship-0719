@@ -114,8 +114,10 @@
   
   Using `dd` to: 
   
-   - To put an image to a a drive 
+   - To backup the entire hard disk 
    - To blank out a drive (using source is dev/zero)
    - Transfer all files, folders in one disk drive to another
+   - To create an image of a Hard Disk
+   - To restore using the Hard Disk Image
    
   Syntax: `dd if=<source> of=<dest> (bs=) (count)= [option]`
