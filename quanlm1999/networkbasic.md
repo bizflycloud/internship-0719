@@ -140,8 +140,122 @@ Trong đó có đường dẫn đến file ví dụ  `dhcpd.conf.sample.`, sửa
 * Cách hoạt động
     * Khi máy tính của bạn kết nối đến VPN, máy tính sẽ hoạt động giống như đang cùng mạng cục bộ với VPN. Tất cả lưu lượng mạng của bạn sẽ được gửi qua một kết nối an toàn đến VPN. Bạn sẽ có thể sử dụng internet như thể bạn đang có mặt tại vị trí của VPN
 
+### Config Routing Basic on Linux: ‘ip route’
+**View or display Linux routing table** 
+* `ip route show`
+* `ip route list` 
+**set a route to the locally connected network on Linux**
+* `ip route add {netaddress}/{betmask} dev {interface}`
+* `ip route add {netaddress}/{betmask} via {gateway} dev {interface}`
+**Set a default route**
+* `ip route add default via {netaddress}`
+**Delete route from table**
+* 'ip route delete {netaddress}/{betmask} dev {interface }'
+* 'ip route delete default via {netaddress}/{betmask} dev {interface}'
+**Add a static route on Debian** 
+* edit `/etc/network/interfaces`
+*       # The loopback network interface
+        auto lo
+        iface lo inet loopback
+        # The primary network interface
+        auto eth0
+        iface eth0 inet static
+          address 192.168.2.24
+         gateway 192.168.2.254
+**Add a static route on REHL** 
+* Create a file named `/etc/sysconfig/network-scripts/route-{interface}` for interface
+* add static route entry: `{netaddress}/{betmask} via {gateway} dev {interface}`
+* Save the file. Restart network service `sudo service network restart` or `sudo systemctl restart network` 
 
-
-
+### SSH Basic: ssh, ssh-add,ssh forward agent, config ssh, ‘rsync’, ‘scp’
+**SSH** là Secure Shell, một giao thức điều khiển từ xa cho phép người dùng kiểm soát và chỉnh sửa server từ xa qua Internet
+ * Lệnh SSH: `ssh {user}@{host}`
+ * Tạo SSH Keys: `ssh-keygen -t rsa`
+    * Passphrase có thể có hoặc không 
+  * Copy Public key lên server: `ssh-copy-id user@serverip`
+**SSH-add** 
+    * ssh-add là lệnh dùng để add ssh private keys vào ssh authentication agent để thực hiện đăng nhập 1 lần 
+    * ssh-add có thể chạy mà không cần biến đi kèm. Sẽ tự động add key ở thư mục mặc định  `~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa. ~/ssh/id_ed25519, ~/.ssh/identity,` nếu tồn tại
+    * Muốn add key nằm ngoài đó thì ta phải chỉ đường dẫn đến cho ssh-add, `ssh-add ~/.ssh/key` sẽ add file `key` đó 
+    * Với key có passpharase, `ssh-add` sẽ chạy `ssh-askpass` để lấy passpharase từ người dùng.
     
+**rsync** 
+* rsync là một công cụ dùng để sao chép và đồng bộ file/thư mục được dùng rất phổ biến. Với sự trợ giúp của rsync, bạn có thể đồng bộ dữ liệu trên local hoặc giữa các server với nhau một cách dễ dàng.
+   * Rsync hỗ trợ copy giữ nguyên thông số của files/folder như Symbolic links, Permissions, TimeStamp, Owner và Group.
+   * Rsync nhanh hơn scp vì Rsync sử dụng giao thức remote-update, chỉ transfer những dữ liệu thay đổi mà thôi.
+   * Rsync tiết kiệm băng thông do sử dụng phương pháp nén và giải nén khi transfer.
+    Rsync không yêu cầu quyền super-user.
+
+* Cú pháp `rsync options source destination`
+* Option: 
+    * -v: Verbose
+    * -r: copy dữ liệu đệ quy, không đảm bảo thông số của file và thư mục
+    * -a: copy dữ liệu đệ quy, giữ nguyên tất cả thông số
+    * -z: Nén dữ liệu khi chuyển, tiết kiệm băng thông
+    * -h: Out kết quả dễ đọc
+    * --delete: xóa dữ liệu ở đích nếu nguồn k tồn tại
+    * --exclude: Loại trừ dữ liệu không muốn truyền đi 
+* Copyfile từ remote server vè local server qua SSH: `rsync -avzhe ssh root@192.168.0.100:/root/install.log /tmp/`
+copy file `/root/install.log`trên sv `192.168.0.100` về thư mục `/tmp/`
+* Copy file từ Local lên Remote Server qua SSH: `rsync -avzhe ssh backup.tar root@192.168.0.100:/backups/`
+* Nếu sử dụng ssh ccustom không dùng port 22, phải dùng -p {port} 
+
+**SCP**
+* SCP là ứng dụng sử dụng SSH để mã hóa toàn bộ quá trình chuyển tập tin
+* SCP là lệnh dùng để di chuyển file dữ liệu giữa các máy chạy hđh Linux từ xa chỉ cần biết địa chỉ IP
+* SCP dùng ssh để chuyển dữ liệu, có chế độ bảo mật như ssh
+
+*Cú pháp 
+ `scp [-pqrvBC46 ] [-F ssh_config ] [-S program ] [-P port ] [-c cipher ] [-i identity_file ] [-o ssh_option ] [[user@ ] host1 : file1 ] [... ] [[user@ ] host2 : file2 ]`
+ * Option 
+    - v: Verbouse 
+    - r: Copy toàn bộ thư mục lên máy chủ 
+    - c: Nén lại để t ăng tốc đôj chuyển file
+    - l: Giới hạn băng thông tối đa bằng đơn vị **Kbit/s**
+    - P: Kết nối đến port khác  mặc định 
+    - p: Giữ nguyên thuộc tính file cần chuyển 
+    - q: Output khoogn hiển thị, tắt thông báo
+    - F: chỉnh định file ssh_config khác mặc định
+
+### iptables
+* Iptables là một hệ thống tường lửa (Firewall) tiêu chuẩn được cấu hình, tích hợp mặc định trong hầu hết các bản phân phối của hệ điều hành Linux (CentOS, Ubuntu…). Iptables hoạt động dựa trên việc phân loại và thực thi các package ra/vào theo các quy tắc được thiết lập từ trước.
+* Liệt kê quy tắc của iptables  `iptables -L`
+    * `Chain INPUT (policy ACCEPT)`
+    `target     prot opt source               destination`         
+
+    *  ` Chain FORWARD (policy ACCEPT)`
+    `target     prot opt source               destination`         
+
+    *  ` Chain OUTPUT (policy ACCEPT)`
+    `target     prot opt source               destination`
+
+Trong đó:
+* TARGET sẽ được áp dụng cho mỗi quy tắc
+    * Accept: gói dữ liệu được chuyển tiếp xử lý tại ứng dụng cuối hoặc HĐH
+    * Drop: gói dữ liệu bị chặn, loại bỏ
+    * Reject: gói dữ liệu bị chăn, loại bỏ đồng thời gửi 1 thông báo lỗi tới người gửi
+* PROT (protoco) Quy định các giao thứ sẽ được áp dụng để thực thi quy tắc nào, bao gồm all, TCP/ UDP, SSH,FTP,sFTP ......
+* SOURCE và DESTINATION địa chỉ của lượt truy cập ddược phép áp dụng các quy tấc
+    * Hiển thị quy tắc
+      `iptables -L`
+    * DÙng iptables để mở port VPS 
+     `  iptables -A INPUT -p tcp -m tcp --dport xxx -j ACCEPT`
+     `  iptables -I INPUT -p tcp -m tcp --dport xxx -j ACCEPT`
+        * A: Append: chèn xuống cuối
+        * I: Insert: Chèn vào dòng chỉ định
+* CHặn IP
+      `iptables -t filter -A INPUT -s {IP} -j REJECT`
+    * Cỏ thể chặn 1 dải IP sử dụng CIDR 
+      `iptables -t filter -A INPUT -s {IP}/{mask}-j REJECT`
+* XÓa quy tắc
+    `iptables -D INPUT -s {IP}-j REJECT`
+    `iptables -D INPUT 12` Xóa quy tắc thứ 12 từ dãy input 
+* Sửa quy tắc
+    `iptables -R INPUT {linenumber} -s {new IP} -j ACCEPT`
+* Giao thức và module.
+    * Block tất cả input TCP
+        `iptables -A INPUT -p tcp -j DROP`
+* Thay đổi chính sách mặc định
+    Để thay đổi chính sách sử dụng `-P` 
+    Đổi chính sách INPUT Từ Accept thành DROP ta dùng: `optables -P INPUT DROP`
 
