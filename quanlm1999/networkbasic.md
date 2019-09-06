@@ -178,6 +178,23 @@ Trong đó có đường dẫn đến file ví dụ  `dhcpd.conf.sample.`, sửa
     * ssh-add có thể chạy mà không cần biến đi kèm. Sẽ tự động add key ở thư mục mặc định  `~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa. ~/ssh/id_ed25519, ~/.ssh/identity,` nếu tồn tại
     * Muốn add key nằm ngoài đó thì ta phải chỉ đường dẫn đến cho ssh-add, `ssh-add ~/.ssh/key` sẽ add file `key` đó 
     * Với key có passpharase, `ssh-add` sẽ chạy `ssh-askpass` để lấy passpharase từ người dùng.
+
+**SSH-config**
+ Nằm ở vị trí `/etc/ssh/ssh_config`
+ Cú pháp config 
+    `config value`
+    `config1 value1 value2`
+Option 
+    
+    Host: Tên viết tắt của máy chủ, bạn có thể đặt bất kì cái nào dễ nhớ nhất, giả sử tên dự án
+    HostName: Địa chỉ ip của máy chủ
+    User : User để ssh vào server.
+    IdentityFile: Chính là public key của ssh, mặc định nó sẽ tìm trong ~/.ssh/id_rsa nếu bạn không config.
+    ProxyCommand: Command đặc biệt khi connect vào server
+    Port: Port khi connect vào server, mặc định sẽ là 22
+    ServerAliveInterval: Time out khi connect vào server.
+
+    
     
 **rsync** 
 * rsync là một công cụ dùng để sao chép và đồng bộ file/thư mục được dùng rất phổ biến. Với sự trợ giúp của rsync, bạn có thể đồng bộ dữ liệu trên local hoặc giữa các server với nhau một cách dễ dàng.
