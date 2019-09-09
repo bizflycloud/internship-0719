@@ -46,7 +46,7 @@
        - The partition ends on block "X" shown under `End`
        - The block-size is 512 bytes shown as `sectors of 1 * 512`
        
-       > The numbers mean that the parition ends on byte "X"x512 of the file. After that byte comes the unallocated-part.
+        > The numbers mean that the parition ends on byte "X"x512 of the file. After that byte comes the unallocated-part.
        
      - Shrink the image-file to a size that can just contain the partition using `truncate`: 
       
