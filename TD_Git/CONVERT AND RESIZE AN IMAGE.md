@@ -2,7 +2,7 @@
 
 **DOWNLOAD** 
   
-  Sử dụng link: (https://cloud-images.ubuntu.com/releases/xenial/release/) chọn đặc tả qcow2
+  Use the following link: (https://cloud-images.ubuntu.com/releases/xenial/release/) choose specified qcow2 image description
   
   Checking downloaded qcow2 image's size : `qemu-img info xenial-server-cloudimg-amd64-disk1.img`
 
