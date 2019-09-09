@@ -37,7 +37,7 @@
     
       > Now all the important data stand at the beginning of the image so it's time to shave of that unallocated part
       
-     - To know where the partition ends and where the unallocated part begins, use: `fdisk -l myimage.img`
+     - To know where the partition ends and where the unallocated part begins, use: `fdisk -l this.img`
       
       > Note two things in the output:
        
@@ -50,6 +50,6 @@
       
       > Need (X+1)x512 bytes to supply the size of the file in bytes. `+1` because block-numbers start at 0
      
-      Perform: `truncate --size=$[(9181183+1)*512] myimage.img`
+      Perform: `truncate --size=$[(X+1)*512] this.img`
     
         
