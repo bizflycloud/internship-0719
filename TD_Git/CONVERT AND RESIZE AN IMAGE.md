@@ -51,7 +51,7 @@
      - Shrink the image-file to a size that can just contain the partition using `truncate`: 
       
       > Need (X+1)x512 bytes to supply the size of the file in bytes. `+1` because block-numbers start at 0
-     
-       Perform: `truncate --size=$[(X+1)*512] this.img`
+      
+       - Perform: `truncate --size=$[(X+1)*512] this.img`
     
         
