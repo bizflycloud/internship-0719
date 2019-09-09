@@ -11,7 +11,9 @@
   ` qemu-img convert -O  raw xenial-server-cloudimg-amd64-disk1.img xenial-server-cloudimg-amd64-disk1.raw`
 
 **RESIZING**
-
+  
+  > The goal is to resize the image as smallest as possible without causing any trouble or the loss of datas
+  
   - Checking raw image's sqcow2 : `qemu-img info xenial-server-cloudimg-amd64-disk1.raw`
   
   - Resizing: Using `GParted`, `fdisk` and `truncate`
