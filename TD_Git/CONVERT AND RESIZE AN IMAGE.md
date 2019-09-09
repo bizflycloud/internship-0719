@@ -34,4 +34,22 @@
       - Unload loopback-device: `sudo losetup -d /dev/loop0`
      
     - Shaving Image
+    
+      > Now all the important data stand at the beginning of the image so it's time to shave of that unallocated part
+      
+     - To know where the partition ends and where the unallocated part begins, use: `fdisk -l myimage.img`
+      
+      > Note two things in the output:
        
+       - The partition ends on block "X" shown under `End`
+       - The block-size is 512 bytes shown as `sectors of 1 * 512`
+       
+       > The numbers mean that the parition ends on byte "X"x512 of the file. After that byte comes the unallocated-part.
+       
+     - Shrink the image-file to a size that can just contain the partition using `truncate`: 
+      
+      > Need (X+1)x512 bytes to supply the size of the file in bytes. `+1` because block-numbers start at 0
+     
+      Perform: `truncate --size=$[(9181183+1)*512] myimage.img`
+    
+        
