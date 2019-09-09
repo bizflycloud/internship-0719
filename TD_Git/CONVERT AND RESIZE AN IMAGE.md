@@ -40,11 +40,9 @@
       > Now all the important data stand at the beginning of the image so it's time to shave of that unallocated part
       
      - To know where the partition ends and where the unallocated part begins, use: `fdisk -l this.img`
-      
-      > Note two things in the output:
-       
-       - The partition ends on block "X" shown under `End`
-       - The block-size is 512 bytes shown as `sectors of 1 * 512`
+     
+        - The partition ends on block "X" shown under `End`
+        - The block-size is 512 bytes shown as `sectors of 1 * 512`
        
         > The numbers mean that the parition ends on byte "X"x512 of the file. After that byte comes the unallocated-part.
        
