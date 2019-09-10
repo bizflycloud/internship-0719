@@ -1,6 +1,6 @@
 **Convert ubuntu cloud image từ dạng qcow2->raw->resize**
 
-Bước 1: tải ubuntu cloud image dạng qcow2 (400mb)
+Bước 1: tải ubuntu cloud image dạng qcow2 (400mb) 
 
 Bước 2: sử dụng câu lệnh `qemu-img convert {image_name}.qcow2 {image_name}.raw` để convert từ qcow2(400mb) sang raw(2.2G)
 
