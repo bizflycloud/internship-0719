@@ -15,3 +15,4 @@
 - Sau đó dùng Gparted để resize file image:
 - Dùng lệnh:`sudo gparted /dev/loop1` để vào phân vùng `/dev/loop1` 
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/2.png)
+- Sau đó chọn phân vùng và click vào mục Resize/move và sẽ hển thị ra cửa sổ sau ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/3.png)
