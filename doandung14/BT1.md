@@ -25,4 +25,4 @@ Bước 5: thực hiện resize file raw từ 2.2G xuống tối thiểu là 1.6
 7.Sử dụng truncate để cắt ngắn file raw . Có ends on block 3358719 (shown under End) và block-size là 512 bytes (shown as sectors of 1 * 512) : `truncate --size=$[(3358719+1)*512] <đường dẫn file raw>`
 
 
-Bước 6: sử dụng kvm để kiểm tra file raw vừa resize.File raw k lỗi =>   **Resize thành công**
+Bước 6: sử dụng kvm để kiểm tra file raw vừa resize.File raw k lỗi =>   **Resize thành công** ![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/Sau%20khi%20resize)
