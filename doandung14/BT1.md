@@ -8,7 +8,7 @@ Bước 3: sử dụng kvm để test file raw xem có xảy ra lỗi sau khi co
 
 Bước 4: cài gparted ( tiện ích giúp sắp xếp và resize phân vùng ) 
 
-Bước 5: thực hiện resize file raw từ 2.2G xuống tối thiểu là 1.6G
+Bước 5: thực hiện resize file raw từ 2.2G 
 
 1.kích hoạt loopback nếu nó chưa được kích hoạt: `sudo modprobe loop`
 
