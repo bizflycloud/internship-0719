@@ -2,7 +2,7 @@
 
 Bước 1: tải ubuntu cloud image dạng qcow2 (400mb) 
 
-Bước 2: sử dụng câu lệnh `qemu-img convert {image_name}.qcow2 {image_name}.raw` để convert từ qcow2(400mb) sang raw(2.2G)
+Bước 2: sử dụng câu lệnh `qemu-img convert {image_name}.qcow2 {image_name}.raw` để convert từ qcow2(400mb) sang raw(2.2G) ![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/2.png) ![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/3.pnghttps://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/3.png) 
 
 Bước 3: sử dụng kvm để test file raw xem có xảy ra lỗi sau khi convert k
 
