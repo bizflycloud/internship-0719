@@ -57,3 +57,21 @@
       - Create an admin account: `salt 'minion1' cmd.run "ejabberdctl register dungnt 192.168.122.28 dung@456"`, if success, this returns result like:       
       
       ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/11.png)
+
+      - Login vào Ejabberd theo url: `https://192.168.122.28:5280/admin` because port 5280 for http has been defined and  domain "192.168.122.28" has been defined too. Which will return result: 
+      
+      ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/12.png)
+      
+## Using a XMPP Client to test
+  
+  - install pidgin
+  
+  - configure user1 and user2 to connect to server 192.168.122.28
+  
+  - `ctrl + m` to start a chat conversation
+  
+  - Here's the result
+  
+  ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/13.png)
+  
+  ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/14.png)
