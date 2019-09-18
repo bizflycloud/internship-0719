@@ -39,4 +39,11 @@
       
       We give it 2 IDs: "ejabberd" and "ejabberd.yml"
           
-          Under "ejabberd" is the module.funtion: `pkg.installed:`
+       - Under "ejabberd" is the <module.funtion>: `pkg.installed` means to install the package, watch for service "ejabberd", if it's not running yet, then start it
+       - Under "ejabberd.yml" is the <module.function> `file.managed`, we use it to manage configuration to the minions,                - `name` is the directory to apply on the minions 
+           - `source` is the directory that contains the file to apply, in this case, `salt://ejabberd/ejabberd.yml` stands for `/srv/salt/ejabberd/ejabberd.yml`
+           - `user`, `group` and `mod` are states that apply to the configuration to minions
+           - `require` is that state will always execute unless target fails
+           - `watch_in` is `watch` that has corresponding requisite_in which is like `require`, but adds additional behaviour, also is requisite state  
+           
+       
