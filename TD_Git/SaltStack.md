@@ -45,5 +45,15 @@
            - `user`, `group` and `mod` are states that apply to the configuration to minions
            - `require` is that state will always execute unless target fails
            - `watch_in` is `watch` that has corresponding requisite_in which is like `require`, but adds additional behaviour, also is requisite state  
-           
-       
+   
+  - Finally, we apply the "init.sls" file to minions (on this case the target is just minion1 as announced above) using command: `salt 'minion1' state.apply init`, if success, it return like this:
+  
+      ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/10.png)
+      
+ 
+ 
+  - Registering an account for Ejabberd:
+      - Restart the service, using command :`salt 'minion1' cmd.run "service ejabberd restart"`
+      - Create an admin account: `salt 'minion1' cmd.run "ejabberdctl register dungnt 192.168.122.28 dung@456"`, if success, this returns result like:       
+      
+      ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/11.png)
