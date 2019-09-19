@@ -2,9 +2,9 @@
 - Để cài đặt satl-master và salt-minion dùng lệnh
  - `sudo apt-get install salt-master` trên server 1
  - `sudo apt-get install salt-minion` trên server 2
-- Sau đó vào file cấu hình salt-minon `/etc/salt/minion` trên máy minion để thêm đỉa chỉ ip của máy master ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/ip.png)
+- Sau đó vào file cấu hình salt-minon `/etc/salt/minion` trên máy minion để thêm địa chỉ ip của máy master ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/ip.png)
 - Dùng lệnh `sudo salt-key -A` để thêm các key máy minion vào trong master
-- Dùng lệnh `sudo salt-key -L` để xem danh sách các máy minion đã được accest vào master ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/list.png)
+- Dùng lệnh `sudo salt-key -L` để xem danh sách các máy minion đã được accept vào master ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/list.png)
 - dùng lênh `sudo salt '*' test.ping` để ping tới các máy mà master quản lý ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/lb.png)
 # Dùng salt để setup + config ejabberd cho một server
 ** Cài đặt ejabberd **
