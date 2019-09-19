@@ -1,4 +1,4 @@
-# Cài đăt salt-marter và salt-minion
+# Cài đặt salt-marter và salt-minion
 - Để cài đặt satl-master và salt-minion dùng lệnh
  - `sudo apt-get install salt-master` trên server 1
  - `sudo apt-get install salt-minion` trên server 2
