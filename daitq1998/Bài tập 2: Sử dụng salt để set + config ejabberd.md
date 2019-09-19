@@ -7,9 +7,9 @@
 - Dùng lệnh `sudo salt-key -L` để xem danh sách các máy minion đã được accept vào master ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/list.png)
 - dùng lênh `sudo salt '*' test.ping` để ping tới các máy mà master quản lý ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/lb.png)
 # Dùng salt để setup + config ejabberd cho một server
-** Cài đặt ejabberd **
-- Để cài đặt ejabber từ master vào minion dùng lệnh: `salt 'dainatq' pkg.install ejabberd`
-**Cấu hình ejabberd**
+**Cài đặt ejabberd**
+ - Để cài đặt ejabber từ master vào minion dùng lệnh: `salt 'dainatq' pkg.install ejabberd`
+- **Cấu hình ejabberd**
 - Để cấu hình ejabberd cho một server trên máy master ta tạo một file cấu hình ejabberd trong `/srv/salt/` với đuôi sls,![]( https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/os.png) cùng trong thư mục đấy tạo thêm một file `test.sls`
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/lm.png)
 - Trong đó:
