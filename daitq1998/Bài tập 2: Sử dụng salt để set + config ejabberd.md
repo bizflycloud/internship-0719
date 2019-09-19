@@ -15,7 +15,7 @@
 - Trong đó:
  - souce: là nguồn là đường dẫn bắt đầu bằng `salt://` là file lưu trong `/srv/salt/`
  - name: là tên mà đường dẫn muốn lưu trong minion server
-- Sau khi tạo fỉle trong `srv/salt` xong ta dùng lệnh `salt 'dainatq' state.apply test` để lưu và cập nhật cấu hình ejabberd sang server![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/chang%202.png)
+- Sau khi tạo file trong `srv/salt` xong ta dùng lệnh `salt 'dainatq' state.apply test` để lưu và cập nhật cấu hình ejabberd sang server![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/chang%202.png)
 - Tiếp theo ta dùng lệnh `salt 'dainatq' cmd.run 'ejabberd register <user> <domain> <password>` để tạo user ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/t%202.png)
 - Sau khi tạo user thành công. Trên trình duyệt ta nhập tên domain của user với cú pháp:`https://<server:port>/admin` 
 - Trong đó server là các domain 
