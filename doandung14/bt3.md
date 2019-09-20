@@ -90,9 +90,27 @@ Càng gắn nhiều đĩa cứng và thiết lập càng nhiều LVM thì hệ t
 
 Khả năng mất dữ liệu cao khi một trong số các đĩa cứng bị hỏng.
 
-***2.RAID***
+***2.RAID0***
 
 là hình thức ghép nhiều ổ đĩa cứng vật lý(HardDisks) thành một hệ thống ổ đĩa cứng có chức năng: gia tăng tốc độ đọc/ghi dữ liệu(1)hoặc nhằm tăng sự an toàn dữ liệu chứa trên hệ thống đĩa(2) hoặc kết hợp cả 2 yếu tố (1) và (2).
+
+**Ưu điểm**
+
+khả năng nâng cao hiệu suất trao đổi dữ liệu của đĩa cứng
+
+Tốc độ đọc ghi nhanh (gấp đôi bình thường theo lý thuyết).
+
+Thích hợp với những dịch vụ cần lưu trữ và truy xuất với tốc độ cao. Chẳng hạn như dịch vụ video streaming, chạy cơ sở dữ liệu...
+
+**Nhược điểm**
+
+Tiềm ẩn rủi ro về dữ liệu. Lý do dữ liệu được chia đôi lưu trên 2 ổ đĩa.
+
+Trường hợp 1 trong 2 ổ đĩa bị hỏng thì nguy cơ mất dữ liệu rất cao.
+
+Về ổ cứng yêu cầu phải 2 ổ cùng dung lượng, nếu 2 ổ khác dung lượng thì lấy ổ thấp nhất => 
+
+
 
 
 
