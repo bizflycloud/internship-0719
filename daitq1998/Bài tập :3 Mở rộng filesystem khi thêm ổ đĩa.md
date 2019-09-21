@@ -12,6 +12,13 @@
 | Có thể tạo ra các  vùng dung lượng lớn nhỏ tùy ý | Làm cho việc khôi phục dữ liệu trở nên khó khăn hơn do cấu trúc trên đĩa phức tạp hơn|
 | Điều chỉnh phân vùng ổ cứng một cách linh động khả năng kiểm soát cao | |
 | LVM cho phép đóng băng một Logical Volume bất cứ lúc nào, ngay cả khi hệ thống đang chạy | |
--**Sử dụng RAID0 để mở rộng filesystem
-
+- **Sử dụng RAID0 để mở rộng filesystem**
+- RAID là hình thức ghép nhiều đĩa chứng vật lý thành một ổ đĩa cứng logic có chức năng gia tăng tốc độ đọc ghi dữ liệu hoặc tăng thêm sự an toàn cho dữ liệu trên hệ thống
+- Dùng RAID0 để mở rộng file syste sau khi thêm một ổ đĩa. Để tạo raid0 dùng lệnh `mdadm` để ghép 2 phân vùng hoặc hai ổ cúng lại với nhau 
+- Như trong một server có các thiết bị ổ cứng là /dev/sdb /dev/sdc. Dùng lệnh `mdadm --create /dev/md0 --level=0 --raid-device=2 /dev/sdb /dev/sdc` để tạo raid 0
+- Sau đó định dạng `ext4` cho raid0 bằng lệnh: `mkfs.ext4 /dev/md0` và mount vào `/raid`
+- Kiểm tra thiết bị raid0 đã tạo `mdadm --detail /dev/md0`
+- **Ưu điểm và nhược điểm của RAID0
+| Ưu điểm | Nhược điểm |
+|---------|------------|
 
