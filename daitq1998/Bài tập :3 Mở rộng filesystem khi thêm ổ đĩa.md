@@ -18,7 +18,7 @@
 - Như trong một server có các thiết bị ổ cứng là /dev/sdb /dev/sdc. Dùng lệnh `mdadm --create /dev/md0 --level=0 --raid-device=2 /dev/sdb /dev/sdc` để tạo raid 0
 - Sau đó định dạng `ext4` cho raid0 bằng lệnh: `mkfs.ext4 /dev/md0` và mount vào `/raid`
 - Kiểm tra thiết bị raid0 đã tạo `mdadm --detail /dev/md0`
-- **Ưu điểm và nhược điểm của RAID0
+- **Ưu điểm và nhược điểm của RAID0**
 
 | Ưu điểm | Nhược điểm |
 |---------|------------|
