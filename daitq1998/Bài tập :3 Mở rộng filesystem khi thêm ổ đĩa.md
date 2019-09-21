@@ -1,7 +1,7 @@
 # Mở rộng filesystem khi lắp thêm ổ đĩa
 - **Sử dụng LVM(Logical Volume Manage**
 - LVM là phương pháp cho phép ấn định không gian đĩa cứng thành những logical volume làm cho việc mở rộng kích thước filesystem dễ dàng
-- Sau khi thêm ổ HDD tạo các phân vùng trên ổ đĩa với định dạng Linux LVM , dùng `pvcreate`để ghép một số phân vùng của đĩa thành Physical Volume (pv) sau đó nhóm các physical volume lại để thành các volume group(vg) và từ volume group tạo thành Logical volume(lv) và định dạng lại lv từ đó dùng lệnh`lvextend` có thể mở rộng logical volume và`resize2fs` tăng kích thước filesystem trong logical volume
+- Sau khi thêm ổ HDD tạo các phân vùng trên ổ đĩa với định dạng Linux LVM , dùng `pvcreate`để ghép một số phân vùng của đĩa thành Physical Volume (pv) sau đó nhóm các physical volume lại để thành các volume group(vg) và từ volume group tạo thành Logical volume(lv) và định dạng lại lv từ đó dùng lệnh`lvextend` có thể mở rộng logical volume và`resize2fs` tăng kích thước filesystem trong logical volume với filesystem định dạng `ext2,ext3,ext4` còn với filesystem định dạng `xfs`dùng `xfs_growfs`để mở rộng filesystem
 - **Ưu điểm và nhược điểm của LVM**
 
 | Ưu điểm | Nhược điểm |
@@ -19,6 +19,9 @@
 - Sau đó định dạng `ext4` cho raid0 bằng lệnh: `mkfs.ext4 /dev/md0` và mount vào `/raid`
 - Kiểm tra thiết bị raid0 đã tạo `mdadm --detail /dev/md0`
 - **Ưu điểm và nhược điểm của RAID0
+
 | Ưu điểm | Nhược điểm |
 |---------|------------|
-
+| Tốc độ đọc ghi nhanh | Không thể tạo được raid0 khi khác định dạng phân vùng hoặc ổ cứng|
+| | Khi một đĩa bị lỗi thì tất cả dữ liệu trong raid0 sẽ bị mất hết,rủi ro về dữ liệu|
+- **xfs_growfs**
