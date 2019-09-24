@@ -38,6 +38,9 @@
    
    - Sau khi sinh public key, ta thực hiện push nó lên server, sử dụng command: `ssh-copy-id -i ~/.ssh/id_rsa.pub root@server` 
    
-   - SSH thành công
+   - SSH thành công, set Password Authentication thành `no`
+   
         ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/18.png)
    
+
+### SSH add
