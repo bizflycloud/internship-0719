@@ -23,9 +23,11 @@
 - Một trong các phương thức đăng nhập vào VPS khá an toàn đó là việc sử dụng SSH Key để thay thế cho mật khẩu. Mặc định mỗi VPS bạn sẽ đăng nhập vào bằng username root và mật khẩu root mà nhà cung cấp đã gửi cho bạn lúc thuê VPS, tuy nhiên việc sử dụng mật khẩu luôn có 2 nguy cơ lớn là:
  - Bạn sẽ mất hoàn toàn nếu lộ mật khẩu.
  - Các attacker có thể sử dụng Brute Force Attack để dò tìm mật khẩu.
-- Đầu tiên để thiết lập ssh key dùng lệnh:`ssh-keygen` để tạo một cặp key rsa sau khi tạo sẽ ra kết quả như sau:![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/k.png)
+- Đầu tiên để thiết lập ssh key dùng lệnh:`ssh-keygen` để tạo một cặp key rsa sau khi tạo sẽ ra kết quả như sau:
+![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/k.png)
 - Sau khi thực hiện câu lệnh này hệ thống sẽ yêu cầu nhập passphrase tại chỗ này mình nên nhập một passphrase này để làm tăng hiệu qửa bảo mật 2 lớp
-- Sau đó ta có thể copy key lên máy từ xa dùng lệnh `ssh-copy-id <user@ip>`có thể thấy thông báo ntn là thành công ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/cpsshid.png)
+- Sau đó ta có thể copy key lên máy từ xa dùng lệnh `ssh-copy-id <user@ip>`có thể thấy thông báo ntn là thành công
+![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/cpsshid.png)
 **Cấu hình ssh**
 - SSH-add:
 # Iptable
