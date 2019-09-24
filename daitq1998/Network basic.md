@@ -29,7 +29,10 @@
 - Sau đó ta có thể copy key lên máy từ xa dùng lệnh `ssh-copy-id <user@ip>`có thể thấy thông báo ntn là thành công
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/cpsshid.png)
 **Cấu hình ssh**
-- SSH-add:
+- `ssh-add`:là lệnh dùng để thêm các khóa mới vào trong ssh
+- `ssh-agent`: là một chương trình nền xử lý mật khẩu cho các khóa riêng của SSH. Các ssh-addlệnh nhắc nhở người sử dụng cho một mật khẩu khóa riêng và thêm nó vào danh sách duy trì bởi ssh-agent
+- Để khởi động `ssh-agent`dùng lệnh `evan ssh-agent`
+- Sau khi khởi động để thêm một private key vào ssh-agent dùng lệnh `ssh-add` và nhập mật khẩu khóa riêng
 # Iptable
 - Iptable là một tường lửa có tiêu chuẩn được bao gồm trong hầu hết tất cả các bản phân phối linux theo mặc định.   
 - Iptables hoạt động dựa trên việc phân loại và thực thi các package ra/vào theo các quy tắc được thiết lập từ trước.
