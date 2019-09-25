@@ -12,4 +12,4 @@
  
 **To set a route to the locally connected network interface**
 
- Syntax: `ip route add [address/mask] dev [interface]
+ Syntax: `ip route add [address/mask] dev [interface]`
