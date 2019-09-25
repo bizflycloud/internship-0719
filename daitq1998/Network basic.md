@@ -28,6 +28,7 @@
 - Sau khi thực hiện câu lệnh này hệ thống sẽ yêu cầu nhập passphrase tại chỗ này mình nên nhập một passphrase này để làm tăng hiệu qửa bảo mật 2 lớp
 - Sau đó ta có thể copy key lên máy từ xa dùng lệnh `ssh-copy-id <user@ip>`có thể thấy thông báo ntn là thành công
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/cpsshid.png)
+Ngoài phương pháp này còn các phương pháp thủ công(phức tạp hơn)
 **Cấu hình ssh**
 - Để cấu hình cho các kết nối ssh sử dụng các tên thay thế ngắn hơn cho hostname trong file /etc/ssh/ssh_config
 - `ssh-add`:là lệnh dùng để thêm các khóa mới vào trong ssh
@@ -35,11 +36,11 @@
 - Để khởi động `ssh-agent`dùng lệnh `eval ssh-agent`
 - Sau khi khởi động để thêm một private key vào ssh-agent dùng lệnh `ssh-add` và nhập mật khẩu khóa riêng
 - ssh forward agent: Sau khi ssh đến một server sau đó muốn ssh đến một server khác với key đang dùng thì sử dụng ssh forward agent
-- forward agent :đc bật vơi tùy chon -A của ssh
+- forward agent :đc bật với tùy chon -A của ssh
 - Để cho phép Agent Forwarding bạn cần phải thực hiện lệnh ssh-add để add key của bạn trước khi thực hiện ssh với tùy chọn Agent Forwarding.
 - cũng có thể thực hiện Agent Forwarding bằng cách thêm vào các kết nối ssh trong file ssh_config tùy chọn như sau:
-ForwardAgent yes 
-- rsync qua ssh :với rsync ta có thể transfer (copy và đồng bộ) ua giao thức ssh qua đó thì sữ liệu đc bảo mật và an toàn hơn
+Forward Agent yes 
+- rsync qua ssh :với rsync ta có thể transfer (copy và đồng bộ) qua giao thức ssh qua đó thì dữ liệu đc bảo mật và an toàn hơn. Nó an toàn & nhanh hơn scp & cũng có thể được sử dụng thay cho lệnh scp để sao chép tệp / thư mục vào máy chủ từ xa.
 - Để các định giao thức sẽ đc sử dụng rsync cần thêm tùy chọn -e cùng với tên giao thức(ssh) có thể copy file từ localserver lên remote server và ngược lại
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/rs.png)
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/rsync.png)
@@ -48,6 +49,7 @@ ForwardAgent yes
 - Để copyfile từ local server lên remote server:`scp <option> <source_file><remoteuser>:/<destination_file>
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/scpssh.png)
 hoặc ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/scp.png)
+- Ngoài ra rysnc có tùy chọn để sao lưu vi sai mà scp thiếu. Nhưng cả hai đều an toàn như nhau và rất dễ sử dụng.
 # Iptable
 - Iptable là một tường lửa có tiêu chuẩn được bao gồm trong hầu hết tất cả các bản phân phối linux theo mặc định.   
 - Iptables hoạt động dựa trên việc phân loại và thực thi các package ra/vào theo các quy tắc được thiết lập từ trước.
