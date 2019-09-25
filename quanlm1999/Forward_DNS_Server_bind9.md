@@ -1,4 +1,4 @@
-## Bind9 
+## Bind9
 
     bind9 là dịch vụ cache server sẽ ghi nhớ những câu trả lời mỗi khi DNS Server xuất hiện truy vấn hostname và trả lời vào những lần sau. Dịch vụ này đặc biệt hữu ích trong những môi trường có kết nối Internet chậm. Bằng cách sử dụng Cache Server, bạn sẽ giảm thiểu được lưu lượng bang thông và độ trễ mỗi khi máy xuất hiện truy vấn.
     
@@ -43,13 +43,15 @@
     * Để server chỉ foward mà không tư phân giải request
     * dnssec để cung cấp cơ chế xác thực giữa các máy chủ với nhau 
     
+    
 **Salt**
-    * Dùng câu lệnh: salt '*' stale.apply dnsconfig để đưa file config lên minion và restart bind9 
+* Dùng câu lệnh: `salt '*' stale.apply dnsconfig` để đưa file config lên minion và restart bind9 
+
     ![filemanaged](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-52-11.png)
     
 ### B3: Kiểm tra hoạt động của dịch vụ 
-**   Truy cập vào `/etc/resolv.conf`**
-**   Thêm `nameserver 192.168.122.82`** 
+**Truy cập vào `/etc/resolv.conf`**
+**Thêm `nameserver 192.168.122.82`** 
 
 ![dig](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-58-09.png)
 
