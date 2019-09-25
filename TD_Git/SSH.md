@@ -26,7 +26,7 @@
         
         ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/17.png)
    
-#### SSH Key-pair Authentication
+#### SSH Key Authentication
 
    > Phương thức này cho phép giữa client và server khởi tạo một phiên kết nối dựa vào khóa công khai được chia sẻ từ client tới server
    
@@ -43,4 +43,16 @@
         ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/18.png)
    
 
-### SSH add
+#### SSH Forward agent
+      
+   - Bình thường hàng ngày các sysadmin thường sử dụng phương pháp Key Authentication kết hợp với một passphrase giúp cho việc đăng nhập trở nên bảo mật hơn so với chỉ sử dụng password. Nhưng với số lượng server lớn mỗi lần đăng nhập vào một server là một lần phải gõ passphrase chưa kể nếu đặt passphrase phức tạp thì tỉ lệ gõ sai hoặc lại phải gõ lại. Trong tình huống này thì ssh-agent được sinh ra để giải quyết các vấn đề này.
+   
+   - Với mỗi session, ta chỉ cần gõ passphrase một lần sau đó ssh-agent sẽ lưu lại passphare trong một biến môi trường cho những lần đăng nhập sau và tự động điền vào mỗi khi có yêu cầu nhập passphrase. Thông tin này chỉ duy nhất được lưu trong phiên hiện tại, kết thúc phên nó sẽ bị xóa.
+   
+   - Để sử dụng ssh-agent ta làm như sau:
+   
+      - Start ssh-agent: `ssh-agent $SHELL`. Trong trường hợp sử dụng bash shell có thể dùng `ssh-agent bash`
+      - Import ssh private key vào ssh-agent: `ssh-add <path_to_private_key>`
+      
+         ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/19.png)
+      - 
