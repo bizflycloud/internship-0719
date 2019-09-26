@@ -76,3 +76,14 @@
       Thông thường ta sẽ phải nhập :`ssh -i /nfs/shared/users/nixcraft/keys/server1/id_rsa -p 4242 nixcraft@server1.cyberciti.biz` nên sẽ rất dài và khó chịu.
       
       Chúng ta có thể tránh được cảnh gõ cả đống tham số trên lệnh ssh khi đang logging tới một remote machine hoặc khi thực thi commands trên một remote machine. Tất cả những gì chúng ta cần làm là tạo một ssh config file. 
+   - Các entry trong `~/.ssh/config`:
+      - Host : Định nghĩa host mà config sẽ áp dụng. Phần cấu hình host sẽ kết thúc khi một cấu hình host khác được định nghĩa hoặc kết thúc file. Dấu * được sử dụng để cấp global defaults cho mọi hosts.
+      - HostName : Xác định host name thực tế để log in, được phép thay bằng IP
+      - User : Định nghĩa username cho SSH connection
+      - IdentityFile : Xác định file mà các phương thức xác thực danh tính của user như DSA, ECDSA hoặc DSA sẽ được đọc. Mặc định là `~/.ssh/identity` với giao thức version 1, và `~/.ssh/id_dsa`, `~/.ssh/id_ecdsa`, `~/.ssh/id_rsa` cho giao thức version 2.
+      - ProxyCommand : Xác định lệnh cụ thể dùng để kết nối tới server. Command sẽ tiếp tục được khai báo đến khi xuống dòng, và được thực thi bởi user’s shell. Trong command ấy, `%h` sẽ được thay thể bởi host name để kết nối, `%p` bởi port, và `%r` bởi remote user name. 
+      - LocalForward : Xác định một port TCP trong local machine sẽ được forward qua một kênh truyền bảo mật tới một host cụ thể và port của remote machine. Mệnh đề đầu tiên là [bind_address:] port và mệnh đề thứ hai là host:hostport.
+      - Port : Xác định port number để connect tới the remote host.
+      - Protocol : Xác định phiên bản giao thức mà ssh(1) hỗ trợ để ưu tiên. Giá trị là 1 và 2.
+      - ServerAliveInterval : Sets timeout interval theo giây sau khi không có dữ liệu được nhận từ server, ssh(1) sẽ gửi một thông điệp thông qua kênh truyền đã mã hóa để yêu cầu phản hồi từ server.
+      - ServerAliveCountMax : Sets số lượng tin nhắn còn sống của máy chủ có thể được gửi đi mà không cần ssh(1) nhận phản hồi từ server. Nếu khi gửi tin nhắn còn sống của máy chủ mà đạt ngưỡng này thì ssh sẽ disconnect từ server, k session.
