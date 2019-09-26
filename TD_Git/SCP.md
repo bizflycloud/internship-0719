@@ -25,3 +25,4 @@
   - Specify specific port to use with SCP: Usually SCP is using port 22 as a default port. But for security reason, you may change the port into another port. For example, we are using port 2249. Then the command should be like :`scp -P 2249 folder_on_client usernameo@destination_host:destination_folder`
   - To specified private key, use command: `scp -i private_key.pem file_on_client username@destination_host:destination_folder`
   - To use other encryption methods, use command: `scp -c other_algorithm local_file username@destination_host:destination_folder`
+  - To use other SSH configuration file, use command: `scp -F path_to_your_custom_ssh_config_file file(folder) username@destination_host:destination_folder`
