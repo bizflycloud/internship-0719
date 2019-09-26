@@ -79,4 +79,7 @@ hoặc ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/
    - p<protocol>là giao thức mạng thực hiện lọc(tcp/udp)
    - dport<port>là cổng ng dùng muốn đặt bộ lọc
  - Giả sử : muốn thêm một chain rules như sau:`sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT` là cho phép truy cập giao thức TCP trên cổng 22
- hoặc `sudo iptables -A INPUT -s 192.168.122.1 -j DROP` là từ chối các gói tin từ ip address 192.168.122.1
+ hoặc `sudo iptables -A INPUT -s 192.168.122.1 -j DROP` là từ chối các gói tin từ ip address 192.168.122.1 ; `sudo iptables -A OUTPUT -p tcp --dport 443 -j DROP`là chặn các gói tin đi ra với giao thức tcp đi ra từ cổng 433
+ - Để xóa tất cả các rules dùng lệnh `sudo iptables -F`
+ - Để xóa từng dòng rules :`sudo iptable -D <chain rules>
+ -Ví dụ: `sudo iptables -D INPUT3` Để xóa dòng thứ 3 của chain rules INPUT3
