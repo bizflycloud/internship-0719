@@ -86,4 +86,4 @@
       - Port : Xác định port number để connect tới the remote host.
       - Protocol : Xác định phiên bản giao thức mà ssh(1) hỗ trợ để ưu tiên. Giá trị là 1 và 2.
       - ServerAliveInterval : Sets timeout interval theo giây sau khi không có dữ liệu được nhận từ server, ssh(1) sẽ gửi một thông điệp thông qua kênh truyền đã mã hóa để yêu cầu phản hồi từ server.
-      - ServerAliveCountMax : Sets số lượng tin nhắn còn sống của máy chủ có thể được gửi đi mà không cần ssh(1) nhận phản hồi từ server. Nếu khi gửi tin nhắn còn sống của máy chủ mà đạt ngưỡng này thì ssh sẽ disconnect từ server, k session.
+      - ServerAliveCountMax : Sets số lượng tin nhắn còn sống của máy chủ có thể được gửi đi mà không cần ssh(1) nhận phản hồi từ server. Nếu khi gửi tin nhắn còn sống của máy chủ mà đạt ngưỡng này thì ssh sẽ disconnect từ server, kết thúc session.
