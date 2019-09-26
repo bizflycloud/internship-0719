@@ -46,10 +46,37 @@ Forward Agent yes
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/rsync.png)
 - scp : SCP (Secure Copy) là file transfer protocol (giao thức chuyển file trên mạng), giúp di chuyển file trong hệ thống mạng an toàn và dễ dàng. Nó có thể chuyển file giữa một máy tính cá nhân đến máy chủ từ xa, hoặc chuyển file giữa 2 máy tính từ xa. Để dễ hiểu SCP giống như một kết hợp giữa RCP và SSH (Secure Shell). Nó dựa trên RCP để thực hiện thao tác copy, và SSH để mã hóa mọi thông tin truyền đi, và chứng thực máy tính từ xa là đúng máy cần truyền.
 - Nhưng không giống Rsync, lệnh SCP với username và password hoặc passphrase là có thể chuyển file được rồi. Nó đơn giản hóa cả quá trình này, và bạn không phải đăng nhập vào bất kỳ máy tính nào.Nó dựa trên RCP để thực hiện thao tác copy, và SSH để mã hóa mọi thông tin truyền đi, và chứng thực máy tính từ xa là đúng máy cần truyền.
-- Để copyfile từ local server lên remote server:`scp <option> <source_file><remoteuser>:/<destination_file>
+- Để copyfile từ local server lên remote server:`scp <option> <source_file><remoteuser>:/<destination_file>`
 ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/scpssh.png)
 hoặc ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/scp.png)
 - Ngoài ra rysnc có tùy chọn để sao lưu vi sai mà scp thiếu. Nhưng cả hai đều an toàn như nhau và rất dễ sử dụng.
-# Iptable
+# Iptables
 - Iptable là một tường lửa có tiêu chuẩn được bao gồm trong hầu hết tất cả các bản phân phối linux theo mặc định.   
 - Iptables hoạt động dựa trên việc phân loại và thực thi các package ra/vào theo các quy tắc được thiết lập từ trước.
+**Nguyên tắc áp dụng iptables**
+- Liệt kê các quy tắc của iptables dùng lệnh: `iptables -L` ![](
+- Trong đó :
+ - Cột 1: là các target có các taget như :
+   - Accept: gói dữ liệu đc chuyển tiếp để xử lý tại ứng dụng cuối hoặc hệ điều hành
+   - Drop: gói dữ liệu bị chặn hoặc loại bỏ
+   - Reject: gói dữ liệu đc chặn loại bỏ và gửi thông báo lỗi đến ng gửi
+ - Cột 2:prot(giao thức) quy định các giao thức sẽ đc thực thi để áp dụng các quy tắc bao gồm all TCP,UDP
+ - Cột 4,5 :(Source,Destination) là địa chỉ của lượt truy cập cho phép áp dụng quy tắc
+ **Xử lý gói trong iptables**
+ -Tất cả mọi dữ liệu đều đc kiểm tra bởi iptables bằng cách dùng các bảng tuần tự xây dựng sẵn gồm:
+- *Fillter table*
+ - Filter table đc sử dụng để lọc các gói tin dữ liệu Noa gồm 3 nguyên tắc:
+  - Forward chain: Lọc gói khi đi đến các server khác
+  - Input chain: Lọc gói khi đi vào server
+  - output chain: Lọc gói khi đi ra khỏi server
+  *Nat*
+  - Pre-routing chain: thay đổi địa chỉ đến của các gói dữ liệu khi cần thiết
+  - Post-routing chain: thay đổi địa chỉ nguồn của các gói dữ liệu khi cần thiết
+  **Định nghĩa các chain rules**
+  - Là việc thực hiện thêm vào các chain hiện tại dùng lệnh : `sudo iptables -A  -i <interface> -p <protocol (tcp/udp)> -s <source> --dport <port no.>  -j <target>`
+   - -A: thêm chain tules
+   - -i<interface> là giao diện mang cần thực hiện lọc các gói tin
+   - p<protocol>là giao thức mạng thực hiện lọc(tcp/udp)
+   - dport<port>là cổng ng dùng muốn đặt bộ lọc
+ - Giả sử : muốn thêm một chain rules như sau:`sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT` là cho phép truy cập giao thức TCP trên cổng 22
+ hoặc `sudo iptables -A INPUT -s 192.168.122.1 -j DROP` là từ chối các gói tin từ ip address 192.168.122.1
