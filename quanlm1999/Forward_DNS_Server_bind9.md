@@ -15,7 +15,7 @@
 **File dnsconfig.sls**          https://gist.github.com/lmq1999/9fcb1edcf17a13d4bb3c8e3c99c31cc2
 
 * Dùng câu lệnh: `salt '*' state.apply dnsinstall` để thực hiện cài bind9 cho minion : 
-![install](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-35-15.png)
+![install](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/dnsinstall.png)
 
 #### B2: Config dns foward server nằm ở /etc/bind/named.conf.options
 
@@ -47,15 +47,15 @@
 **Salt**
 * Dùng câu lệnh: `salt '*' stale.apply dnsconfig` để đưa file config lên minion và restart bind9 
 
-    ![filemanaged](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-52-11.png)
+    ![filemanaged](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/dnsconfig.png)
     
 ### B3: Kiểm tra hoạt động của dịch vụ 
 **Truy cập vào `/etc/resolv.conf`**
 **Thêm `nameserver 192.168.122.82`** 
 
-![dig](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-58-09.png)
+![dig](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/dnstest1.png)
 
-![dig2](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202019-09-25%2015-59-55.png)
+![dig2](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/dnstest2.png)
 
 *   Ta có thể thấy DNS server cũng là 1 DNS cache server và đã lưu giữ lại thông tin từ lần truy vấn trước đó  
     *   Query time lần 1: 1067 msec
