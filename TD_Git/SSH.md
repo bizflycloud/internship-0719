@@ -57,3 +57,22 @@
          ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/19.png)
       - Lần sau trong phiên hiện tại bất kể lúc nào sử dụng key kia để đăng nhập thì ta không cần gõ thêm passphrase lần nữa.
       
+### Generating SSH config file
+
+   - System-wide OpenSSH config file client configuration
+   
+      `/etc/ssh/ssh_config` : File này thiết lập những cấu hình mặc định cho tất cả những user của các OpenSSH client trên máy desktop và tất cả user trên hệ thống đều đọc được file này.
+   - User-specific OpenSSH file client configuration
+   
+      `~/.ssh/config` hay `$HOME/.ssh/config` : đây là file cấu hình riêng biệt của user, nó sẽ  ghi đè các settings trong global client configuration file, `/etc/ssh/ssh_config`.
+   - Tại sao cần tạo SSH custom configuration file? Ta xét ví dụ: Giả sử ta phải thiết lập ssh với setup như sau
+      - Local desktop client – Apple OS X or Ubuntu Linux.
+      - Remote Unix server – OpenBSD server running latest OpenSSH server.
+      - Remote OpenSSH server ip/host: 75.126.153.206 (server1.cyberciti.biz)
+      - Remote OpenSSH server user: nixcraft
+      - Remote OpenSSH port: 4242
+      - Local ssh private key file path : `/nfs/shared/users/nixcraft/keys/server1/id_rsa`
+      
+      Thông thường ta sẽ phải nhập :`ssh -i /nfs/shared/users/nixcraft/keys/server1/id_rsa -p 4242 nixcraft@server1.cyberciti.biz` nên sẽ rất dài và khó chịu.
+      
+      Chúng ta có thể tránh được cảnh gõ cả đống tham số trên lệnh ssh khi đang logging tới một remote machine hoặc khi thực thi commands trên một remote machine. Tất cả những gì chúng ta cần làm là tạo một ssh config file. 
