@@ -4,6 +4,9 @@
 - Trường hợp gặp một số vấn đề thực thi dùng lệnh `sudo netplan --debug apply` để gỡ lỗi
 # DNS system
 - DNS là hệ thống tên miền là một dịch vụ trên mạng tcp/ip cho phép khách hàng dịch tên thành địa chỉ ip như khi sử dụng trình duyệt để truy cập trang web,sau đó nhập tên của trang web đó vào phần thanh url. Nhưng để máy tính thực sự giao tiếp với máy chủ lưu trữ web cho biết trang web, máy tính cần địa chỉ IP của máy chủ web đó. Đó là nơi dns đến
+# DHCP
+- Dynamic host configuration protocol :là môt giao thức tcp/ip tiêu chuẩn phân phối cấu hình ip cho khách hàng. DHCP giúp cấp phát địa chỉ IP một cách tự động, trong đó bao gồm các thông số Subnet Mask và Gateway. Dịch vụ DHCP giúp máy tính trong mạng được cấu hình địa chỉ IP một cách tự động, giảm thiểu thời gian cấu hình thủ công. Dịch vụ này đặc biệt hữu ích trong các hệ thống máy tính có hàng trăm, hàng ngàn máy con.
+Để cài đặt dhcp :`sudo apt-get install isc-dhcp-server`
 # Config `ip route`
 - Để hiển thị bảng định tuyến trên linux nhập lệnh `ip route show` hoặc `ip route list`
 - Để gửi tất cả các gói trực tiếp đến một mạng cục bộ qua một cổng dùng lệnh `ip route add <ip address> dev <port>`
