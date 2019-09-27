@@ -46,27 +46,26 @@
 
    ### Connections from a single IP address
 
-   This example shows how to block all connections from the IP address 10.10.10.10:
-
-        `iptables -A INPUT -s 10.10.10.10 -j DROP`
+   This example shows how to block all connections from the IP address 10.10.10.10: 
+   `iptables -A INPUT -s 10.10.10.10 -j DROP`
 
    ### Connections from a range of IP addresses
 
    This example shows how to block all of the IP addresses in the 10.10.10.0/24 network range. You can use a netmask or standard slash notation to specify the range of IP addresses.
 
-        `iptables -A INPUT -s 10.10.10.0/24 -j DROP` or `iptables -A INPUT -s 10.10.10.0/255.255.255.0 -j DROP`
+   `iptables -A INPUT -s 10.10.10.0/24 -j DROP` or `iptables -A INPUT -s 10.10.10.0/255.255.255.0 -j DROP`
 
    ### Connections to a specific port
 
    This example shows how to block SSH connections from 10.10.10.10:
 
-        `iptables -A INPUT -p tcp --dport ssh -s 10.10.10.10 -j DROP`
+   `iptables -A INPUT -p tcp --dport ssh -s 10.10.10.10 -j DROP`
 
    > You can replace “ssh” with any protocol or port number. The `-p tcp` part tells iptables what kind of connection the protocol uses.  If you were blocking a protocol that uses UDP rather than TCP, then `-p udp` would be necessary instead.
 
    This example shows how to block SSH connections from any IP address.
 
-        `iptables -A INPUT -p tcp --dport ssh -j DROP`
+   `iptables -A INPUT -p tcp --dport ssh -j DROP`
 
    ### Connection States 
      
@@ -74,11 +73,11 @@
   
    Example: SSH connections FROM 10.10.10.10 are permitted, but SSH connections TO 10.10.10.10 are not. The system is permitted to send back information over SSH as long as the session has already been established, which makes SSH communication possible between these two hosts.
 
-        `iptables -A INPUT -p tcp --dport ssh -s 10.10.10.10 -m state --state NEW,ESTABLISHED -j ACCEPT`
+   `iptables -A INPUT -p tcp --dport ssh -s 10.10.10.10 -m state --state NEW,ESTABLISHED -j ACCEPT`
 
-        `iptables -A OUTPUT -p tcp --sport 22 -d 10.10.10.10 -m state --state ESTABLISHED -j ACCEPT`
+   `iptables -A OUTPUT -p tcp --sport 22 -d 10.10.10.10 -m state --state ESTABLISHED -j ACCEPT`
         
-        > For more, see man page
+   > For more, see man page
 
    ### Saving Changes
 
