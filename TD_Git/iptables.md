@@ -6,41 +6,37 @@
 
 ## Types of Chains
     
-     iptables uses three different chains: input, forward, and output.
+   iptables uses three different chains: input, forward, and output.
 
-     -  Input: This chain is used to control the behavior for incoming connections. For example, if a user attempts to SSH into your PC/server, iptables will attempt to match the IP address and port to a rule in the input chain.
+   -  Input: This chain is used to control the behavior for incoming connections. For example, if a user attempts to SSH into your PC/server, iptables will attempt to match the IP address and port to a rule in the input chain.
+   -  Forward: This chain is used for incoming connections that aren’t actually being delivered locally. Think of a router – data is always being sent to it but rarely actually destined for the router itself; the data is just forwarded to its target. Unless you’re doing some kind of routing, NATing, or something else on your system that requires forwarding, you won’t even use this chain. There’s one sure-fire way to check whether or not your system uses/needs the forward chain: `iptables -L -v`
+   -  Output: This chain is used for outgoing connections. For example, if you try to ping howtogeek.com, iptables will check its output chain to see what the rules are regarding ping and howtogeek.com before making a decision to allow or deny the connection attempt.
 
-     -  Forward: This chain is used for incoming connections that aren’t actually being delivered locally. Think of a router – data is always being sent to it but rarely actually destined for the router itself; the data is just forwarded to its target. Unless you’re doing some kind of routing, NATing, or something else on your system that requires forwarding, you won’t even use this chain. There’s one sure-fire way to check whether or not your system uses/needs the forward chain: `iptables -L -v`
-
-     -  Output: This chain is used for outgoing connections. For example, if you try to ping howtogeek.com, iptables will check its output chain to see what the rules are regarding ping and howtogeek.com before making a decision to allow or deny the connection attempt.
-
-     >  When using iptables to lock down your system, remember that a lot of protocols will require two-way communication, so both the input and output chains will need to be configured properly. SSH is a common protocol that people forget to allow on both chains.
+   >  When using iptables to lock down your system, remember that a lot of protocols will require two-way communication, so both the input and output chains will need to be configured properly. SSH is a common protocol that people forget to allow on both chains.
 
 ## Policy Chain Default Behavior
 
-     To see what your policy chains are currently configured to do with unmatched traffic, run the `iptables -L` command.
+   To see what your policy chains are currently configured to do with unmatched traffic, run the `iptables -L` command.
 
-     More times than not, you’ll want your system to accept connections by default. Unless you’ve changed the policy chain rules previously, this setting should already be configured. Command to accept connections by default:
+   More times than not, you’ll want your system to accept connections by default. Unless you’ve changed the policy chain rules previously, this setting should already be configured. Command to accept connections by default:
 
-        - `iptables --policy INPUT ACCEPT`
-        - `iptables --policy OUTPUT ACCEPT`
-        - `iptables --policy FORWARD ACCEPT`
+   - `iptables --policy INPUT ACCEPT`
+   - `iptables --policy OUTPUT ACCEPT`
+   - `iptables --policy FORWARD ACCEPT`
 
      If you would rather deny all connections and manually specify which ones you want to allow to connect, you should change the default policy of your chains to drop. Doing this would probably only be useful for servers that contain sensitive information and only ever have the same IP addresses connect to them.
 
-        - `iptables --policy INPUT DROP`
-        - `iptables --policy OUTPUT DROP`
-        - `iptables --policy FORWARD DROP`
+   - `iptables --policy INPUT DROP`
+   - `iptables --policy OUTPUT DROP`
+   - `iptables --policy FORWARD DROP`
 
 ## Connection-specific Responses
 
-     With your default chain policies configured, you can start adding rules to iptables so it knows what to do when it encounters a connection from or to a particular IP address or port.
+   With your default chain policies configured, you can start adding rules to iptables so it knows what to do when it encounters a connection from or to a particular IP address or port.
 
-        - Accept: Allow the connection.
-
-        - Drop: Drop the connection, act like it never happened. This is best if you don’t want the source to realize your system exists.
-
-        - Reject: Don’t allow the connection, but send back an error. This is best if you don’t want a particular source to connect to your system, but you want them to know that your firewall blocked them.
+   - Accept: Allow the connection.
+   - Drop: Drop the connection, act like it never happened. This is best if you don’t want the source to realize your system exists.
+   - Reject: Don’t allow the connection, but send back an error. This is best if you don’t want a particular source to connect to your system, but you want them to know that your firewall blocked them.
 
 ## Allowing or Blocking Specific Connections
 
