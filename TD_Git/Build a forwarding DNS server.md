@@ -155,3 +155,13 @@
         
         DNS does pull data from its cache after client queries the second time: 
         ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/24.png)  
+
+### Making Client DNS Settings Permanent
+
+   - The `/etc/resolv.conf` settings that point the client machine to our DNS server will not survive a reboot. To make the changes last, we need to modify the files that are used to generate this file.
+
+   - If the client machine is running Debian or Ubuntu, open the `/etc/network/interfaces` file with super user privileges: `sudo nano /etc/network/interfaces`
+   
+   - Look for the `dns-nameservers` parameter. You can remove the existing entries and replace them with your DNS server or just add your DNS server as one of the options: `dns-nameservers 192.168.122.238`
+   
+   - Save and close the file when you are finished. Next time you boot up, your settings will be applied.
