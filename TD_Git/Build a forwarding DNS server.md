@@ -149,4 +149,9 @@
 
    - Test to make sure queries can resolve correctly by using some common tools.
 
-      - You can use ping to test that connections can be made to domains: `ping -c 1 google.com`
+      - Using `ping -c 1 google.com`
+      - Using `dig` for detail information: `dig linuxfoundation.org`
+        ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/23.png)  
+        
+        DNS does pull data from its cache after client queries the second time: 
+        ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/24.png)  
