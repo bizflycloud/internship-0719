@@ -139,11 +139,11 @@
    
    - The file will list the DNS servers to use to resolve queries by setting the nameserver directives. Comment out all of the current entries and add a nameserver line that points to your DNS server:
 
-        `nameserver 192.168.122.238
+         `nameserver 192.168.122.238
    
          # nameserver 8.8.4.4
    
-         # nameserver 8.8.8.8 `
+         # nameserver 8.8.8.8`
    
    - Save and close the file.
 
