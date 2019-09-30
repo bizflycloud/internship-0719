@@ -31,6 +31,7 @@
        auth-nxdomain no;    # conform to RFC1035
               
        listen-on-v6 { any; };
+       
     }; 
       
   - Do not change recursion to no. The forwarding server is still providing recursive services by answering queries for zones it is not authoritative for. Instead, we need to set up a list of caching servers to forward our requests to. This will be done within the options {} block. First, we create a block inside called forwarders that contains the IP addresses of the recursive name servers that we want to forward requests to, we will use Google’s public DNS servers (8.8.8.8 and 8.8.4.4):
@@ -50,6 +51,7 @@
        8.8.8.8;
            
        8.8.4.4;
+       
        };
        
     ...
@@ -81,6 +83,7 @@
        8.8.8.8;
                
        8.8.4.4;
+       
        };
        
        forward only;
@@ -136,11 +139,11 @@
    
    - The file will list the DNS servers to use to resolve queries by setting the nameserver directives. Comment out all of the current entries and add a nameserver line that points to your DNS server:
 
-   ` nameserver 192.168.122.238
+        `nameserver 192.168.122.238
    
-   # nameserver 8.8.4.4
+         # nameserver 8.8.4.4
    
-   # nameserver 8.8.8.8`
+         # nameserver 8.8.8.8 `
    
    - Save and close the file.
 
