@@ -112,61 +112,95 @@ Ngoài ra có thể cấu hình các thông số cho ssh-agent ví dụ như ch�
 
 Cach tat ssh-agent: export SSH_AUTH_SOCK=""
 
+**Rsync – Công cụ đồng bộ dữ liệu**
 
-
-
- Rsync – Công cụ đồng bộ dữ liệu
 Rsync (Remote Sync) là một công cụ dùng để sao chép và đồng bộ file/thư mục được dùng rất phổ biến
+
 I. Tính năng nổi bật của Rsync
+
 Rsync hỗ trợ copy giữ nguyên thông số của files/folder như Symbolic links, Permissions, TimeStamp, Owner và Group.
+
 Rsync nhanh hơn scp vì Rsync sử dụng giao thức remote-update, chỉ transfer những dữ liệu thay đổi mà thôi.
+
 Rsync tiết kiệm băng thông do sử dụng phương pháp nén và giải nén khi transfer.
+
 Rsync không yêu cầu quyền super-user
-II. Cài đặt Rsync
+
+**II. Cài đặt Rsync**
+
 Rsync được cài đặt dễ dàng với một dòng lệnh:
+
 – Trên Red Hat/CentOS
-yum install rsync
+
+`yum install rsync`
+
 – Trên Debian/Ubuntu
-apt-get install rsysnc
+`apt-get install rsysnc`
+
 III. Sử dụng Rsync
+
 Câu lệnh căn bản của rsync:
-rsync options source destination
+
+`rsync options source destination`
+
 Trong đó:
+
 Source: dữ liệu nguồn
+
 Destination: dữ liệu đích
+
 Options: một số tùy chọn thêm
+
 Các tham số cần biết khi dùng Rsync
+
 -v: hiển thị trạng thái kết quả
+
 -r: copy dữ liệu recursively, nhưng không đảm bảo thông số của file và thư mục
+
 -a: cho phép copy dữ liệu recursively, đồng thời giữ nguyên được tất cả các thông số của thư mục và file
+
 -z: nén dữ liệu khi transfer, tiết kiệm băng thông tuy nhiên tốn thêm một chút thời gian
+
 -h: human-readable, output kết quả dễ đọc
+
 --delete: xóa dữ liệu ở destination nếu source không tồn tại dữ liệu đó.
+
 --exclude: loại trừ ra những dữ liệu không muốn truyền đi, nếu bạn cần loại ra nhiều file hoặc folder ở nhiều đường dẫn khác nhau thì mỗi cái bạn phải thêm --exclude tương ứng.
+
 Rsync không tự động chạy nên thường được dùng kết hợp với crontab
  
 SCP: 
+
 Copy file from a remote host to local host SCP example:
-$ scp username@from_host:file.txt /local/directory/
+`$ scp username@from_host:file.txt /local/directory/`
  
 Copy file from local host to a remote host SCP example:
-$ scp file.txt username@to_host:/remote/directory/
+`$ scp file.txt username@to_host:/remote/directory/`
  
 Copy directory from a remote host to local host SCP example:
-$ scp -r username@from_host:/remote/directory/  /local/directory/
+`$ scp -r username@from_host:/remote/directory/  /local/directory/`
  
 Copy directory from local host to a remote hos SCP example:
-$ scp -r /local/directory/ username@to_host:/remote/directory/
+`$ scp -r /local/directory/ username@to_host:/remote/directory/`
  
 Copy file from remote host to remote host SCP example:
-$ scp username@from_host:/remote/directory/file.txt username@to_host:/remote/directory/
+`$ scp username@from_host:/remote/directory/file.txt username@to_host:/remote/directory/`
+
 SCP options:
+
 –r Recursively copy entire directories. Note that this follows symbolic links encountered in the tree traversal.
+
 -C Compression enable. Passes the -C flag to ssh to enable compression.
+
 -l limit – Limits the used bandwidth, specified in Kbit/s.
+
 -o ssh_option – Can be used to pass options to ssh in the format used in ssh_config.
+
 -P port – Specifies the port to connect to on the remote host. Note that this option is written with a capital ‘P’.
+
 -p Preserves modification times, access times, and modes from the original file.
+
 -q Quiet mode: disables the progress meter as well as warning and diagnostic messages from ssh.
+
 -v Verbose mode. Print debugging messages about progress. This is helpful in debugging connection, authentication, and configuration problems.
 
