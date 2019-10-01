@@ -1,4 +1,4 @@
-# Introducing to LAMP:
+# Introducing to LAMP
 
    LAMP (Linux, Apache, MySQL, PHP) is an archetypal model of web service stacks, named as an acronym of the names of its original four open-source components: the Linux operating system, the Apache HTTP Server, the MySQL relational database management system (RDBMS), and the PHP programming language. The LAMP components are largely interchangeable and not limited to the original selection. As a solution stack, LAMP is suitable for building dynamic web sites and web applications.
 
