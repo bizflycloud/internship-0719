@@ -8,9 +8,9 @@
 
   Using command: 
   
-    `sudo apt-get update` and 
+  `sudo apt-get update` and 
     
-    `sudo apt-get install bind9 bind9utils bind9-doc`
+  `sudo apt-get install bind9 bind9utils bind9-doc`
     
 ### Configure as a Forwarding DNS Server
 
@@ -36,65 +36,65 @@
       
   - Do not change recursion to no. The forwarding server is still providing recursive services by answering queries for zones it is not authoritative for. Instead, we need to set up a list of caching servers to forward our requests to. This will be done within the options {} block. First, we create a block inside called forwarders that contains the IP addresses of the recursive name servers that we want to forward requests to, we will use Google’s public DNS servers (8.8.8.8 and 8.8.4.4):
 
-    ...
+          ...
     
-    options {
+          options {
       
-       directory "/var/cache/bind";
+          directory "/var/cache/bind";
 
-       recursion yes;
+          recursion yes;
               
-       allow-query { goodclients; };
+          allow-query { goodclients; };
 
-       forwarders {
+          forwarders {
        
-       8.8.8.8;
+          8.8.8.8;
            
-       8.8.4.4;
+          8.8.4.4;
        
-       };
+          };
        
-    ...
+          ...
       
   - Afterward, we should set the forward directive to “only” since this server will forward all requests and should not attempt to resolve requests on its own.
 
     The configuration file will look like this when you are finished:
 
-      acl goodclients {
+          acl goodclients {
       
-       192.168.122.0/24;
+          192.168.122.0/24;
               
-       localhost;
+          localhost;
               
-       localnets;
+          localnets;
       
-      };
+          };
 
-      options {
+          options {
       
-       directory "/var/cache/bind";
+          directory "/var/cache/bind";
 
-       recursion yes;
+          recursion yes;
               
-       allow-query { goodclients; };
+          allow-query { goodclients; };
 
-       forwarders {
+          forwarders {
        
-       8.8.8.8;
+          8.8.8.8;
                
-       8.8.4.4;
+          8.8.4.4;
        
-       };
+          };
        
-       forward only;
+          forward only;
 
-       dnssec-validation auto;
+          dnssec-validation auto;
 
-       auth-nxdomain no;    # conform to RFC1035
+          auth-nxdomain no;    # conform to RFC1035
               
-       listen-on-v6 { any; };
+          listen-on-v6 { any; };
        
-      };
+          };
       
   - One final change we should make is to the dnssec parameters. With the current configuration, depending on the configuration of forwarded DNS servers, you may see some errors that look like this in the logs:
 
@@ -104,17 +104,17 @@
     
     To avoid this, change the dnssec-validation setting to “yes” and explicitly enable dnssec:
 
-      ...
+          ...
       
-      forward only;
+          forward only;
 
-      dnssec-enable yes;
+          dnssec-enable yes;
       
-      dnssec-validation yes;
+          dnssec-validation yes;
 
-      auth-nxdomain no;    # conform to RFC1035
+          auth-nxdomain no;    # conform to RFC1035
       
-      ...
+          ...
       
 
 ### Test your Configuration and Restart Bind
