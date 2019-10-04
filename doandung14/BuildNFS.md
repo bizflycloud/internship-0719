@@ -46,7 +46,9 @@ Multiple clients, by specifying an entire subnet that the clients belong to:
 
 `/mnt/sharedfolder subnetIP/24(rw,sync,no_subtree_check)`
 
-![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/Screenshot%20from%202019-10-04%2009-53-24.png)
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/150.png)
+
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/150.png)
 
 The permissions “rw,sync,no_subtree_check” permissions defined in this file mean that the client(s) can perform:
 
