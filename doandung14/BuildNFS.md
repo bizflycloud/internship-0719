@@ -34,17 +34,19 @@ Once you have opened the file, you can allow access to:
 
 A single client by adding the following line in the file:
 
-/mnt/sharedfolder clientIP(rw,sync,no_subtree_check)
+`/mnt/sharedfolder clientIP(rw,sync,no_subtree_check)`
 
 Multiple clients by adding the following lines in the file:
 
-/mnt/sharedfolder client1IP(rw,sync,no_subtree_check)
+`/mnt/sharedfolder client1IP(rw,sync,no_subtree_check)`
 
-/mnt/sharedfolder client2IP(rw,sync,no_subtree_check)
+`/mnt/sharedfolder client2IP(rw,sync,no_subtree_check)`
 
 Multiple clients, by specifying an entire subnet that the clients belong to:
 
-/mnt/sharedfolder subnetIP/24(rw,sync,no_subtree_check)
+`/mnt/sharedfolder subnetIP/24(rw,sync,no_subtree_check)`
+
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/Screenshot%20from%202019-10-04%2009-53-24.png)
 
 The permissions “rw,sync,no_subtree_check” permissions defined in this file mean that the client(s) can perform:
 
@@ -95,6 +97,10 @@ Use the following command in order to mount the shared folder from the host to a
 `sudo mount serverIP:/exportFolder_server /mnt/mountfolder_client`
 
 **Step 4: Test the connection**
+
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/step4.png)
+
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/step42.png)
 
 
 
