@@ -64,3 +64,4 @@
 
    Create or save a file in the export folder of the NFS host server. Now, open the mount folder on the client machine; you should be able to view the same file shared and accessible in this folder.
    
+   ![](https://github.com/bizflycloud/internship-0719/blob/master/TD_Git/PIC/35.png)
