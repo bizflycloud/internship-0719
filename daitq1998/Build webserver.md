@@ -31,5 +31,5 @@
    - Sau đó thay đổi quyền của toàn bộ file trong thư mục `/var/www/html/`:`chown -R www-data:www-data /var/www/html/`![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/chown.png)
    - Và xóa file chỉ mục `index.html`
    -Cuối cùng trên trình duyệt nhập địa chỉ ip để chọn ngôn ngữ để cài đặt và tạo ngừời dùng và đặt mật khẩu, và đăng nhập vào Wordpress:
-   ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/test.png)
+   ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/login.png)
    ![](https://github.com/bizflycloud/internship-0719/blob/master/daitq1998/image/test.png)
