@@ -13,7 +13,8 @@
 - Trong đó :
  - Derectory_to_share: là tên thư mục chia sẻ
  - Client là có thể là địa chỉ ip của máy client share
- - Các tùy chọn là : `rw` (client có khả năng đọc và ghi)
+ - Các tùy chọn là : 
+ - `rw` (client có khả năng đọc và ghi)
   - `sync`: Tùy chọn này buộc NFS ghi các thay đổi vào đĩa trước khi trả lời. Điều này dẫn đến một môi trường ổn định và nhất quán hơn vì phản hồi phản ánh trạng thái thực tế của âm lượng từ xa. Tuy nhiên, nó cũng làm giảm tốc độ hoạt động của tập tin.
   - `no_subtree_check`Tùy chọn này ngăn kiểm tra cây con, đây là một quá trình trong đó server  phải kiểm tra xem tệp có thực sự vẫn có sẵn trong cây được xuất cho mỗi yêu cầu hay không. Điều này có thể gây ra nhiều vấn đề khi một tệp được đổi tên trong khi client đã mở. Trong hầu hết các trường hợp, tốt hơn là vô hiệu hóa kiểm tra cây con.
   - `no_root_squash`: Theo mặc định, NFS chuyển các yêu cầu từ user root từ xa sang người dùng không có đặc quyền trên máy chủ. Điều này được dự định là tính năng bảo mật để ngăn tài khoản root trên client sử dụng hệ thống tệp của máy chủ làm root
