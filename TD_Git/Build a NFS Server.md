@@ -1,7 +1,7 @@
 # NFS Server
   
-    - NFS (Network File System) is a distributed file system protocol. Through NFS, you can allow a system to share directories and files with others over a network. In NFS file sharing, users and even programs can access information on remote systems almost as if they were standing on a local machine.
-    - NFS is operated in a client-server environment where the server is responsible for managing the authentication, authorization, and management of clients, as well as all the data shared within a specific file system. 
+   - NFS (Network File System) is a distributed file system protocol. Through NFS, you can allow a system to share directories and files with others over a network. In NFS file sharing, users and even programs can access information on remote systems almost as if they were standing on a local machine.
+   - NFS is operated in a client-server environment where the server is responsible for managing the authentication, authorization, and management of clients, as well as all the data shared within a specific file system. 
     
 # Setting up the host server
     
