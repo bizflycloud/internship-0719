@@ -33,4 +33,6 @@ Khi ưu đãi đã được thực hiện cho địa chỉ IP đã chọn, thi�
 **Config client**
 
 `sudo vi /etc/network/interface` # thêm dòng auto ens33 ,iface ens33 inet dhcp để cho phép nhận ip từ dhcp server 
+![](https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/151.png) 
+![]((https://github.com/bizflycloud/internship-0719/blob/master/doandung14/PIC/dhcp%20%20nhan%20ip.png)
 
