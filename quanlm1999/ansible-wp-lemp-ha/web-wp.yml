@@ -1,0 +1,21 @@
+- hosts: 192.168.122.209
+
+  tasks:
+  - name: Download WordPress
+    get_url:
+      url=https://wordpress.org/latest.tar.gz
+      dest=/home/wordpress.tar.gz
+      validate_certs=no
+
+  - name: Extract WordPress
+    unarchive: src=/home/wordpress.tar.gz 
+        dest=/home/ 
+        copy=no
+  
+  - name: Update wp config
+    template: src=/tmp/wp-config.php    
+        dest=/home/wordpress/wp-config.php
+        backup=yes
+
+  - name: copy to html
+    shell: 'cp -r /home/wordpress/* /var/www/html/'

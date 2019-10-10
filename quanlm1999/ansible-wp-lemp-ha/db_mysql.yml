@@ -1,0 +1,93 @@
+- hosts: db 
+
+  tasks:
+    - name: update apt cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: install mysql
+      apt: name=mysql-server state=present
+
+    - name: install mysql-py
+      apt: name=python-pymysql state=present
+
+    - name: Update mysql config
+      template: src=tmp/my.cnf
+            dest=/etc/mysql/my.cnf
+            backup=yes
+
+    - name: "MySQL | Create database"
+      mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "wordpress"
+        state: present
+
+    - name: MySQL | Create replication user
+      mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "replica1"
+        password: "123456"
+        host: "%"
+        priv: "*.*:SUPER,REPLICATION CLIENT"
+        state: present
+
+    - name: MySQL | Create user
+      mysql_user:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "wordpress1"
+        password: "123456"
+        host: "%"
+        priv: "*.*:All,GRANT"
+        state: present
+
+- hosts: 192.168.122.187
+  vars:
+    db: wordpress
+    user: replica1
+    password: 123456
+    address_j2: 192.168.122.171
+  tasks:
+
+    - name: "MySQL | Get master file and position | j2"
+      mysql_replication: 
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_host: "{{ address_j2 }}"
+        login_user: "replica1"
+        login_password: "123456"
+        mode: getmaster
+      register: mysql_repl_j2
+
+    - name: "MySQL | Change Master Status | db1"
+      command: "
+        /usr/bin/mysql -u root -e
+        \"
+        STOP SLAVE;
+        CHANGE MASTER TO MASTER_HOST='{{ address_j2 }}', MASTER_USER='replica1', MASTER_PASSWORD='123456', MASTER_LOG_FILE='{{ mysql_repl_j2.File }}', MASTER_LOG_POS = {{ mysql_repl_j2.Position }};
+        START SLAVE;
+        \"
+      "
+
+- hosts: 192.168.122.171
+  vars:
+    db: wordpress
+    user: replica1
+    password: 123456
+    address_j3: 192.168.122.187
+
+  tasks:
+    - name: "MySQL | Get master file and position | j3"
+      mysql_replication:
+        login_host: "{{ address_j3 }}"
+        login_user: "replica1"
+        login_password: "123456"
+        mode: getmaster
+      register: mysql_repl_j3
+
+    - name: "MySQL | Change Master Status | j2"
+      command: "
+        /usr/bin/mysql -u root -e
+        \"
+        STOP SLAVE;
+        CHANGE MASTER TO MASTER_HOST='{{ address_j3 }}', MASTER_USER='wordpress', MASTER_PASSWORD='{{ password }}', MASTER_LOG_FILE='{{ mysql_repl_j3.File }}', MASTER_LOG_POS = {{ mysql_repl_j3.Position }};
+        START SLAVE;
+        \"
+       "

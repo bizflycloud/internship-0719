@@ -1,0 +1,31 @@
+- hosts: 192.168.122.209
+
+  tasks:
+    - name: update apt cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: install nfs_server
+      apt: name=nfs-kernel-server state=present
+
+    - name: config exports
+      template: src=/tmp/exports
+        dest=/etc/exports
+
+    - name: restart nfs server
+      service: name=nfs-kernel-server state=restarted
+
+
+
+- hosts: 192.168.122.36
+
+  tasks:
+    - name: update apt cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: install nfs_server
+      apt: name=nfs-common state=present
+    
+    - name: set mount point
+      template: src=/tmp/fstab 
+        dest=/etc/fstab
+
