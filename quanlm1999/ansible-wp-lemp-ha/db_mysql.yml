@@ -87,7 +87,7 @@
         /usr/bin/mysql -u root -e
         \"
         STOP SLAVE;
-        CHANGE MASTER TO MASTER_HOST='{{ address_j3 }}', MASTER_USER='wordpress', MASTER_PASSWORD='{{ password }}', MASTER_LOG_FILE='{{ mysql_repl_j3.File }}', MASTER_LOG_POS = {{ mysql_repl_j3.Position }};
+        CHANGE MASTER TO MASTER_HOST='{{ address_j3 }}', MASTER_USER='replica1', MASTER_PASSWORD='{{ password }}', MASTER_LOG_FILE='{{ mysql_repl_j3.File }}', MASTER_LOG_POS = {{ mysql_repl_j3.Position }};
         START SLAVE;
         \"
        "
