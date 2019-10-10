@@ -66,7 +66,7 @@ to do with processes “F”
 9. `ps – G (RGID)` select by real group name
 10. `ps -g` select by EGID
 11. `ps w > ps.txt`  you can then examine the output file in a text that support widelines
-12. `ps -aux`  show all processes owned by user “x”
+12. `ps -aux`  show all processes owned by user 
 
 
 -**Kill Process** There’re manyways to kill processes:
