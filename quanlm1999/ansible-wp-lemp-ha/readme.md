@@ -13,7 +13,7 @@ Loadbalancer đc cấu hình dùng 2 file:
 * `lb_heartbeat.yml` để cấu hình heathcheck (active-passive)
 
 Webserver được cấu hình sử dùng 3 file: 
-* `web_lemp.yml` để cài đặt lemp stack và config nginx sử dụng php
+* `web_lemp.yml` để cài đặt lemp stack và config nginx sử dụng php và mysql-client
 * `web-nfs.yml` để cài đặt NFS server cho 1 web server còn lại là client mục đích để chia sẻ chung file code web 
 * `web-wp.yml` để cài đặt wordpress
          
