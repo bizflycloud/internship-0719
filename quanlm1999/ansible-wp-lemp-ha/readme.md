@@ -32,6 +32,7 @@ Webserver được cấu hình sử dùng 3 file:
 * `web_lemp.yml` để cài đặt lemp stack và config nginx sử dụng php và mysql-client
 * `web-nfs.yml` để cài đặt NFS server cho 1 web server còn lại là client mục đích để chia sẻ chung file code web 
 * `web-wp.yml` để cài đặt wordpress
+* `web_glusterFS.yml` để cài đặt glusterFS cho web server, loại bỏ single point failure của NFS, đã thử nghiệm. 
          
 Database được cấu hình sử dụng  3 file:
 * `db_mysql.yml` để cấu hình master-master replication và tạo datatase cho wordpress
