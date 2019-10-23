@@ -35,11 +35,6 @@ Cài đặt: `sudo apt-get install sysstat`
 * Theo dõi n lần, mỗi lần cách m giây: `iostat m n`
 
 
-# Đánh giá
-IOPS: Càng cao càng tốt
-Lantency: Càng thấp càng tốt
-Bandwidth: Càng cao càng tốt
-
 Ví dụ: 
 ![iostat](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/iostat.png)
 
@@ -82,5 +77,9 @@ Ví dụ: n = 10
 
 Trong đó 529,5 us = 0,5295 ms
 
+# Đánh giá
+IOPS: Càng cao càng tốt
+Lantency: Càng thấp càng tốt
+Bandwidth: Càng cao càng tốt
 
 
