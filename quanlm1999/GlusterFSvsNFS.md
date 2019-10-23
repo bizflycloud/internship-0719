@@ -12,7 +12,7 @@
 
 *   **`Phía Server:`**
     *   NFS server xử lý các yêu cầu từ client
-    *   Từ RPC stub unmarshals request (yêu cầu sơ khai), Server chuyển chúng thành các hoạt động tệp VFS
+    *   Từ RPC stub unmarshals request (yêu cầu sơ khai), Server chuyển chúng thành các hoạt động tệp VFS.
 
     *   VFS chịu trách nhiệm triển khai 1 hệ thống tệp cục bộ.
 
