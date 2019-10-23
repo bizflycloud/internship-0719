@@ -66,7 +66,7 @@
 ## Chi phí
 **NFS** & **GlusterFS**
 *   Chi phí thấp, không cần thiết bị chuyên biệt nào
-*   Có thể cài đặt trên bất cứ máy chủ Linux na
+*   Có thể cài đặt trên bất cứ máy chủ Linux n
 
 
 ## Tính sẵn sàng cao 
