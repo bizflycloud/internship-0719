@@ -59,4 +59,4 @@
 *   NFS
 ![dd_NFS](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/dd_NFS.png)
 
-# Ta có thể thấy với các file lớn thì tốt độ đọc ghi nhanh, Nhưng với nhiều file nhỏ thì rất chậm     
+# Ta có thể thấy dùng GlusterFS thì với các file lớn thì tốt độ đọc ghi nhanh, Nhưng với nhiều file nhỏ thì rất chậm     
