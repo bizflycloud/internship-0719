@@ -107,6 +107,10 @@ Nhưng với file lơn như 5MB thì tốc độ lại khá chậm, không bằn
 
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/squirrel%20mail.png)
 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/mail1.png)
 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/mail2.png)
+
+2 server mail dùng chung 1 storage system nên sv1 chuyển thư vào thùng rác, sv 2 cũng có thư ở đó
 
 
