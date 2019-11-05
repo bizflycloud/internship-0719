@@ -7,6 +7,8 @@ Storage: CephFS
 
 ![](https://raw.githubusercontent.com/lmq1999/internship-0719/master/quanlm1999/Untitled%20Diagram.png)
 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/cephFSpool.png)
+
 #### Sử dụng gluterFS 
 *   Thư mục lưu trữ: `/Maildir -> /storage/Maildir//`
 *   Benchmark:https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/benchmark_mail_glusterFS.png
@@ -113,4 +115,29 @@ Nhưng với file lơn như 5MB thì tốc độ lại khá chậm, không bằn
 
 2 server mail dùng chung 1 storage system nên sv1 chuyển thư vào thùng rác, sv 2 cũng có thư ở đó
 
+```
+quanlm@ceph3:/mnt/mycephfs$ sudo ceph -s
+  cluster:
+    id:     07df97db-f315-4c78-9d2a-ab85007a1856
+    health: HEALTH_ERR
+            Module 'dashboard' has failed: IOError("Port 80 not free on '192.168.122.89'",)
+            Degraded data redundancy: 221/793 objects degraded (27.869%), 20 pgs degraded, 32 pgs undersized
+ 
+  services:
+    mon: 3 daemons, quorum ceph1,ceph3,ceph2
+    mgr: ceph1(active), standbys: ceph2, ceph3
+    mds: mycephfs-1/1/1 up  {0=ceph1=up:active}, 1 up:standby
+    osd: 3 osds: 2 up, 2 in
+    rgw: 2 daemons active
+ 
+  data:
+    pools:   6 pools, 96 pgs
+    objects: 351  objects, 84 MiB
+    usage:   241 MiB used, 1.8 GiB / 2.0 GiB avail
+    pgs:     221/793 objects degraded (27.869%)
+             64 active+clean
+             20 active+undersized+degraded
+             12 active+undersized
+
+```
 
