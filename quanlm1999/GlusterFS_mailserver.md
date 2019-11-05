@@ -1,7 +1,11 @@
 # GlusterFS cho mailserver
 #### Mô hình
-*   Số lượng server 2
-*   Sử dụng: postfix
+*   Số lượng server 3
+*   Sử dụng: postfix, dovecot, squirrel mail
+
+Storage: CephFS
+
+![](https://raw.githubusercontent.com/lmq1999/internship-0719/master/quanlm1999/Untitled%20Diagram.png)
 
 #### Sử dụng gluterFS 
 *   Thư mục lưu trữ: `/Maildir -> /storage/Maildir//`
@@ -101,9 +105,7 @@ Nhưng với file lơn như 5MB thì tốc độ lại khá chậm, không bằn
  
 ## CephFS cho mail server
 
-Storage: CephFS
-
-![](https://raw.githubusercontent.com/lmq1999/internship-0719/master/quanlm1999/Untitled%20Diagram.png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/squirrel%20mail.png)
 
 
 
