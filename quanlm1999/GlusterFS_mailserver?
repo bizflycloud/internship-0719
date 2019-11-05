@@ -13,7 +13,7 @@
 * File càng nhỏ số lượng ghi càng nhiều thì càng chậm
 
 **Đánh giá** Với quy mô nhỏ thì dùng tạm được nhưng với quy mô lớn thì không hiệu quả.
-
+https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/ceph_benchmark.png
 **Giải pháp**
 *   Sử dụng **NFS**
 Tốc độc ghi với file nhỏ của NFS nhanh hơn so với glusterFS , phải cấu hình thêm HA NFS
@@ -98,4 +98,13 @@ Nhưng với file lơn như 5MB thì tốc độ lại khá chậm, không bằn
 
    * Với dữ liệu phi câu trúc như email, hình ảnh, video, nội dung ít thay đổi, số lương nhiều -> **ceph**
    * Với dữ liệu có cấu trúc , thường xuyên thay đổi , stream, sao lưu **glusterfs**
+ 
+## CephFS cho mail server
+
+Storage: CephFS
+
+![](https://raw.githubusercontent.com/lmq1999/internship-0719/master/quanlm1999/Untitled%20Diagram.png)
+
+
+
 
