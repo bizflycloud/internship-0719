@@ -24,10 +24,20 @@
 
 #   Mục đích sử dụng
 *   Ngành tài chính
-*   Dữ liệu của chính phủ 
+   Thích hợp cho ngành tài chính vì tuần thủ hoàn toàn theo ACID, lý tưởng cho công việc OLTP. Ngoài ra còn hỗ trợ với công cụ         khác như matlab, R giúp cho việc phân tích cơ sở dưx liệu
+   
+*   Dữ liệu GIS của chính phủ ( hệ thống thông tin địa lý)
+   PostgreSQL hỗ trợ GIS (PostGIS) có hỗ trợ hàm và thủ tục xử lý dữ liệu hình học với nhiều định dạng khác nhau
+   
 *   Chế tạo
-*   Công nghê web 
+   PostgreSQL tin cậy, được hỗ trợ dài hạn, làm lưu trữ đáng tin cậy với chi phí thấp, có thể cấu hình auto-failover, upgrade 0 downtime
+   
+*   Công nghê web
+   Khả năng scale tốt, hỗ trợ nhiều framwork như Django (Python), node.js (JavaScript), Hibernate (Java), Ruby on rails, PHP .... 
+   Là cơ sở dữ liệu quan hệ -đối  tương, có thể làm việc đến dữ liệu NoSQL
+   
 *   Dữ liệu khoa học 
+   Khả năng xử lý dữ liệu lớn
 
 #   Use case    
 ### Dùng khi
