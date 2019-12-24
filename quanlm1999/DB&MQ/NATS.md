@@ -1,7 +1,7 @@
 KQ benchmark : https://docs.google.com/spreadsheets/d/1_XLV_KKw3cTamAT_Lc9u16D6p0aRt87y9u8ZKQgQuAE/edit?usp=sharing
 # Khả năng
 ****
-    Dễ sử dụng và vận hành 
+    Dễ sử dụng và vận hành.
     Hiệu năng cao
     Độ sẵn sàng cao
     Rất nhẹ
