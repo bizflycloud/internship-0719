@@ -1,0 +1,104 @@
+- hosts: wordpress
+  gather_facts: False
+  
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- hosts: wordpress
+
+  roles:
+    - server
+    - php
+    - glusterFS
+
+- hosts: web1 
+
+  roles:
+    - wordpress
+      
+- hosts: web1 
+
+  tasks: 
+   - name: Probe GlusterFS Nodes
+     shell: gluster peer probe web2
+
+- hosts: web2
+  tasks:
+   - name: Probe GlusterFS Nodes
+     shell: gluster peer probe web1
+
+- hosts: wordpress
+  tasks:
+    - name: Create Brick Directories
+      file: path=/home/quan/glusterfs-storage state=directory
+
+- hosts: web1
+  
+  tasks:
+
+    - name: Create GlusterFS Volume
+      shell: gluster volume create volume2 replica 2 transport tcp web1:/glusterfs-storage web2:/glusterfs-storage force
+
+    - name: Start GlusterFS Volume
+      shell: gluster volume start volume2
+
+    - name: fstab config
+      lineinfile:
+        path: /etc/fstab
+        line: web1:/volume2 /storage        glusterfs defaults,_netdev 0 0
+
+- hosts: web2
+
+  tasks:
+    - name: fstab config
+      lineinfile:
+        path: /etc/fstab
+        line: web2:/volume2 /storage        glusterfs defaults,_netdev 0 0
+
+- hosts: wordpress
+  tasks:
+     - name: create mountpoint
+       file:
+        path: /storage
+        state: directory
+        mode: '0755'
+
+     - name: mount
+       shell: mount -a
+       args:
+        warn: false
+
+- hosts: web1
+  
+  tasks:
+     - name: move webcode
+       shell: mv /var/www/html /storage/
+
+     - name: change ownership
+       file:
+         path: /storage/html
+         owner: www-data
+         group: www-data 
+         mode: '0755' 
+
+     - name: create symlink
+       file:
+        src: /storage/html
+        dest: /var/www/html
+        state: link
+
+- hosts: web2
+
+  tasks:
+
+     - name: create web-code
+       file:
+         path: /var/www 
+
+     - name: create symlink
+       file:
+        src: /storage/html
+        dest: /var/www/html
+        state: link
+

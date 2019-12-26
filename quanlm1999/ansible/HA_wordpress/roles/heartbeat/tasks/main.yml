@@ -1,0 +1,30 @@
+---
+# tasks file for heartbeat
+- name: update apt cache
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: install heartbeat
+  apt: name=heartbeat state=present
+
+- name: Enable bind shared address
+  lineinfile:
+     path: /etc/sysctl.conf
+     line: net.ipv4.ip_nonlocal_bind=1
+
+- name: Update ha.cf config
+  template: 
+    src: ha.cf.j2
+    dest: /etc/ha.d/ha.cf
+    backup: yes
+
+- name: Update haresources config
+  template: 
+    src: haresources.j2
+    dest: /etc/ha.d/haresources
+    backup: yes
+   
+- name: Update authkeys config
+  template: 
+    src: authkeys.j2 
+    dest: /etc/ha.d/authkeys
+    mode: 0600

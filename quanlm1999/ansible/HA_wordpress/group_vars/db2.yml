@@ -1,0 +1,4 @@
+db_id: 2
+user: replica1
+password: 123456
+master_address: 192.168.122.187

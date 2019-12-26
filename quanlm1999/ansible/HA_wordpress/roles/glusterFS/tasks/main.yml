@@ -1,0 +1,12 @@
+---
+# tasks file for glusterFS
+- name: update apt cache
+  apt: update_cache=yes cache_valid_time=3600
+  become: yes
+
+- name: install GlusterFS
+  apt: name=glusterfs-server state=present
+ 
+- name: start glusterFS
+  shell: systemctl status glusterd.service
+  become: yes

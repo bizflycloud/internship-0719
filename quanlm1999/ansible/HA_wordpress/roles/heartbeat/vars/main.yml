@@ -1,0 +1,8 @@
+---
+# vars file for heartbeat
+VIP: 192.168.122.99 
+password: password 
+load_hostname: load1
+interface: eth1
+web1_hostname: web1
+web2_hostname: web2 

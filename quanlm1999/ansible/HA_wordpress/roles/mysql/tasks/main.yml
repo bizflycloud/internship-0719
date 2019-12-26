@@ -1,0 +1,52 @@
+---
+# tasks file for mysql
+- name: Install required software
+  apt: name={{ item }} state=present
+  become: yes
+  with_items:
+    - mysql-server
+
+- name: Update mysql config
+  template: src=my.cnf.j2
+        dest=/etc/mysql/my.cnf
+        backup=yes 
+
+- name: Create mysql database
+  mysql_db: name={{ wp_mysql_db }} state=present
+  become: yes
+
+- name: Create mysql user
+  mysql_user: 
+    name={{ wp_mysql_user }} 
+    password={{ wp_mysql_password }} 
+    priv=*.*:ALL
+
+  become: yes  
+
+- name: MySQL | Create replication user
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "replica1"
+    password: "123456"
+    host: "%"
+    priv: "*.*:SUPER,REPLICATION CLIENT"
+    state: present
+ 
+- name: "MySQL | Get master file and position |"
+  mysql_replication: 
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_host: "{{ master_address }}"
+    login_user: "{{ user }}"
+    login_password: "{{ password }}"
+    mode: getmaster
+  register: mysql_repl_j2
+   
+- name: "MySQL | Change Master Status |"
+  command: "
+    /usr/bin/mysql -u root -e
+    \"
+    STOP SLAVE;
+    CHANGE MASTER TO MASTER_HOST='{{ master_address }}', MASTER_USER='{{ user }}', MASTER_PASSWORD='{{ password }}', MASTER_LOG_FILE='{{ mysql_repl_j2.File }}', MASTER_LOG_POS = {{ mysql_repl_j2.Position }};
+    START SLAVE;
+    \"
+  "

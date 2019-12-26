@@ -1,0 +1,17 @@
+- hosts: database
+  gather_facts: False
+
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+ 
+- hosts: db1
+
+  roles:
+    - mysql
+
+
+- hosts: db2
+
+  roles: 
+    - mysql
