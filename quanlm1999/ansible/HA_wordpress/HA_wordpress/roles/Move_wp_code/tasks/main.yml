@@ -1,0 +1,17 @@
+---
+# tasks file for Move_wp_code
+- name: move webcode
+  shell: mv /var/www/wordpress /storage/
+ 
+- name: change ownership
+  file:
+    path: /storage/wordpress
+    owner: www-data
+    group: www-data
+    mode: '0755'
+ 
+- name: create symlink
+  file:
+    src: /storage/wordpress
+    dest: /var/www/wordpress
+    state: link
