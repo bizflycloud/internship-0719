@@ -30,15 +30,3 @@
 - name:  wordpress template
   template: src=wp-config.php.j2 dest=/var/www/wordpress/wp-config.php
   become: yes
-
-  #- name: Update WordPress config file
-  #lineinfile:
-  #  dest=/var/www/wordpress/wp-config.php
-  #  regexp="{{ item.regexp }}"
-  #  line="{{ item.line }}"
-  #with_items:
-  #  - {'regexp': "define\\('DB_NAME', '(.)+'\\);", 'line': "define('DB_NAME', '{{wp_mysql_db}}');"}        
-  #  - {'regexp': "define\\('DB_USER', '(.)+'\\);", 'line': "define('DB_USER', '{{wp_mysql_user}}');"}        
-  #  - {'regexp': "define\\('DB_PASSWORD', '(.)+'\\);", 'line': "define('DB_PASSWORD', '{{wp_mysql_password}}');"}
-  #  - {'regexp': "define\\('DB_HOST', '(.)+'\\);", 'line': "define('DB_HOST', '{{wp_mysql_host}}');"}
-  #      become: yes 
