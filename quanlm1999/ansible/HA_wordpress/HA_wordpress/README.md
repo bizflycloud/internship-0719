@@ -6,19 +6,22 @@
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(1).png)
 
 #### Các file cần chạy: 
-`wordpress.yml` ansible-playbook wordpress.yml -i hosts -u root
+**wordpress.yml** `ansible-playbook wordpress.yml -i hosts -u root`
+
 Cài đặt 2 server wordpress, bao gồm:
 *  LAMP( apache2, mysql, php),  wordpress cho server đầu và replica code web wordpress cho server còn lại)
 *  glusterFS để làm hệ thống lưu trữ  chung  chưa code web 
 *  wordpress cho server đầu và replica code web wordpress cho server còn lại
 
-`loadbalancer.yml` ansible-playbook loadbalancer.yml -i hosts -u root
+**loadbalancer.yml** `ansible-playbook loadbalancer.yml -i hosts -u root`
+
 Cài đặt 2 server loadbalancer, bao gồm 
 * HAproxy: Cân bằng tải cho 2 server web
 * Heartbeat: health check 
 * VIP chung để kết nối
 
-`mysql.yml` ansible-playbook mysql.yml -i hosts -u root
+**mysql.yml** `ansible-playbook mysql.yml -i hosts -u root`
+
 Cài đặt 2 server mysql làm db cho wordpress, được replicate với nhau 
 
 hoặc chạy file **main.yml** `ansible-playbook main.yml -i hosts -u root` để thực hiện cả 3 lệnh trên
