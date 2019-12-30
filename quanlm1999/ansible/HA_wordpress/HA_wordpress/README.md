@@ -2,6 +2,7 @@
 ****
 
 **Mô hình:** 
+
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram.png)
 
 #### Các file cần chạy: 
