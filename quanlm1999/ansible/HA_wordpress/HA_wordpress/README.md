@@ -19,11 +19,12 @@ Cài đặt 2 server loadbalancer, bao gồm
 
 `mysql.yml`
 Cài đặt 2 server mysql làm db cho wordpress, được replicate với nhau 
-hoặc chạy file **main.yml**
+
+hoặc chạy file **main.yml** để thực hiện cả 3 lệnh trên
 
 
 #### Các biến cấn điều chỉnh 
-`hosts`
+File `hosts`
 ```
 [wordpress]
 192.168.122.253 web_ip=192.168.122.253 
@@ -49,15 +50,15 @@ hoặc chạy file **main.yml**
 ```
 
 
-`group_vars`
-*   `database.yml`: bao gồm thông tin về cấu hình DB 
+Dir `group_vars`
+*   File ` database.yml`: bao gồm thông tin về cấu hình DB 
     *   **user**: tên user để replicate database
     *   **passowrd**: password của user replicate
     *   **wp_mysql_db**: tên database của wordpress
     *   **wp_mysql_user**: tên user của db wordpress
     *  **wp_mysql_password**: password của user wordpress   
 
-*   `loadbalancer.yml`: bao gồm thông tin cấu hình trong HAproxy
+*   File `loadbalancer.yml`: bao gồm thông tin cấu hình trong HAproxy
     *   **protocol**: giao thức trong HAproxy
     *   **VIP**: Virtual_IP muốn sử dụng
     *   **backend**: backend muốn sử dụng
@@ -70,7 +71,7 @@ hoặc chạy file **main.yml**
     * **interface**: interface của card mạng sử để tạo  kết nối heathcheck
     * **port**: port ứng dụng muốn sử dụng (HAproxy)
 
-* `wordpress.yml`Bao gồm thông tin cấu hình wordpress 
+* File `wordpress.yml`Bao gồm thông tin cấu hình wordpress 
     * **wp_mysql_db**: tên database của wordpress (phải giống ở trên 
     * **wp_mysql_user**: tên user của db wordpress (phải giống ở trên 
     * **wp_mysql_password**: password của user wordpress (phải giống ở trên 
