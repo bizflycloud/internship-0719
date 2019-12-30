@@ -3,7 +3,7 @@
 
 **Mô hình:** 
 
-![](hhttps://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(1).png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(1).png)
 
 #### Các file cần chạy: 
 `wordpress.yml` 
