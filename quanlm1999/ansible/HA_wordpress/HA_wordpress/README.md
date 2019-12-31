@@ -6,7 +6,7 @@
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(2).png)
 
 #### Các file cần chạy: 
-**whttps://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(2).pngordpress.yml** `ansible-playbook wordpress.yml -i hosts -u root` (server ảnh hưởng: web-1 web-2)
+**wordpress.yml** `ansible-playbook wordpress.yml -i hosts -u root` (server ảnh hưởng: web-1 web-2)
 
 Cài đặt 2 server wordpress, bao gồm:
 *  LAMP( apache2, mysql, php),  wordpress cho server đầu và replica code web wordpress cho server còn lại)
