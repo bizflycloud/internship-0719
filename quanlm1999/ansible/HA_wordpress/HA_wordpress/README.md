@@ -33,18 +33,19 @@ File `hosts`
 [wordpress]
 web-1 ansible_host=192.168.122.253 web_ip=192.168.122.253 
 web-2 ansible_host=192.168.122.17 web_ip=192.168.122.17
+
 #IP giống với host 
 # Biến này sẽ đặt cho địa chỉ IP của 2 server web
 
 [loadbalancer]
 load-1 ansible_host=192.168.122.253 load_ip=192.168.122.17 
 load-2 ansible_host=192.168.122.17 load_ip=192.168.122.253
+
  #IP đối xứng với host 
  # Biến này sẽ đặt cho địa chỉ IP của 2 server loadbalancer
  
 [database]
-db-1 ansible_host=192.168.122.253  db_id=1 wp_mysql_host=192.168.122.253 master_address=192.168.122.17
-#wp_mysql_host IP giống với host 
+db-1 ansible_host=192.168.122.253  db_id=1 wp_mysql_host=192.168.122.253 master_address=192.168.122.17 
 
 db-2 ansible_host=192.168.122.17 db_id=2 wp_mysql_host=192.168.122.17 master_address=192.168.122.253 
 
