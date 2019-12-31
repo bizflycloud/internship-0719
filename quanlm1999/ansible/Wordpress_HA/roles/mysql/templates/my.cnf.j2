@@ -1,0 +1,30 @@
+
+# --print-defaults to see which it would actually understand and use.
+#
+# For explanations see
+# http://dev.mysql.com/doc/mysql/en/server-system-variables.html
+
+#
+# * IMPORTANT: Additional settings that can override those from this file!
+#   The files must end with '.cnf', otherwise they'll be ignored.
+#
+
+!includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mysql.conf.d/
+
+
+[mysqld]
+
+bind-address        = {{ wp_mysql_host }}
+
+
+server_id           = {{db_id}}
+log_bin             = /var/log/mysql/mysql-bin.log
+log_bin_index       = /var/log/mysql/mysql-bin.log.index
+relay_log           = /var/log/mysql/mysql-relay-bin
+relay_log_index     = /var/log/mysql/mysql-relay-bin.index
+expire_logs_days    = 10
+max_binlog_size     = 100M
+log_slave_updates   = 1
+auto-increment-increment = 2
+auto-increment-offset = {{db_id}}
