@@ -17,7 +17,7 @@ Cài đặt 2 server wordpress, bao gồm:
 
 Cài đặt 2 server loadbalancer, bao gồm 
 * HAproxy: Cân bằng tải cho 2 server web
-* Heartbeat: health check 
+* Heartbeat: health check cho 2 server load-1 load-2
 * Virtual IP
 
 **mysql.yml** `ansible-playbook mysql.yml -i hosts -u root` (server ảnh hưởng: db-1 db-2)
