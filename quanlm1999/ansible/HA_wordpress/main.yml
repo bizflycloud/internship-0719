@@ -1,3 +1,0 @@
-- include: wordpress.yml
-- include: loadbalancer.yml
-- include: mysql.yml

@@ -1,6 +1,0 @@
-user: replica1
-password: password
-
-wp_mysql_db: wordpress
-wp_mysql_user: wordpress
-wp_mysql_password: randompassword
