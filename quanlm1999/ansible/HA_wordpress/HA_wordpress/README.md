@@ -9,20 +9,20 @@
 **wordpress.yml** `ansible-playbook wordpress.yml -i hosts -u root` (server ảnh hưởng: web-1 web-2)
 
 Cài đặt 2 server wordpress, bao gồm:
-*  LAMP( apache2, mysql, php),  wordpress cho server đầu và replica code web wordpress cho server còn lại)
+*  LAMP( apache2, mysql, php)
 *  glusterFS để làm hệ thống lưu trữ  chung  chưa code web 
-*  wordpress cho server đầu và replica code web wordpress cho server còn lại
+*  wordpress cho server web-1 và replica code web wordpress cho server web-2
 
 **loadbalancer.yml** `ansible-playbook loadbalancer.yml -i hosts -u root` (server ảnh hưởng: load-1 load-2)
 
 Cài đặt 2 server loadbalancer, bao gồm 
 * HAproxy: Cân bằng tải cho 2 server web
 * Heartbeat: health check 
-* VIP chung để kết nối
+* Virtual IP
 
 **mysql.yml** `ansible-playbook mysql.yml -i hosts -u root` (server ảnh hưởng: db-1 db-2)
 
-Cài đặt 2 server mysql làm db cho wordpress, được replicate với nhau 
+Cài đặt 2 server mysql làm db cho wordpress, được replicate với nhau theo Master-Master
 
 hoặc chạy file **main.yml** `ansible-playbook main.yml -i hosts -u root` để thực hiện cả 3 lệnh trên
 
