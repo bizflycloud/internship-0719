@@ -3,7 +3,7 @@
 
 **Mô hình:** 
 
-![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/HA_wordpress/HA_wordpress/group_vars/Untitled%20Diagram(2).png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/ansible/Wordpress_HA/group_vars/Untitled%20Diagram(2).png)
 
 #### Các file cần chạy: 
 **wordpress.yml** `ansible-playbook wordpress.yml -i hosts -u root` (server ảnh hưởng: web-1 web-2)
