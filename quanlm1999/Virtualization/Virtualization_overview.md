@@ -1,4 +1,5 @@
-# Virtualization - Ảo hóa là gì?
+# Tổng quan về ảo hóa
+## Virtualization - Ảo hóa là gì?
 ***   
 
 Ảo hóa là một công nghệ được thiết kế để tạo ra tầng trung gian giữa hệ thống phần cứng máy tính và phần mềm chạy trên nó. 
@@ -8,7 +9,7 @@
 Ý tưởng của công nghệ ảo hóa máy chủ là từ một máy vật lý đơn lẻ có thể tạo thành nhiều máy ảo độc lập. Mỗi một máy ảo đều có một thiết lập nguồn hệ thống riêng rẽ, hệ điều hành riêng và các ứng dụng riêng
 
 
-# Các loại ảo hóa
+## Các loại ảo hóa
 ***
 
 * ### Ảo hóa mạng (Network virtualization) 
@@ -27,7 +28,7 @@
     - Là ảo hóa tài nguyên máy chủ (bao gồm số và danh tính của máy chủ vật lý, bộ xử lý và hệ điều hành) từ server users. 
     
     - Mục đích là để người dùng tránh phải hiểu và quản lý các chi tiết phức tạp của tài nguyên máy chủ.
-# Mục tiêu của ảo hóa
+## Mục tiêu của ảo hóa
 ****
  Ảo hóa xoay quanh 4 mục tiêu chính: **Availability, Scalability, Optimization, Management.**
 * ##### Availability: 
@@ -41,7 +42,7 @@
     
 * ##### Management:
     * Khả năng quản lý tập trung, giúp việc quản lý trở nên dễ dàng hơn bao giờ hết.
-# Các thành phần của một hệ thống ảo hóa.
+## Các thành phần của một hệ thống ảo hóa.
 ****
 
 ### Một hệ thống ảo hóa bao gồm những thành phần sau:
@@ -76,7 +77,7 @@
 
 ![](https://voer.edu.vn/media/transforms/20140306-214626-tong-quan-ve-ao-hoa-may-chu/Picture%203.png)
 
-#   Các kiến trúc ảo hóa. 
+##   Các kiến trúc ảo hóa. 
 ****
 
 #### Kiến trúc ảo hóa Hosted-based.
@@ -153,7 +154,7 @@
 
 * Một số ví dụ về các hệ thống Bare-metal hypervisor như là: **Oracle VM, Vmware ESX Server, IBM's POWER Hypervisor (PowerVM), Microsoft's Hyper-V, Citrix XenServer…**
 
-# Các mức độ ảo hóa. 
+## Các mức độ ảo hóa. 
 ****
 #### Ảo hóa toàn phần - Full Virtualization.   
 *   **Đây là loại ảo hóa mà ta không cần chỉnh sửa hệ điều hành khách (guest OS) cũng như các phần mềm đã được cài đặt trên nó để chạy trong môi trường hệ điều hành chủ (host OS).**
@@ -180,7 +181,7 @@
             
     ![](https://img.tfd.com/cde/PARVIRT2.GIF)
         
-# Ưu điểm, nhược điểm của ảo hoá máy chủ.
+## Ưu điểm, nhược điểm của ảo hoá máy chủ.
 ****
 #### Ưu điểm.
 * ##### Giúp tận dụng tối đa tài nguyên phần cứng của máy chủ vật lí, tiết kiệm chi phí đầu tư hệ thống.
@@ -220,7 +221,7 @@
 * ##### Rủi ro lỗi vật lý cao: 
     * Vỡi 1 lỗi vật lý, có thể sẽ khiến cho  tất cả các server bị offline 
 
-# Lợi ích khi ảo hóa máy chủ 
+## Lợi ích khi ảo hóa máy chủ 
 ****
 *   #### Tiết kiệm năng lượng
     *   Di chuyển các máy chủ vật lý thành các máy ảo và hợp nhất chúng vào số lượng ít các máy chủ vật lý hơn sẽ giúp bạn giảm chi phí điện và chi phí làm mát hàng tháng trong datacenter. 
@@ -246,7 +247,7 @@
     *   Hợp nhất các máy chủ thành ít các máy vật lý hơn trong production, một tổ chức có thể dễ dàng tạo ra một replication site có giá cả phải chăng. 
     *   Có phần mềm có thể giúp tự động chịu lỗi khi xảy ra thảm họa. Các phần mềm tương tự cũng cung cấp một cách để kiểm tra disaster recovery failover
     
-# Lợi ích chính của ảo hóa trong Trung tâm dữ liệu 
+## Lợi ích chính của ảo hóa trong Trung tâm dữ liệu 
 ****
 
 *   ####  Ít nhiệt tích tụ
