@@ -209,7 +209,29 @@ Một số khác biệt giữa bộ dòng lệnh virt và virsh:
     ```
 * Để quản lý các thành phần ảo khác như mạng ảo, pool ảo, volumn ảo, … thì sẽ dùng với cú pháp chung như sau:
 `virsh <object>-<command> <object_name>`
+  Ví dụ: sửa lại cấu hình cho mạng default: 
+  `virsh # net-edit default`
+Kết quả:
+```
+<network>
+  <name>default</name>
+  <uuid>83a564a7-658f-4c98-9b7a-6506c5ff3b90</uuid>
+  <forward mode='nat'/>
+  <bridge name='virbr0' stp='on' delay='0'/>
+  <mac address='52:54:00:7a:f7:f5'/>
+  <ip address='192.168.122.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.122.2' end='192.168.122.254'/>
+    </dhcp>
+  </ip>
+</network>
 
+```
+Sửa xong lưu lại, không thay đổi nên kết qủa trả về sẽ là: 
+```
+virsh # net-edit default
+Network default XML configuration not changed.
+```
 * Để console tới máy ảo:
 `virsh console <VM_name>`
 ```
