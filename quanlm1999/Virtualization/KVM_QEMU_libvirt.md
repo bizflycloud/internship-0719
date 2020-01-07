@@ -263,4 +263,134 @@ Welcome to Ubuntu 18.04.3 LTS (GNU/Linux 4.15.0-72-generic x86_64)
 
 root@rabbitmq1:~# 
 ```
+### virt command tool
 
+Bộ câu lệnh virt gồm rất nhiều câu lệnh để quản lý máy ảo có hỗ trợ quản lý KVM như: virt-install (cài đặt máy ảo), virt-viewer (console tới máy ảo), virt-log (đọc log của máy ảo), virt-xml (dùng để sửa các cấu hình trong file xml), virt-edit (sửa cấu hình máy ảo), …
+
+* **virt-install**
+    * Là công cụ dòng lệnh dùng để tạo các máy ảo KVM, Xen, hoặc LXC sử dụng libvirt để quản lý hypervisor.
+    * Hỗ trợ giao diện đồ họa cho máy ảo sử dụng VNC hoặc SPICE, cũng như là chế độ text thông qua console. Máy ảo có thể được cấu hình sử dụng một hoặc nhiều ổ đĩa ảo, nhiều interface mạng, physical USB, PCI devices, …
+
+    * Cấu trúc câu lệnh: `virt-install [OPTION]... `
+        * Ví dụ: Tạo máy ảo từ 1 img có sẵn:
+ ```
+        quanlm@quanlm-laptop:/works/home/quan/Downloads$ virt-install \
+>               --connect qemu:///system \
+>               --name kvm1 \
+>               --memory 512 \
+>               --vcpus 1 \
+>               --disk   /works/home/quan/Downloads/xenial-server-cloudimg-amd64-disk1.img \
+>               --import \
+>               --network network=default \
+>               --graphics vnc,listen='0.0.0.0'   
+    Error setting up logfile: No write access to logfile /home/quan/.cache/virt-manager/virt-install.log
+    WARNING  No operating system detected, VM performance may suffer. Specify an OS with --os-variant for optimal results.
+    
+    Starting install...
+```
+Trong đó, 1 số thông số như: 
+   * name: Tên máy ảo
+   * description: Mô tả server
+   * os-type: loại hệ điều hành: linux, unix, windows
+   * os-variant: Biến thể của hđh, 
+        * với linux có thể là rhel6, centos6, ubuntu14, suse11, fedora6 , etc.
+        * với  windows, có thể là win10, win8, win7, ....
+   * ram: Bộ nhớ cho VM ( MB))
+   * vcpu: tổng số Virtual CPU cho VM
+   * disk: Đường dẫn đến file img
+   * network default:
+        
+* Ta có thể thấy sẽ có 1 virt-viewer hiện lên console tới máy ảo: 
+        ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-01-07%2010-14-44.png)
+* Hoặc kết nối đến với máy ảo mới tạo sử dụng `visrh console kvm1`
+    ```
+    quanlm@quanlm-laptop:~$ virsh console kvm1
+    Connected to domain kvm1
+    Escape character is ^]
+    
+    Ubuntu 16.04.6 LTS ubuntu ttyS0
+    
+    ubuntu login: 
+    Ubuntu 16.04.6 LTS ubuntu ttyS0
+    
+    ubuntu login: 
+    ```
+
+* Để cấu hình máy ảo, ta sử dùng text editor vào đường dẫn: `/etc/libvirt/qemu/`
+    ```
+    quanlm@quanlm-laptop:/home/quan$ vim /etc/libvirt/qemu/
+    autostart/   kvm1.xml     networks/    rabbit1.xml  rabbit2.xml  rabbit3.xml
+    ```
+    Ta có thế thấy file xml chứa thông tin cấu hình máy ảo ở đây: 
+    ```
+    domain type='kvm'>
+      <name>kvm1</name>
+      <uuid>9319bb78-3c87-46fc-ba5f-68e67cdd9a29</uuid>
+      <memory unit='KiB'>524288</memory>
+      <currentMemory unit='KiB'>524288</currentMemory>
+      <vcpu placement='static'>1</vcpu>
+      <os>
+        <type arch='x86_64' machine='pc-i440fx-bionic'>hvm</type>
+        <boot dev='hd'/>
+      </os>
+      <features>
+        <acpi/>
+        <apic/>
+        <vmport state='off'/>
+      </features>
+      <cpu mode='custom' match='exact' check='partial'>
+        <model fallback='allow'>Broadwell-noTSX-IBRS</model>
+      </cpu>
+      <clock offset='utc'>
+        <timer name='rtc' tickpolicy='catchup'/>
+        <timer name='pit' tickpolicy='delay'/>
+        <timer name='hpet' present='no'/>
+      </clock>
+      <on_poweroff>destroy</on_poweroff>
+      <on_reboot>restart</on_reboot>
+      <on_crash>destroy</on_crash>
+      <pm>
+        <suspend-to-mem enabled='no'/>
+        <suspend-to-disk enabled='no'/>
+      </pm>
+      <devices>
+        <emulator>/usr/bin/kvm-spice</emulator>
+        <disk type='file' device='disk'>
+          <driver name='qemu' type='qcow2'/>
+          <source file='/works/home/quan/Downloads/xenial-server-cloudimg-amd64-disk1.img'/>
+    ...
+    ```
+    
+    Khi sửa file ta đảm bảo rằng máy ảo cần sửa đã tắt.
+    Sử dụng lệnh: `virsh edit <domain name>` để cấu hình, khi bấm enter kết quả sẽ ra file ở trên.
+    ```
+    root@quanlm-laptop:/home/quan# virsh edit test
+    Domain test3 XML configuration edited.
+    ```
+    
+Ngoài ra, khi tạo máy ảo từ file iso, ta phải tạo 1 file img rỗng 
+```
+virt-install \
+              --connect qemu:///system \
+              --name kvm2 \
+              --memory 1024 \
+              --vcpus 1 \
+              --disk /works/home/quan/Download/kvm2.img,size=10G #Tự tạo ra một image rỗng tên kvm2, kích thước 10G \
+               --location /var/lib/libvirt/images/ubuntu-16.04.4-server-amd64.iso \
+              --network network=default \
+              --graphics vnc,listen='0.0.0.0' 
+```
+Tương tự với netboot img:
+```
+virt-install \
+              --connect qemu:///system \
+              --name kvm3 \
+              --ram 1024 \
+              --vcpus 1 \
+              --disk /var/lib/libvirt/images/kvm3.img,size=10G \
+               --location http://vn.archive.ubuntu.com/ubuntu/dists/xenial/main/installer-i386/ \
+              --network network=default \
+              --graphics vnc,listen='0.0.0.0'   
+```
+
+        
