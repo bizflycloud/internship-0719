@@ -501,6 +501,7 @@ Trong đó, 1 số thông số như:
         </target>
     </pool>
         ```
+****
 
 ### Quản lý KVM networking với libvirt
 **Linux bridge**
