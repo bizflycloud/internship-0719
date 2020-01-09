@@ -415,8 +415,6 @@ Trong đó, 1 số thông số như:
     
     ubuntu login: 
     ```
-****
-    
 ### Quản lý KVM sử dụng lib virt
 *   Tăng memory máy ảo lên: `virsh setmem <name> --size <size>`
 *   Tăng max mem lên: `virsh setmaxmem <name> --size <size>`
@@ -503,8 +501,6 @@ Trong đó, 1 số thông số như:
         </target>
     </pool>
         ```
-        
-****
 
 ### Quản lý KVM networking với libvirt
 **Linux bridge**
@@ -587,8 +583,6 @@ Với bridge này máy ảo sẽ có thể kết nối với mạng cùng subnet
 **Cấu hình mạng thông qua PCI**
    *   Liệt kê tất cả thiết bị trên máy chủ: `virsh nodedev-list --tree`
 *   Liệt kê các PCI enternet adapter
-
-****
 
 ### Di chuyển KVM 
 
@@ -693,9 +687,7 @@ Domain kvm_gfs defined from kvm_gfs.xml
 *   Chuyển file đến server: `scp /tmp/kvm_no_sharedfs.img kvm2:/tmp/kvm_no_sharedfs.img`
 *   Di chuyển VM đến server mới `virsh migrate --live --persistent --verbose --copy-storage-all kvm_no_sharedfs qemu+ssh://kvm2/system`
     *   `virsh migrate --live --persistent --verbose --copy-storage-inc kvm_no_sharedfs qemu+ssh://kvm/system`
-    Nếu có lỗi xảy ra xem lại  **1 số lỗi có thể gặp phải ở trên**
-    
-****
+    Nếu có lỗi xảy ra xem lại  **1 số lỗi có thể gặp phải ở trên**KVM
 
 ### Giám sát và sao lưu máy ảo KVM
 **Thu thập tài nguyên sử dụng bằng libvirt**
@@ -710,3 +702,136 @@ Domain kvm_gfs defined from kvm_gfs.xml
 *   Kiểm tra thông tin về kích cỡ block device:`virsh domblkinfo --device hda kvm1`
 *   Kiểm tra block device bị lỗi: `virsh domblkerror kvm1`
 *   In ra thống kê vè block deivce: `virsh domblkstat --device hda --human kvm1`
+
+**Giám sát máy ảo với Sensu**
+*   Cài đặt redis và và rabbitMQ `redis-server` `rabbitmq-server`
+*   Tạo vHost `sensu` với rabbitMQ 
+    ```
+    root@kvm:~# rabbitmqctl add_vhost /sensu
+    Creating vhost "/sensu" ...
+    ...done.
+    
+    root@kvm:~# rabbitmqctl add_user sensu secret
+    Creating user "sensu" ...
+    ...done.
+    
+    root@kvm:~# rabbitmqctl set_permissions -p /sensu sensu ".*" ".*" ".*"
+    Setting permissions for user "sensu" in vhost "/sensu" ...
+    ...done.
+    
+    ```
+*   Cài đặt repository, keys của nó và cài đặt sensu 
+    ```
+    wget -q https://sensu.global.ssl.fastly.net/apt/pubkey.gpg -
+    O- | apt-key add -
+    OK
+    
+    root@kvm:~# echo "deb https://sensu.global.ssl.fastly.net/apt sensu
+    main" | tee /etc/apt/sources.list.d/sensu.list
+    deb https://sensu.global.ssl.fastly.net/apt sensu main
+    
+    root@kvm:~# apt-get update
+    ...
+    
+    root@kvm:~# apt-get install -y sensu
+    ```
+* Tạo file Sensu API( JSON)
+    ```
+    /etc/sensu/conf.d# cat api.json
+    
+    {
+        "api": {
+            "host": "localhost",
+            "bind": "0.0.0.0",
+            "port": 4567
+        }
+    }
+    ```
+* Cấu hình phương thức vận chuyển cho Sensu sử dụng rabbitMQ
+    ```
+    cat transport.json
+    
+    {
+        "transport": {
+            "name": "rabbitmq",
+            "reconnect_on_error": true
+        }
+    }
+    ```
+
+*   Cấu hình rabbitMQ chấp nhận kết nối
+    ```
+    cat rabbitmq.json
+    
+    {
+        "rabbitmq": {
+            "host": "0.0.0.0",
+            "port": 5672,
+            "vhost": "/sensu",
+            "user": "sensu",
+            "password": "secret"
+        }
+    }
+    ```
+
+*   Cấu hình host và port cho dịch vụ redis theo dõi
+
+    ```
+    cat redis.json
+    
+    {
+        "redis": {
+            "host": "localhost",
+            "port": 6379
+        }
+    }
+```
+
+*   Cấu hình client Sensu
+    ```
+    cat client.json
+    
+    {
+        "client": {
+            "name": "ubuntu",
+            "address": "127.0.0.1",
+            "subscriptions": [
+                "base"
+            ],
+            "socket": {
+                "bind": "127.0.0.1",
+                "port": 3030
+            }
+        }
+    }
+    ```
+
+*   Cài đặt uchiwa làm web front-end cho Sensu
+    ```
+    {
+        "sensu": [
+            {
+                "name": "KVM guests",
+                "host": "localhost",
+                "ssl": false,
+                "port": 4567,
+                "path": "",
+                "timeout": 5000
+            }
+        ],
+        "uchiwa": {
+            "port": 3000,
+            "stats": 10,
+            "refresh": 10000
+        }
+    }
+    ```
+
+
+*   Khởi động dịch vụ sensu-server/api/client và uchiwa
+    ```
+    /etc/init.d/sensu-server start
+    /etc/init.d/sensu-api start
+    /etc/init.d/sensu-client start
+    /etc/init.d/uchiwa restart
+    ```
