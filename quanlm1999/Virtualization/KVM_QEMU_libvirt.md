@@ -88,6 +88,7 @@ Cấu trúc
 * **Quản lý disk image với QEMU**
 *   Tạo 1 img: `qemu-img create -f {type} {name}.img {size} `
     *   Trong đó: `type` có thể là `raw` `qcow2` `qcow` `dmg` `nbd` `vdi` `vmdk` `vhdx`
+*   Tăng giảm dung lượng của 1 img: `qemu-img resize -f {type}{name}.img {+-}{size}`
 *   Xem thông tin thêm về image:    `qemu-img info {name}.img`
 *   **Chạy máy ảo với qemu** : 
     `qemu-system-x86_64 -name debian -vnc 146.20.141.254:0 -cpu Nehalem -m 1024 -drive format=raw,index=2,file=debian.img -daemonize`
@@ -196,6 +197,61 @@ Một số khác biệt giữa bộ dòng lệnh virt và virsh:
      -     rabbit2                        shut off
      -     rabbit3                        shut off
     ```
+* Tạo máy ảo:
+    *   Tạo file {name}.xml để làm file xml cho máy ảo 
+    Ví dụ: 
+    ```
+    <domain type='kvm' id='1'>
+    <name>kvm1</name>
+    <memory unit='KiB'>1048576</memory>
+    <vcpu placement='static'>1</vcpu>
+    <os>
+        <type arch='x86_64' machine='pc-i440fx-trusty'>hvm</type>
+        <boot dev='hd'/>
+    </os>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>restart</on_crash>
+    <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+        <driver name='qemu' type='raw'/>
+        <source file='/tmp/debian.img'/>
+        <target dev='hda' bus='ide'/>
+        <alias name='ide0-0-0'/>
+        <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <interface type='network'>
+        <source network='default'/>
+        <target dev='vnet0'/>
+        <model type='rtl8139'/>
+        <alias name='net0'/>
+        <address type='pci' domain='0x0000' bus='0x00' slot='0x03'
+    function='0x0'/>
+        </interface>
+        <graphics type='vnc' port='5900' autoport='yes'
+    listen='146.20.141.158'>
+            <listen type='address' address='146.20.141.158'/>
+        </graphics>
+        </devices>
+        <seclabel type='none'/>
+    </domain>
+    ```
+    Trong đó:
+        *   `type` & `id`: loại và id của máy ảo
+        *   `name`: tên máy ảo sẽ hiển thị 
+        *   `memory`: lượng memory của máy ảo 
+        *   `vcpu`: số lượng cpu của máy ảo
+        *   `os`
+            *   `type arch`: kiến trúc cpu là `x86_64`
+            *   `hvm`: full virtualize
+            *   `boot dev` chỉ định boot device
+        * 3 thông số tiếp theo chỉ định hành động khi máy ảo tắt, khởi động lại hoặc bị crash.
+        *   Định nghĩa các device của máy ảo như disk, card mạng, .....
+        
+    
+*   Định nghĩa máy ảo mới tạo với file `.xml`
+    `virsh define kvm1.xml`
 
 - Bật máy ảo:
 `virsh start <VM_name>`
@@ -225,6 +281,11 @@ Một số khác biệt giữa bộ dòng lệnh virt và virsh:
     quanlm@quanlm-laptop:~$ virsh reboot rabbit1
     Domain rabbit1 is being rebooted
     ```
+* Tắt máy ảo:
+`virsh destroy <VM_name>`
+
+* Xóa máy ảo:
+`virsh undefined <VM_name>`
 
 - Lưu lại trạng thái đang hoạt động của máy ảo vào một file và sau này restore lại:
     `virsh save <VM_name> <VM_name_time>.state ( time tùy chọn để sau này dễ nhớ)`
@@ -239,39 +300,13 @@ Một số khác biệt giữa bộ dòng lệnh virt và virsh:
     Domain restored from rabbit1.state
     ```
 
-- Tắt máy ảo:
-    `virsh shutdown <VM_name>`
-    ```
-    quanlm@quanlm-laptop:~$ virsh shutdown rabbit1
-    Domain rabbit1 is being shutdown
-    ```
 * Để quản lý các thành phần ảo khác như mạng ảo, pool ảo, volumn ảo, … thì sẽ dùng với cú pháp chung như sau:
 `virsh <object>-<command> <object_name>`
-  Ví dụ: sửa lại cấu hình cho mạng default: 
-  `virsh # net-edit default`
-Kết quả:
-```
-<network>
-  <name>default</name>
-  <uuid>83a564a7-658f-4c98-9b7a-6506c5ff3b90</uuid>
-  <forward mode='nat'/>
-  <bridge name='virbr0' stp='on' delay='0'/>
-  <mac address='52:54:00:7a:f7:f5'/>
-  <ip address='192.168.122.1' netmask='255.255.255.0'>
-    <dhcp>
-      <range start='192.168.122.2' end='192.168.122.254'/>
-    </dhcp>
-  </ip>
-</network>
 
-```
-Sửa xong lưu lại, không thay đổi nên kết qủa trả về sẽ là: 
-```
-virsh # net-edit default
-Network default XML configuration not changed.
-```
-* Để console tới máy ảo:
+
+* Để console tới máy ảo
 `virsh console <VM_name>`
+
 ```
 quanlm@quanlm-laptop:~$ virsh console rabbit1
 error: The domain is not running
@@ -323,6 +358,11 @@ Welcome to Ubuntu 18.04.3 LTS (GNU/Linux 4.15.0-72-generic x86_64)
 
 root@rabbitmq1:~# 
 ```
+
+
+
+
+
 ### virt command tool
 
 Bộ câu lệnh virt gồm rất nhiều câu lệnh để quản lý máy ảo có hỗ trợ quản lý KVM như: virt-install (cài đặt máy ảo), virt-viewer (console tới máy ảo), virt-log (đọc log của máy ảo), virt-xml (dùng để sửa các cấu hình trong file xml), virt-edit (sửa cấu hình máy ảo), …
@@ -375,82 +415,93 @@ Trong đó, 1 số thông số như:
     
     ubuntu login: 
     ```
-
-* Để cấu hình máy ảo, ta sử dùng text editor vào đường dẫn: `/etc/libvirt/qemu/`
-    ```
-    quanlm@quanlm-laptop:/home/quan$ vim /etc/libvirt/qemu/
-    autostart/   kvm1.xml     networks/    rabbit1.xml  rabbit2.xml  rabbit3.xml
-    ```
-    Ta có thế thấy file xml chứa thông tin cấu hình máy ảo ở đây: 
-    ```
-    domain type='kvm'>
-      <name>kvm1</name>
-      <uuid>9319bb78-3c87-46fc-ba5f-68e67cdd9a29</uuid>
-      <memory unit='KiB'>524288</memory>
-      <currentMemory unit='KiB'>524288</currentMemory>
-      <vcpu placement='static'>1</vcpu>
-      <os>
-        <type arch='x86_64' machine='pc-i440fx-bionic'>hvm</type>
-        <boot dev='hd'/>
-      </os>
-      <features>
-        <acpi/>
-        <apic/>
-        <vmport state='off'/>
-      </features>
-      <cpu mode='custom' match='exact' check='partial'>
-        <model fallback='allow'>Broadwell-noTSX-IBRS</model>
-      </cpu>
-      <clock offset='utc'>
-        <timer name='rtc' tickpolicy='catchup'/>
-        <timer name='pit' tickpolicy='delay'/>
-        <timer name='hpet' present='no'/>
-      </clock>
-      <on_poweroff>destroy</on_poweroff>
-      <on_reboot>restart</on_reboot>
-      <on_crash>destroy</on_crash>
-      <pm>
-        <suspend-to-mem enabled='no'/>
-        <suspend-to-disk enabled='no'/>
-      </pm>
-      <devices>
-        <emulator>/usr/bin/kvm-spice</emulator>
+### Quản lý KVM sử dụng lib virt
+*   Tăng memory máy ảo lên: `virsh setmem <name> --size <size>`
+*   Tăng max mem lên: `virsh setmaxmem <name> --size <size>`
+*   Tăng vCPU lên: `virsh edit kvm1`
+    * Chỉnh sửa thông số sau  `<vcpu placement='static'>4</vcpu>`
+*   Gắn  thêm đĩa vào máy ảo: `virsh attach-disk <VM_name> <disk_location> vda --live` thay `--live` = `--persist` nếu như muốn lưu lại sau khi máy restart
+    *   Disk này có thể được tạo = lệnh dd: `dd if=/dev/zero of=/<disk_location> bs=1M count=1024`
+    *    Ngoài ra còn có thể tạo file xml `<disk>.xml`
+          ```
         <disk type='file' device='disk'>
-          <driver name='qemu' type='qcow2'/>
-          <source file='/works/home/quan/Downloads/xenial-server-cloudimg-amd64-disk1.img'/>
-    ...
-    ```
+        <driver name='qemu' type='raw' cache='none'/>
+        <source file='<disk_location>'/>
+        <target dev='vdb'/>
+          </disk>
+        ```
+        Sau đó: `virsh attach-device <VM_name> --live <disk_location>`
+*   Bỏ đĩa khỏi máy ảo: `virsh detach-disk <VM_name> <target dev> --live`
+*   Tạo 1 mount directory để chuyển file giữa máy ảo và máy chủ 
+    *   Trên máy chủ: `mkdir /tmp/shared`
+        *   Chỉnh sửa file xml của máy ảo, thêm 
+        ```
+        <filesystem type='mount' accessmode='passthrough'>
+        <source dir='/tmp/shared'/>
+        <target dir='tmp_shared'/>
+        </filesystem>
+        ```
+    *   Trên máy ảo: 
+        *   Tạo mount point: `mount -t 9p -o trans=virtio tmp_shared /mnt`
     
-    Khi sửa file ta đảm bảo rằng máy ảo cần sửa đã tắt.
-    Sử dụng lệnh: `virsh edit <domain name>` để cấu hình, khi bấm enter kết quả sẽ ra file ở trên.
+*   Tạo storage pool:
+    *   Tạo thư mục làm pool
+    *   Định nghĩa pool với file xml: 
     ```
-    root@quanlm-laptop:/home/quan# virsh edit test
-    Domain test3 XML configuration edited.
+    cat file_storage_pool.xml
+    <pool type="dir">
+    <name>file_virtimages</name>
+    <target>
+    <path>/var/lib/libvirt/images</path>
+    </target>
+    </pool>
     ```
+    `virsh pool-define file_storage_pool.xml`
+    * Xem thông tin về pool: `virsh pool-info file_virtimages`
+    * Khỏi động pool: 
+        *   `virsh pool-start file_virtimages`
+        *   `virsh pool-autostart file_virtimages`
+    *   Xem thông tin về volume trong pool: `virsh vol-info /var/lib/libvirt/images/kvm1.img`
+        
+*   Volume
+    *   Tạo volume `virsh vol-create-as <pool> <vol> <size>`
+    *   Resize volume `virsh vol-resize <vol> <size> --pool <pool>`
+    *   Delete volume `virsh vol-delete <vol> --pool <pool>`
+    *   Clone volume `virsh vol-clone <vol1> <vol2> --pool <pool>`
     
-Ngoài ra, khi tạo máy ảo từ file iso, ta phải tạo 1 file img rỗng 
-```
-virt-install \
-              --connect qemu:///system \
-              --name kvm2 \
-              --memory 1024 \
-              --vcpus 1 \
-              --disk /works/home/quan/Download/kvm2.img,size=10G #Tự tạo ra một image rỗng tên kvm2, kích thước 10G \
-               --location /var/lib/libvirt/images/ubuntu-16.04.4-server-amd64.iso \
-              --network network=default \
-              --graphics vnc,listen='0.0.0.0' 
-```
-Tương tự với netboot img:
-```
-virt-install \
-              --connect qemu:///system \
-              --name kvm3 \
-              --ram 1024 \
-              --vcpus 1 \
-              --disk /var/lib/libvirt/images/kvm3.img,size=10G \
-               --location http://vn.archive.ubuntu.com/ubuntu/dists/xenial/main/installer-i386/ \
-              --network network=default \
-              --graphics vnc,listen='0.0.0.0'   
-```
+*   Quản lý secret (là đối tượng chưa thông tin nhạy cảm như mật khẩu,....)
+    *   Định nghĩa secret: 
+    ```
+    cat volume_secret.xml
+    <secret ephemeral='no'>
+        <description>Passphrase for the iSCSI iscsi-target.linux-admins.net
+    target server</description>
+        <usage type='iscsi'>
+            <target>iscsi_secret</target>
+           </usage>
+    </secret>   
+    ```
+        
+    *   Tạo secret: `virsh secret-define volume_secret.xml`
+    *   Đặt giá trị cho secret: `virsh secret-set-value 7ad1c208-c2c5-4723-8dc5-e2f4f576101a`
+    *   Tạo 1 pool sử dụng secret đã tạo : 
+    ```
+    cat iscsi.xml
+    <pool type='iscsi'>
+        <name>iscsi_virtimages</name><source>
+    <source>    
+        <host name='iscsi-target.linux-admins.net'/>
+        <device path='iqn.2004-04.ubuntu:ubuntu16:iscsi.libvirtkvm'/>
+        <auth type='chap' username='iscsi_user'>    
+            <secret usage='iscsi_secret'/>
+        </auth>
+    </source>
+        <target>
+            <path>/dev/disk/by-path</path>
+        </target>
+    </pool>
+        ```
 
+### Quản lý KVM networking với libvirt
+    
         
