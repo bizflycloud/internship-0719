@@ -423,14 +423,14 @@ Trong đó, 1 số thông số như:
 *   Gắn  thêm đĩa vào máy ảo: `virsh attach-disk <VM_name> <disk_location> vda --live` thay `--live` = `--persist` nếu như muốn lưu lại sau khi máy restart
     *   Disk này có thể được tạo = lệnh dd: `dd if=/dev/zero of=/<disk_location> bs=1M count=1024`
     *    Ngoài ra còn có thể tạo file xml `<disk>.xml`
-          ```
-        <disk type='file' device='disk'>
-        <driver name='qemu' type='raw' cache='none'/>
-        <source file='<disk_location>'/>
-        <target dev='vdb'/>
-          </disk>
-        ```
-        Sau đó: `virsh attach-device <VM_name> --live <disk_location>`
+    ```
+    <disk type='file' device='disk'>
+    <driver name='qemu' type='raw' cache='none'/>
+    <source file='<disk_location>'/>
+    <target dev='vdb'/>
+      </disk>
+    ```    
+    Sau đó: `virsh attach-device <VM_name> --live <disk_location>`
 *   Bỏ đĩa khỏi máy ảo: `virsh detach-disk <VM_name> <target dev> --live`
 *   Tạo 1 mount directory để chuyển file giữa máy ảo và máy chủ 
     *   Trên máy chủ: `mkdir /tmp/shared`
@@ -503,5 +503,81 @@ Trong đó, 1 số thông số như:
         ```
 
 ### Quản lý KVM networking với libvirt
+**Linux bridge**
+*  Để có thể thao tác với Linux bridge, ta cần package: `bridge-utils`
+    *  Liệt kê bridge: `brctl show`
+    *  Tắt virtual bridge: `ifconfig virbr0 down`
+    *  Xóa : `brctl delbr virbr0`
+    *  Tạo mới: `brctl addbr virbr0`
+    *   Bật: `ifconfig virbr0 up`
+    *   Gán địa chỉ: `ip addr add 192.168.122.1 dev virbr0`
+    *   Gán interface ảo vào brigde: `brctl addif virbr0 vnet0`
+    *   Kích hoạt STP (spanning tree protocol) `brctl stp virbr0 on`
+      
+**Open vSwitch**
+Nhiều tính năng hơn Linux bridge như: chính sách định tuyến, ACLs,chính sách QoS, giám sát, taggìg VLAN, ....
+* Để có thể thao tác với OVS ta cần  package: `openvswitch-switch`
+    *   Tạo OVS switch: `ovs-vsctl add-br virbr1`
+    *   Xóa OVS switch: `ovs-vsctl del-br virbr1`
+    *   Thêm interface vào OVS switch: `ovs-vsctl add-port virbr1 vnet0`
+    *   Bỏ interface: `ovs-vsctl del-port virbr1 vnet0`
+    *   Cấu hình IP cho OVS switch: `ip addr add 192.168.122.1/24 dev virbr1`
+
+**Cấu hình NAT forwarding** 
+*  Tạo file xml định nghĩa NAT network : 
+```
+cat nat_net.xml
     
-        
+<network>
+   <name>nat_net</name>
+    <bridge name="virbr1"/>
+    <forward/>
+   <ip address="10.10.10.1" netmask="255.255.255.0">
+        <dhcp>
+            <range start="10.10.10.2" end="10.10.10.254"/>
+        </dhcp>
+     </ip>
+</network>
+```
+  Trong đó: `<foward/>` sẽ định nghĩa kết nối NAT ra với máy chủ, nếu k có thì sẽ tạo ra 1 mạng độc lập  
+* Định nghĩa mạng mới tạo: `virsh net-define nat_net.xml`
+* Khởi động: `virsh net-start nat_net`
+* Tự động: `virsh net-autostart nat_net`
+* Xem thông tin: `virsh net-info nat_net`
+* Cấu hình cho máy ảo dùng mạng mới: 
+    ```
+    <interface type='network'>
+    ...
+    <source network='nat_net'/>
+    ...
+    </interface>
+    ```
+*   Kiểm tra routing của mạng  mới:`iptables -L -n -t nat`
+
+**Cấu hình bridge network**
+    *   Tắt interface định bridge `ifdown eth1`
+    *   Đặt IP tĩnh cho interface đó: 
+    ```
+    auto virbr2
+    iface virbr2 inet static
+        address 192.168.1.2
+        netmask 255.255.255.0
+        network 192.168.1.0
+        broadcast 192.168.1.255
+        gateway 192.168.1.1
+        bridge_ports eth1
+        bridge_stp on
+        bridge_maxwait 0
+    ```
+    *  Khởi động lại interface: `ifup virbr2`
+    *  Bỏ gưir packet qua `iptables`: `sysctl -w net.bridge.bridge-nf-call-iptables=0`
+    *  Cho máy ảo dùng bridge: 
+    ```
+    <interface type='bridge'>
+        <source bridge='virbr2'/>
+    </interface>
+    ```
+    
+
+
+
