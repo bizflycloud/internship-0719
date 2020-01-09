@@ -94,12 +94,19 @@ Cấu trúc
 
     *   Trong đó:
         * `qemu-system-x86_64`: gỉa lập kiến trúc `x86-64` CPU,
+        
         * `-cpu Nehalem`  giả lập kiến trúc mẫu Nehalem CPU ( codename for an Intel processor microarchitecture released in November 2008)
+        
         * `-vnc` khởi động VNC server với địa chỉ IP đã đặt để có thể kết nối đến máy  VM`
+        
         *   `-m` lượng memory khởi tạo (MB)
+        
         * `format=raw` format của disk img
+        
         *   `file`: vị trí của img
+        
         *   `index`: chỉ định xem load từ phân vùng nào của disk img (nơi chưa bootloader và root) ( nếu có nhiều)
+        
         *   `-daemonize` để chạy trên background        
         
 *   **Chạy máy ảo với qemu-kvm**
@@ -111,6 +118,7 @@ Cấu trúc
     
     khi có cài đặt: `qemu-kvm` có thể chạy lệnh :
     `kvm -name debian -vnc 146.20.141.254:0 -cpu Nehalem -m 1024 -drive format=raw,index=2,file=debian.img -daemonize`
+    
     Trong đó `kvm` đã bao gồm cả `qemu-system-x86_64` và `-enable-kvm`, 2 câu lệnh chức năng như nhau
     
 
