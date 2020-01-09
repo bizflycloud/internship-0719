@@ -415,6 +415,8 @@ Trong đó, 1 số thông số như:
     
     ubuntu login: 
     ```
+****
+    
 ### Quản lý KVM sử dụng lib virt
 *   Tăng memory máy ảo lên: `virsh setmem <name> --size <size>`
 *   Tăng max mem lên: `virsh setmaxmem <name> --size <size>`
@@ -501,6 +503,7 @@ Trong đó, 1 số thông số như:
         </target>
     </pool>
         ```
+        
 ****
 
 ### Quản lý KVM networking với libvirt
@@ -556,29 +559,154 @@ cat nat_net.xml
 *   Kiểm tra routing của mạng  mới:`iptables -L -n -t nat`
 
 **Cấu hình bridge network**
-    *   Tắt interface định bridge `ifdown eth1`
-    *   Đặt IP tĩnh cho interface đó: 
-    ```
-    auto virbr2
-    iface virbr2 inet static
-        address 192.168.1.2
-        netmask 255.255.255.0
-        network 192.168.1.0
-        broadcast 192.168.1.255
-        gateway 192.168.1.1
-        bridge_ports eth1
-        bridge_stp on
-        bridge_maxwait 0
-    ```
-    *  Khởi động lại interface: `ifup virbr2`
-    *  Bỏ gưir packet qua `iptables`: `sysctl -w net.bridge.bridge-nf-call-iptables=0`
-    *  Cho máy ảo dùng bridge: 
-    ```
-    <interface type='bridge'>
-        <source bridge='virbr2'/>
-    </interface>
-    ```
+*   Tắt interface định bridge `ifdown eth1`
+*   Đặt IP tĩnh cho interface đó: 
+```
+auto virbr2
+iface virbr2 inet static
+   address 192.168.1.2
+    netmask 255.255.255.0
+    network 192.168.1.0
+    broadcast 192.168.1.255
+    gateway 192.168.1.1
+    bridge_ports eth1
+    bridge_stp on
+    bridge_maxwait 0
+```
+*  Khởi động lại interface: `ifup virbr2`
+*  Bỏ gưir packet qua `iptables`: `sysctl -w net.bridge.bridge-nf-call-iptables=0`
+*  Cho máy ảo dùng bridge: 
+```
+<interface type='bridge'>
+    <source bridge='virbr2'/>
+</interface>
+```
+
+Với bridge này máy ảo sẽ có thể kết nối với mạng cùng subnet mà k cần NAT
+
+**Cấu hình mạng thông qua PCI**
+   *   Liệt kê tất cả thiết bị trên máy chủ: `virsh nodedev-list --tree`
+*   Liệt kê các PCI enternet adapter
+
+****
+
+### Di chuyển KVM 
+
+**Di chuyển thủ công ngoại tuyến sử dụng iSCSI storage pool**
+* Trên iSCSI target cần package `iscsitarget` `iscsitarget-dkms`
+* Kích hoạt chức năng   `sed -i 's/ISCSITARGET_ENABLE=false/ISCSITARGET_ENABLE=true/g' /etc/default/iscsitarge``
+```
+cat /etc/default/iscsitarget
+ISCSITARGET_ENABLE=true
+ISCSITARGET_MAX_SLEEP=3
+# ietd options
+# See ietd(8) for details
+```
+* Cấu hình block device 
+```
+cat /etc/iet/ietd.conf
+Target iqn.2001-04.com.example:kvm
+Lun 0 Path=/dev/loop1,Type=fileio
+Alias kvm_lun
+```
+* Restart dịch vụ 
+```
+/etc/init.d/iscsitarget restart
+* Removing iSCSI enterprise target devices: [ OK ]
+* Stopping iSCSI enterprise target service: [ OK ]
+* Removing iSCSI enterprise target modules: [ OK ]
+* Starting iSCSI enterprise target service: [ OK ]
+```
+
+* Trên cả 2 máy ảo cài `open-iscsi`
+*   Khởi động dịch vụ
+```
+sed -i 's/node.startup = manual/node.startup =
+automatic/g' /etc/iscsi/iscsid.conf
+root@kvm1/2:~# /etc/init.d/open-iscsi restart
+```
+
+* Truy vấn các iSCSI target server
+```
+iscsiadm -m discovery -t sendtargets -p iscsi_target
+10.184.226.74:3260,1 iqn.2001-04.com.example:kvm
+172.99.88.246:3260,1 iqn.2001-04.com.example:kvm
+192.168.122.1:3260,1 iqn.2001-04.com.example:kvm
+```
     
+Tạo iSCSI storage pool trên 1 máy chủ
+```
+cat iscsi_pool.xml
 
+<pool type="iscsi">
+    <name>iscsi_pool</name>
+    <source>
+<host name="iscsi_target.example.com"/>
+<device path="iqn.2001-04.com.example:kvm"/>
+</source>
+<target>
+<path>/dev/disk/by-path</path>
+</target>
+</pool>
+root@kvm1:~# virsh pool-define iscsi_pool.xml
+Pool iscsi_pool defined from iscsi_pool.xml
+```
 
+**Di chuyển ngoại tuyến thủ công dùng glusterFS**
+*   Cài đặt glusterFS trên cả 2 server `glusterfs-server`
+*   Probe, tạo pool, mount volume (như các bước làm glusterFS))
+*   Tạo VM trên server 1
+```
+virt-install --name kvm_gfs --ram 1024 --extra-args="text
+console=tty0 utf8 console=ttyS0,115200" --graphics vnc,listen=0.0.0.0 --
+hvm --
+location=http://ftp.us.debian.org/debian/dists/stable/main/installer-
+amd64/ --disk /tmp/kvm_gfs/gluster_kvm.img,size=5
+```
+*   dump file xml `virsh dumpxml kvm_gfs > kvm_gfs.xml`
+*   Defined VM trên Máy chủ mới
+```
+virsh --connect qemu+ssh://kvm2/system define kvm_gfs.xml
+Domain kvm_gfs defined from kvm_gfs.xml
+```
 
+**Di chuyển trực tuyến sử dụng bộ lệnh virsh với shared storage**
+*   Di chuyển trực tiếp  đến server 2  (đã cấu hình iSCSI ở trên )
+`virsh migrate --live iscsi_kvm qemu+ssh://kvm2/system`
+*   **1 số lỗi có thể gặp phải:** 
+    *   **Unsafe migration**
+        * Giải pháp:   Cấu hình block device thêm thuộc tính  `cache=none` nếu chưa có .
+    *   **Internal error: Attempt to migrate guest to the same host 02000100-0300-0400-0005-000600070008 .**
+        * Giải pháp:    Bị trùng UUID, kiểm tra `virsh sysinfo | grep -B5 -A3 uuid` và đổi lại UUID của máy đích đến 
+    *   **Unable to resolve address kvm2.localdomain service 49152: Name or service is not known**
+        * Giải pháp: không phân giải được tên miền, sửa trong file hosts hoặc dùng ip  
+    
+**Di chuyển ngoại tuyến sử dụng bộ lệnh virsh với local image**
+*   Đảm bảo có 1 VM đang chạy
+*   2 server có thể liên lạc đươcj với nhau   
+*   Sư dụng lệnh `   virsh migrate --offline --persistent kvm_no_sharedfs`
+    *   Khi đó thì server 1 vẫn chạy, khi di chuyển xong thì máy ảo server 2 sẽ k khởi động luôn 
+      
+**Di chuyển ngoại tuyến sử dụng bộ lệnh virsh với local image**
+*   Đảm bảo cả 2 server đều đang có VM đang chạy sử dụng local image 
+*   2 server đều liên lạc được với nhau
+*   Chuyển file đến server: `scp /tmp/kvm_no_sharedfs.img kvm2:/tmp/kvm_no_sharedfs.img`
+*   Di chuyển VM đến server mới `virsh migrate --live --persistent --verbose --copy-storage-all kvm_no_sharedfs qemu+ssh://kvm2/system`
+    *   `virsh migrate --live --persistent --verbose --copy-storage-inc kvm_no_sharedfs qemu+ssh://kvm/system`
+    Nếu có lỗi xảy ra xem lại  **1 số lỗi có thể gặp phải ở trên**
+    
+****
+
+### Giám sát và sao lưu máy ảo KVM
+**Thu thập tài nguyên sử dụng bằng libvirt**
+*   Thông tin về lượng CPU sử dụng của hypervisor `virsh nodecpustats --percent`
+*   Thông tin về lượng bộ nhớ sử dụng của hypervisor  `virsh nodememstats`
+*   Kiểm tra trạng thái của máy ảo : `virsh domstate kvm1`
+*   Kiểm tra số lượng vCPU của máy ảo đang dùng: `virsh vcpucount --current kvm1 --live`
+*   Kiểm tra chi tiết về vCPU của máy ảo : `virsh vcpuinfo kvm1`
+*   Kiểm tra thông tin chung về VM: `virsh dominfo kvm1`
+*   Kiểm tra về lượng bộ nhớ đang dùng của máy ảo: `virsh dommemstat --live kvm1`
+*   Kiểm tra về block device kết nối với máy ảo: `virsh domblklist kvm1`
+*   Kiểm tra thông tin về kích cỡ block device:`virsh domblkinfo --device hda kvm1`
+*   Kiểm tra block device bị lỗi: `virsh domblkerror kvm1`
+*   In ra thống kê vè block deivce: `virsh domblkstat --device hda --human kvm1`
