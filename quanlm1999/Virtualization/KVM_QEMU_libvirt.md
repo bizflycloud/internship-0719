@@ -83,7 +83,37 @@ Cấu trúc
 - **Virtual machine:** Chính là các máy ảo người dùng tạo ra. Thông thường, nếu không sử dụng các công cụ như virsh hay virt-manager, KVM sẽ sử được sử dụng phối hợp với một hypervisor khác điển hình là QEMU.
 
 - **Kernel support:** Chính là KVM, cung cấp một module làm hạt nhân cho hạ tầng ảo hóa (kvm.ko) và một module kernel đặc biệt chỉ hỗ trợ các vi xử lý VT-x hoặc AMD-V (kvm-intel.ko hoặc kvm-amd.ko) để nâng cao hiệu suất ảo hóa.
+
+#### Tác vụ với qemu
+* **Quản lý disk image với QEMU**
+*   Tạo 1 img: `qemu-img create -f {type} {name}.img {size} `
+    *   Trong đó: `type` có thể là `raw` `qcow2` `qcow` `dmg` `nbd` `vdi` `vmdk` `vhdx`
+*   Xem thông tin thêm về image:    `qemu-img info {name}.img`
+*   **Chạy máy ảo với qemu** : 
+    `qemu-system-x86_64 -name debian -vnc 146.20.141.254:0 -cpu Nehalem -m 1024 -drive format=raw,index=2,file=debian.img -daemonize`
+
+    *   Trong đó:
+        * `qemu-system-x86_64`: gỉa lập kiến trúc `x86-64` CPU,
+        * `-cpu Nehalem`  giả lập kiến trúc mẫu Nehalem CPU ( codename for an Intel processor microarchitecture released in November 2008)
+        * `-vnc` khởi động VNC server với địa chỉ IP đã đặt để có thể kết nối đến máy  VM`
+        *   `-m` lượng memory khởi tạo (MB)
+        * `format=raw` format của disk img
+        *   `file`: vị trí của img
+        *   `index`: chỉ định xem load từ phân vùng nào của disk img (nơi chưa bootloader và root) ( nếu có nhiều)
+        *   `-daemonize` để chạy trên background        
+        
+*   **Chạy máy ảo với qemu-kvm**
+    `qemu-system-x86_64 -name debian -vnc 146.20.141.254:0 -m 1024 -drive format=raw,index=2,file=debian.img` **`-enable-kvm`** `-daemonize`
     
+    *   Trong đó: Giống như trên, thêm `-enable-kvm`
+
+    Hoặc
+    
+    khi có cài đặt: `qemu-kvm` có thể chạy lệnh :
+    `kvm -name debian -vnc 146.20.141.254:0 -cpu Nehalem -m 1024 -drive format=raw,index=2,file=debian.img -daemonize`
+    Trong đó `kvm` đã bao gồm cả `qemu-system-x86_64` và `-enable-kvm`, 2 câu lệnh chức năng như nhau
+    
+
 **Tại sao cần kết hợp KVM-QEMU**
 
 * **KVM** là driver cho hypervisor để sử dụng được virtualization extension của physical CPU nhằm boost performance cho guest VM. KVM như định nghĩa trên trang chủ thì là core virtualization infrastructure mà thôi, nó được các hypervisor khác lợi dụng làm back-end để tiếp cận được các công nghệ hardware acceleration (Dịch code để mô phỏng phần cứng)
