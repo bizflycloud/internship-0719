@@ -1276,22 +1276,124 @@ hypervisor:
 *   Display the current NUMA placement for the KVM guest: `numastat -c kvm1`
 *   Edit the XML instance definition, set the memory mode to strict, and select
 the second NUMA node
-```
-virsh edit kvm1
-...
-<vcpu placement='static' cpuset='10-11'>2</vcpu>
-<numatune>
-<memory mode='strict' nodeset='1'/></numatune>
-...
-Domain kvm1 XML configuration edited.
-root@kvm:~# virsh destroy kvm1
-Domain kvm1 destroyed
-root@kvm:~# virsh start kvm1
-Domain kvm1 started
-root@kvm:~#
-```
+    ```
+    virsh edit kvm1
+    ...
+    <vcpu placement='static' cpuset='10-11'>2</vcpu>
+    <numatune>
+    <memory mode='strict' nodeset='1'/></numatune>
+    ...
+    Domain kvm1 XML configuration edited.
+    root@kvm:~# virsh destroy kvm1
+    Domain kvm1 destroyed
+    root@kvm:~# virsh start kvm1
+    Domain kvm1 started
+    root@kvm:~#
+    ```
 *   Get the NUMA parameters for the KVM instance:`virsh numatune kvm1`
 *   Print the current virtual CPU affinity:`virsh vcpuinfo kvm1`
 *   Print the NUMA node placement for the KVM instance:`numastat -c kvm1`
 
 **Tuning the kernel for network performance**
+*   Increase the max TCP send and receive socket buffer size:
+    ```
+    root@kvm:~# sysctl net.core.rmem_max
+    net.core.rmem_max = 212992
+    root@kvm:~# sysctl net.core.wmem_max
+    net.core.wmem_max = 212992
+    root@kvm:~# sysctl net.core.rmem_max=33554432
+    net.core.rmem_max = 33554432
+    root@kvm:~# sysctl net.core.wmem_max=33554432
+    net.core.wmem_max = 33554432
+    ```
+*   Increase the TCP buffer limits: min, default, and max number of bytes. Set max to 16 MB for 1 GE NIC, and 32 M or 54 M for 10 GE NIC:
+```
+root@kvm:~# sysctl net.ipv4.tcp_rmem
+net.ipv4.tcp_rmem = 4096 87380 6291456
+root@kvm:~# sysctl net.ipv4.tcp_wmem
+net.ipv4.tcp_wmem = 4096 16384 4194304
+root@kvm:~# sysctl net.ipv4.tcp_rmem="4096 87380 33554432"
+net.ipv4.tcp_rmem = 4096 87380 33554432
+root@kvm:~# sysctl net.ipv4.tcp_wmem="4096 65536 33554432"
+net.ipv4.tcp_wmem = 4096 65536 33554432
+```
+
+*   Ensure that TCP window scaling is enabled:
+```
+root@kvm:~# sysctl net.ipv4.tcp_window_scaling
+net.ipv4.tcp_window_scaling = 1
+```
+
+*   To help increase TCP throughput with 1 GB NICs or larger, increase the
+length of the transmit queue of the network interface. For paths with more
+than 50 ms RTT, a value of 5000-10000 is recommended:
+`root@kvm:~# ifconfig eth0 txqueuelen 5000`
+
+*   Reduce the tcp_fin_timeout value:
+
+```
+root@kvm:~# sysctl net.ipv4.tcp_fin_timeout
+net.ipv4.tcp_fin_timeout = 60
+root@kvm:~# sysctl net.ipv4.tcp_fin_timeout=30
+net.ipv4.tcp_fin_timeout = 30
+```
+
+*   Reduce the tcp_keepalive_intvl value:
+```
+root@kvm:~# sysctl net.ipv4.tcp_keepalive_intvl
+net.ipv4.tcp_keepalive_intvl = 75
+root@kvm:~# sysctl net.ipv4.tcp_keepalive_intvl=30
+net.ipv4.tcp_keepalive_intvl = 30
+root@kvm:~#
+```
+
+* Enable fast recycling of TIME_WAIT sockets. The default value is 0 (disabled):
+```
+root@kvm:~# sysctl net.ipv4.tcp_tw_recycle
+net.ipv4.tcp_tw_recycle = 0
+root@kvm:~# sysctl net.ipv4.tcp_tw_recycle=1
+net.ipv4.tcp_tw_recycle = 1
+root@kvm:~#
+```
+
+* Enable the reusing of sockets in the TIME_WAIT state for new connections.
+The default value is 0 (disabled):
+```
+root@kvm:~# sysctl net.ipv4.tcp_tw_reuse
+net.ipv4.tcp_tw_reuse = 0
+root@kvm:~# sysctl net.ipv4.tcp_tw_reuse=1
+net.ipv4.tcp_tw_reuse = 1
+```
+
+*   To enable more pluggable congestion control algorithms, load the kernel
+modules:
+```
+modprobe tcp_htcp
+modprobe tcp_bic
+modprobe tcp_vegas
+modprobe tcp_westwood
+sysctl net.ipv4.tcp_available_congestion_control
+net.ipv4.tcp_available_congestion_control = cubic reno htcp bic vegas
+westwood
+```
+
+*   If the hypervisor is overwhelmed with SYN connections, the following
+options might help in reducing the impact:
+```
+root@kvm:~# sysctl net.ipv4.tcp_max_syn_backlog
+net.ipv4.tcp_max_syn_backlog = 2048
+root@kvm:~# sysctl net.ipv4.tcp_max_syn_backlog=16384
+net.ipv4.tcp_max_syn_backlog = 16384
+root@kvm:~# sysctl net.ipv4.tcp_synack_retries
+net.ipv4.tcp_synack_retries = 5
+root@kvm:~# sysctl net.ipv4.tcp_synack_retries=1
+net.ipv4.tcp_synack_retries = 1
+```
+
+*   increase the max file descriptors, execute the following:
+```
+root@kvm:~# sysctl fs.file-max=10000000
+fs.file-max = 10000000
+root@kvm:~# sysctl fs.file-nr
+fs.file-nr = 1280 0 10000000
+```
