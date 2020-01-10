@@ -785,47 +785,47 @@ Domain kvm_gfs defined from kvm_gfs.xml
             "port": 6379
         }
     }
-```
+
 
 *   Cấu hình client Sensu
-    ```
-    cat client.json
-    
-    {
-        "client": {
-            "name": "ubuntu",
-            "address": "127.0.0.1",
-            "subscriptions": [
-                "base"
-            ],
-            "socket": {
-                "bind": "127.0.0.1",
-                "port": 3030
-            }
+```
+cat client.json
+
+{
+    "client": {
+        "name": "ubuntu",
+        "address": "127.0.0.1",
+        "subscriptions": [
+            "base"
+        ],
+        "socket": {
+            "bind": "127.0.0.1",
+            "port": 3030
         }
     }
-    ```
+}
+```
 
 *   Cài đặt uchiwa làm web front-end cho Sensu
-    ```
-    {
-        "sensu": [
-            {
-                "name": "KVM guests",
-                "host": "localhost",
-                "ssl": false,
-                "port": 4567,
-                "path": "",
-                "timeout": 5000
-            }
-        ],
-        "uchiwa": {
-            "port": 3000,
-            "stats": 10,
-            "refresh": 10000
+```
+{
+    "sensu": [
+        {
+            "name": "KVM guests",
+            "host": "localhost",
+            "ssl": false,
+            "port": 4567,
+            "path": "",
+            "timeout": 5000
         }
+    ],
+    "uchiwa": {
+        "port": 3000,
+        "stats": 10,
+        "refresh": 10000
     }
-    ```
+}
+```
 
 
 *   Khởi động dịch vụ sensu-server/api/client và uchiwa
@@ -835,3 +835,463 @@ Domain kvm_gfs defined from kvm_gfs.xml
     /etc/init.d/sensu-client start
     /etc/init.d/uchiwa restart
     ```
+    
+*   Console tới máy ảo, cầu hình sensu client
+```
+root@kvm:/etc/sensu/conf.d# virsh console kvm1
+Connected to domain kvm1
+Escape character is ^]
+
+root@debian:~# wget -q
+https://sensu.global.ssl.fastly.net/apt/pubkey.gpg -O- | apt-key add -
+OK
+
+root@debian:~# echo "deb https://sensu.global.ssl.fastly.net/apt sensu
+main" | tee /etc/apt/sources.list.d/sensu.list
+deb https://sensu.global.ssl.fastly.net/apt sensu main
+
+root@debian:~# apt install apt-transport-https
+root@debian:~# apt update && apt install sensu
+...
+root@debian:~# cd /etc/sensu/conf.d/
+root@debian:/etc/sensu/conf.d# cat client.json
+{
+    "client": {
+        "name": "monitor_kvm",
+        "address": "10.10.10.92",
+        "subscriptions": ["base"]
+    }
+}
+
+root@debian:/etc/sensu/conf.d# cat rabbitmq.json
+{
+    "rabbitmq": {
+        "host": "10.10.10.1",
+        "port": 5672,
+        "vhost": "/sensu",
+        "user": "sensu",
+        "password": "secret"
+    }
+}
+
+root@debian:/etc/sensu/conf.d# cat transport.json
+{
+    "transport": {
+        "name": "rabbitmq",
+        "reconnect_on_error": true
+    }
+}
+```
+
+*   Cài đặt memory check `rubygems`
+
+*   Định nghĩa memory check cho máy ảo: 
+
+```
+root@kvm:/etc/sensu/conf.d# cat check_memory.json
+{
+    "checks": {
+        "memory_check": {
+            "command": "/usr/local/bin/check-memory-percent.rb -w 80 -c 90",
+            "subscribers": ["base"],
+            "handlers": ["default"],
+            "interval": 300
+        }
+    }
+}
+root@kvm:/et
+```
+**Sao lưu KVM với tar và rsync**
+*   Tạo thư mục back up
+*   copy file `*.xml` và `.img` của máy ảo vào thư mục này 
+*   Archive file `*.xml` và `*.img` của máy ảo này và đửa lên remote server
+*   Để khôi phục, ta  lấy lại file về,  đưa file cấu hình và img vào lại thư mục và định nghĩa lại cho máy ảo
+
+**Tạo snapshot**
+
+* Convert raw image thành dạng qcow2 `qemu-img convert -f raw -O qcow2`
+* Tạo snapshot internal cho máy ảo đang chạy `virsh snapshot-create kvm1`
+* Tạo snapshot external cho máy ảo: `virsh snapshot-create-as kvm1 kvm1_ext_snapshot "Disk only external snapshot for kvm1" --disk-only --diskspec hda,snapshot=external,file=/var/lib/libvirt/images/kvm1_disk_external.qcow`
+    *   **Internal snapshot**:  là chính img chưa trạng thái và thay đổi của máy ảo 
+    *   **External snapshot**: máy ảo trở thành một hình ảnh cơ bản chỉ đọc và lớp phủ mới
+hình ảnh được tạo ra để theo dõi bất kỳ thay đổi trong tương lai
+
+**Liệt kê snapshot**
+* Tất cả:`virsh snapshot-list kvm1`
+* disk_base: `virsh snapshot-list --disk-only kvm1`
+* internal: `virsh snapshot-list --internal kvm1`
+* external:`virsh snapshot-list --external kvm1`
+* hierarchical tree: `virsh snapshot-list --tree kvm1`
+
+**Kiểm tra snapshot**
+* Kiểm tra thông tin: `virsh snapshot-info kvm1 --snapshotname 1492797458`
+* Kiểm tra thông tin disk snapshot `virsh snapshot-info kvm1 --snapshotname kvm1_ext_snapshot`
+* Kiểm tra file xml: `virsh snapshot-dumpxml kvm1 --snapshotname kvm1_ext_snapshot --security-info`
+
+**Chỉnh sửa snapshot**
+*   Đổi tên và mô tả: `virsh snapshot-edit kvm1 --snapshotname kvm1_ext_snapshot --rename`
+```
+<domainsnapshot>
+<name>kvm1_ext_snapshot_renamed</name>
+<description>Disk only external snapshot for kvm1</description>
+```
+
+**Khôi phục sử dụng snapshot**
+* Khôi phục: `virsh snapshot-revert kvm1 --snapshotname 1492802417`
+
+**Xóa snapshot**
+* Xóa theo thời gian: `virsh snapshot-delete kvm1 --snapshotname 1492802417`
+* Xóa gàn nhất: `virsh snapshot-delete kvm1 --current`
+
+****
+### Triển khai máy ảo KVM với OpenStack
+*   Cài đặt và cấu hình Openstack: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/install_config_OpenStack.md
+**Tạo máy ảo KVM sử dụng Opensack**
+    *   Ensure that we have an available Glance image to use: `openstack image list`
+    *   Create a new instance flavor type:`openstack flavor create --id 0 --vcpus 1 --ram 1024 --disk 5000 kvm.medium`
+    *   Create a new SSH key-pair:   `openstack keypair create --public-key ~/.ssh/kvm_rsa.pub kvmkey`
+    *   Define the security group rules that allow SSH and ICMP access:`Openstack security group rule create --proto icmp default` `openstack security group rule create --proto tcp --dst-port 22 default`
+    *   Build a new KVM instance: `openstack server create --flavor kvm.medium --image ubuntu_16.04 --nic net-id=b7ccb514-21fc-4ced-b74f-026e7e358bba --security-group default --key-name kvmkey ubuntu_instance`
+    *   Inspect the KVM instance:`openstack server show ubuntu_instance`
+    
+**Stopping KVM instances with OpenStack**: `openstack server stop ubuntu_instance`
+**Terminating KVM instances with OpenStack**: `openstack server delete ubuntu_instance`
+
+***
+### Tunning hiệu năng máy ảo
+**Tunning kernel for low I/O latency**
+*   Liệt kê lịch trình I/O đang sử dụng 
+    ```
+    cat /sys/block/sda/queue/scheduler
+    noop deadline [cfq]
+    ```
+*   Thay đổi lịch trình I/O
+    ```
+    echo deadline > /sys/block/sda/queue/scheduler
+    root@kvm:~# cat /sys/block/sda/queue/scheduler
+    noop [deadline] cfq
+    ```
+*   Để lưu trữ khi restart server
+    ```
+    echo 'GRUB_CMDLINE_LINUX="elevator=deadline"' >>
+    /etc/default/grub
+    root@kvm:~# tail -1 /etc/default/grub
+    GRUB_CMDLINE_LINUX="elevator=deadline"
+    root@kvm:~# update-grub2
+    Generating grub configuration file ...
+    Found linux image: /boot/vmlinuz-3.13.0-107-generic
+    Found initrd image: /boot/initrd.img-3.13.0-107-generic
+    done
+    root@kvm:~# cat /boot/grub/grub.cfg | grep elevator
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=deadline rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quietrovide more cruisers with a similar protection as tier X ones: on the distance and at the right angle, cruiser plating will be able to cause ricochet of the battleship shells, while 
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=deadline rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quiet
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro recovery
+    nomodeset elevator=deadline
+    root@kvm:~#
+    ```
+* For the KVM instance, set up the noop I/O scheduler persistently:
+    ```
+    root@kvm:~# virsh console kvm1
+    Connected to domain kvm1
+    Escape character is ^]root@kvm1:~# echo 'GRUB_CMDLINE_LINUX="elevator=noop"' >>
+    /etc/default/grub
+    root@kvm1:~# tail -1 /etc/default/grub
+    GRUB_CMDLINE_LINUX="elevator=noop"
+    root@kvm1:~# update-grub2
+    Generating grub configuration file ...
+    Found linux image: /boot/vmlinuz-3.13.0-107-generic
+    Found initrd image: /boot/initrd.img-3.13.0-107-generic
+    done
+    root@kvm1:~# cat /boot/grub/grub.cfg | grep elevator
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=noop rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quiet
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=noop rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quiet
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro recovery
+    nomodeset elevator=noop
+    root@kvm1:~#
+    ```
+*   Set a weight of 100 for the KVM instance using the blkio cgroup controller:
+    ```
+    root@kvm:~# virsh blkiotune --weight 100 kvm
+    root@kvm:~# virsh blkiotune kvm
+    weight : 100
+    device_weight :
+    device_read_iops_sec:
+    device_write_iops_sec:
+    device_read_bytes_sec:
+    device_write_bytes_sec:
+    root@kvm:~#
+    ```
+* Find the cgroup directory hierarchy on the host:
+    ```
+    root@kvm:~# mount | grep cgroup
+    none on /sys/fs/cgroup type tmpfs (rw)
+    systemd on /sys/fs/cgroup/systemd type cgroup
+    (rw,noexec,nosuid,nodev,none,name=systemd)
+    root@kvm:~#
+    ```
+* Ensure that the cgroup for the KVM instance contains the weight that we
+set up earlier on the blkio controller:
+    ```
+    root@kvm:~# cat /sys/fs/cgroup/blkio/machine/kvm.libvirt-
+    qemu/blkio.weight
+    100
+    root@kvm:~#
+    ```
+    
+**Memory tuning for KVM guests**
+*   Check the current HugePages settings on the host OS:
+    ```
+    root@kvm:~# cat /proc/meminfo | grep -i huge
+    AnonHugePages: 509952 kB
+    HugePages_Total: 0
+    HugePages_Free: 0
+    HugePages_Rsvd: 0
+    HugePages_Surp: 0
+    Hugepagesize: 2048 kB
+    root@kvm:~#
+    ```
+*   Connect to the KVM guest and check the current HugePages settings:
+    ```
+    root@kvm1:~# cat /proc/meminfo | grep -i huge
+    HugePages_Total: 0
+    HugePages_Free: 0
+    HugePages_Rsvd: 0
+    HugePages_Surp: 0
+    Hugepagesize: 2048 kB
+    root@kvm1:~#
+    ```
+* Increase the size of the pool of HugePages from 0 to 25000 on the
+hypervisor and verify the following:
+    ```
+    root@kvm:~# sysctl vm.nr_hugepages=25000
+    vm.nr_hugepages = 25000
+    root@kvm:~# cat /proc/meminfo | grep -i huge
+    AnonHugePages: 446464 kB
+    HugePages_Total: 25000
+    HugePages_Free: 24484
+    HugePages_Rsvd: 0
+    HugePages_Surp: 0
+    Hugepagesize: 2048 kB
+    root@kvm:~# cat /proc/sys/vm/nr_hugepages
+    25000
+    root@kvm:~#
+    ```
+    
+* Check whether the hypervisor CPU supports 2 MB and 1 GB
+    HugePages sizes:
+    ```
+    root@kvm:~# cat /proc/cpuinfo | egrep -i "pse|pdpe1" | tail -1
+    flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmovpat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx
+    pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl
+    xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor
+    ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2
+    x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm
+    abm arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept
+    vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid
+    root@kvm:~#
+    ```
+
+* Set 1 GB HugePages size by editing the default GRUB configuration and
+rebooting:
+    ```
+    root@kvm:~# cat /etc/default/grub
+    ...
+    GRUB_CMDLINE_LINUX_DEFAULT="rd.fstab=no acpi=noirq noapic
+    cgroup_enable=memory swapaccount=1 quiet hugepagesz=1GB hugepages=1"
+    ...
+    root@kvm:~# update-grub
+    Generating grub configuration file ...
+    Found linux image: /boot/vmlinuz-3.13.0-107-generic
+    Found initrd image: /boot/initrd.img-3.13.0-107-generic
+    done
+    root@kvm:~# cat /boot/grub/grub.cfg | grep -i huge
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=deadline rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quiet hugepagesz=1GB hugepages=1
+    linux /boot/vmlinuz-3.13.0-107-generic root=/dev/md126p1 ro
+    elevator=deadline rd.fstab=no acpi=noirq noapic cgroup_enable=memory
+    swapaccount=1 quiet hugepagesz=1GB hugepages=1
+    root@kvm:~# reboot
+    ```
+    
+* Install the HugePages package:
+`root@kvm:~# apt-get install hugepages`
+* Check the current HugePages size:
+    ```
+    root@kvm:~# hugeadm --pool-list
+    Size
+    Minimum Current Maximum Default
+    2097152
+    25000
+    25000
+    25000
+    *
+    root@kvm:~#
+    ```
+
+* Enable HugePages support for KVM:
+    ```
+    root@kvm:~# sed -i 's/KVM_HUGEPAGES=0/KVM_HUGEPAGES=1/g'
+    /etc/default/qemu-kvm
+    root@kvm:~# root@kvm:~# /etc/init.d/libvirt-bin restart
+    libvirt-bin stop/waiting
+    libvirt-bin start/running, process 16257
+    root@kvm:~#
+    ```
+* Mount the HugeTable virtual filesystem on the host OS:
+    ```
+    root@kvm:~# mkdir /hugepages
+    root@kvm:~# echo "hugetlbfs /hugepages hugetlbfs mode=1770,gid=2021 0 0"
+    >> /etc/fstab
+    root@kvm:~# mount -a
+    root@kvm:~# mount | grep hugepages
+    hugetlbfs on /hugepages type hugetlbfs (rw,mode=1770,gid=2021)
+    root@kvm:~#
+    ```
+* Edit the configuration for the KVM guest and enable HugePages:
+    ```
+    root@kvm:~# virsh destroy kvm1
+    Domain kvm1 destroyed
+    root@kvm:~# virsh edit kvm1
+    ...
+    <memoryBacking>
+    <hugepages/>
+    </memoryBacking>
+    ...
+    Domain kvm1 XML configuration edited.
+    root@kvm:~# virsh start kvm1
+    Domain kvm1 started
+    root@kvm:~#
+    ```
+
+
+
+* Update the memory hard limit for the KVM instance and verify, as follows:
+    ```
+    root@kvm:~# virsh memtune kvm1
+    hard_limit : unlimited
+    soft_limit : unlimited
+    swap_hard_limit: unlimited
+    root@kvm:~# virsh memtune kvm1 --hard-limit 2GB
+    root@kvm:~# virsh memtune kvm1
+    hard_limit : 1953125
+    soft_limit : unlimited
+    swap_hard_limit: unlimited
+    root@kvm:~#
+    ```
+
+**CPU performance options**
+*   Obtain information about the available CPU cores on the hypervisor:
+    ```
+    root@kvm:~# virsh nodeinfo
+    CPU model: x86_64
+    CPU(s): 40
+    CPU frequency: 2593 MHz
+    CPU socket(s): 1
+    Core(s) per socket: 10
+    Thread(s) per core: 2
+    NUMA cell(s): 2
+    Memory size: 131918328 KiB
+    root@kvm:~#
+    ```
+* Get information about the CPU allocation for the KVM guest:
+    ```
+    root@kvm:~# virsh vcpuinfo kvm1
+    VCPU: 0
+    CPU: 2
+    State: running
+    CPU time: 9.1s
+    CPU Affinity: yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+    root@kvm:~#
+    ```
+
+* Pin the KVM instance CPU ( VCPU: 0 ) to the first hypervisor CPU ( CPU: 0 )
+    and display the result:
+    ```
+    root@kvm:~# virsh vcpupin kvm1 0 0 --live
+    root@kvm:~# virsh vcpuinfo kvm1
+    VCPU: 0
+    CPU: 0
+    State: running
+    CPU time: 9.3s
+    CPU Affinity: y---------------------------------------
+    root@kvm:~#
+    ```
+
+* List the share of runtime that is assigned to a KVM instance:
+    ```
+    root@kvm:~# virsh schedinfo kvm1
+    Scheduler : posixcpu_shares : 1024
+    vcpu_period : 100000
+    vcpu_quota : -1
+    emulator_period: 100000
+    emulator_quota : -1
+    root@kvm:~#
+    ```
+
+* Modify the current CPU weight of a running virtual machine:
+    ```
+    root@kvm:~# virsh schedinfo kvm cpu_shares=512
+    Scheduler : posix
+    cpu_shares : 512
+    vcpu_period : 100000
+    vcpu_quota : -1
+    emulator_period: 100000
+    emulator_quota : -1
+    root@kvm:~#
+    ```
+
+* Check the CPU shares in the CPU cgroups subsystem:
+    ```
+    root@kvm:~# cat /sys/fs/cgroup/cpu/machine/kvm1.libvirt-qemu/cpu.shares
+    512
+    root@kvm:~#
+    ```
+
+* Examine the updated XML instance definition:
+    ```
+    root@kvm:~# virsh dumpxml kvm1
+    ...
+    <vcpu placement='static'>1</vcpu>
+    <cputune>
+    <shares>512</shares>
+    <vcpupin vcpu='0' cpuset='0'/>
+    </cputune>
+    ...
+    root@kvm:~#
+    ```
+
+**NUMA tuning with libvirt**
+*   Install the numactl package and check the hardware configuration of the
+hypervisor:
+`apt-get install numactl` `numactl --hardware`
+*   Display the current NUMA placement for the KVM guest: `numastat -c kvm1`
+*   Edit the XML instance definition, set the memory mode to strict, and select
+the second NUMA node
+```
+virsh edit kvm1
+...
+<vcpu placement='static' cpuset='10-11'>2</vcpu>
+<numatune>
+<memory mode='strict' nodeset='1'/></numatune>
+...
+Domain kvm1 XML configuration edited.
+root@kvm:~# virsh destroy kvm1
+Domain kvm1 destroyed
+root@kvm:~# virsh start kvm1
+Domain kvm1 started
+root@kvm:~#
+```
+*   Get the NUMA parameters for the KVM instance:`virsh numatune kvm1`
+*   Print the current virtual CPU affinity:`virsh vcpuinfo kvm1`
+*   Print the NUMA node placement for the KVM instance:`numastat -c kvm1`
+
+**Tuning the kernel for network performance**
