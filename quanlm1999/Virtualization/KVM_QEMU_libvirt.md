@@ -940,24 +940,362 @@ hình ảnh được tạo ra để theo dõi bất kỳ thay đổi trong tươ
 * Khôi phục: `virsh snapshot-revert kvm1 --snapshotname 1492802417`
 
 **Xóa snapshot**
-* Xóa theo thời gian: `virsh snapshot-delete kvm1 --snapshotname 1492802417`
-* Xóa gàn nhất: `virsh snapshot-delete kvm1 --current`
+* Xóa snapshot theo thời gian: `virsh snapshot-delete kvm1 --snapshotname 1492802417`
+* Xóa snapshot gàn nhất: `virsh snapshot-delete kvm1 --current`
 
 ****
 ### Triển khai máy ảo KVM với OpenStack
 *   Cài đặt và cấu hình Openstack: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/install_config_OpenStack.md
 **Tạo máy ảo KVM sử dụng Opensack**
-    *   Ensure that we have an available Glance image to use: `openstack image list`
-    *   Create a new instance flavor type:`openstack flavor create --id 0 --vcpus 1 --ram 1024 --disk 5000 kvm.medium`
-    *   Create a new SSH key-pair:   `openstack keypair create --public-key ~/.ssh/kvm_rsa.pub kvmkey`
-    *   Define the security group rules that allow SSH and ICMP access:`Openstack security group rule create --proto icmp default` `openstack security group rule create --proto tcp --dst-port 22 default`
-    *   Build a new KVM instance: `openstack server create --flavor kvm.medium --image ubuntu_16.04 --nic net-id=b7ccb514-21fc-4ced-b74f-026e7e358bba --security-group default --key-name kvmkey ubuntu_instance`
-    *   Inspect the KVM instance:`openstack server show ubuntu_instance`
+    *   Đảm báo đã có Glance image để dùng : `openstack image list`
+    *   Tạo flavor type:`openstack flavor create --id 0 --vcpus 1 --ram 1024 --disk 5000 kvm.medium`
+    *   Tạo cặp key SSH mới:   `openstack keypair create --public-key ~/.ssh/kvm_rsa.pub kvmkey`
+    *   Định nghĩa rule cho phép SSH và ICMP kết nối được `Openstack security group rule create --proto icmp default` `openstack security group rule create --proto tcp --dst-port 22 default`
+    *   Tạo máy ảo KVM `openstack server create --flavor kvm.medium --image ubuntu_16.04 --nic net-id=b7ccb514-21fc-4ced-b74f-026e7e358bba --security-group default --key-name kvmkey ubuntu_instance`
+    *   Xem máy ảo KVM`openstack server show ubuntu_instance`
     
-**Stopping KVM instances with OpenStack**: `openstack server stop ubuntu_instance`
-**Terminating KVM instances with OpenStack**: `openstack server delete ubuntu_instance`
+**Dừng máy ảo KVM với OpenStack**: `openstack server stop ubuntu_instance`
+**Xóa máy ảo KVM với OpenStack**: `openstack server delete ubuntu_instance`
 
+### Sử dụng python để tạo và  quản lý máy ảo KVM 
 ***
+**Cài đặt và sử dụng thư viện Python libvirt** 
+*   Cài đặt Python development packages `pip` và `virtualenv`
+`apt-get install python-pip python-dev pkg-config build-essential autoconf libvirt-dev`
+`pip install virtualenv`
+*   Tạo môi trường ảo Python và kích hoạt nó:
+`mkdir kvm_python`
+`virtualenv kvm_python/`
+`source kvm_python/bin/activate`
+*   Cài đặt libvirt modules
+`~/kvm_python# pip install libvirt-python`
+*   Cài đặt `iPython` 
+`~/kvm_python# apt-get install ipython`
+    *   Trong `iPython`, import `libvirt` module
+    `In [1]: import libvirt`
+    *   Tạo định nghĩa máy ảo:
+    ```
+        In [2]: xmlconfig = """
+    <domain type='kvm' id='1'>
+    <name>kvm_python</name>
+    <memory unit='KiB'>1048576</memory>
+    <currentMemory unit='KiB'>1048576</currentMemory>
+    <vcpu placement='static'>1</vcpu>
+    <resource>
+    <partition>/machine</partition>
+    </resource>
+    <os>
+    <type arch='x86_64' machine='pc-i440fx-trusty'>hvm</type>
+    <boot dev='hd'/>
+    </os>
+    <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+    </features>
+    <clock offset='utc'/>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>restart</on_crash>
+    <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+    <driver name='qemu' type='raw'/>
+    <source file='/tmp/debian.img'/>
+    <backingStore/>
+    <target dev='hda' bus='ide'/>
+    <alias name='ide0-0-0'/>
+    <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <controller type='usb' index='0'>
+    <alias name='usb'/>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x01'
+    function='0x2'/>
+    </controller>
+    <controller type='pci' index='0' model='pci-root'>
+    <alias name='pci.0'/><alias name='pci.0'/>
+    </controller>
+    <controller type='ide' index='0'>
+    <alias name='ide'/>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x01'
+    function='0x1'/>
+    </controller>
+    <interface type='network'>
+    <mac address='52:54:00:da:02:01'/>
+    <source network='default' bridge='virbr0'/>
+    <target dev='vnet0'/>
+    <model type='rtl8139'/>
+    <alias name='net0'/>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x03'
+    function='0x0'/>
+    </interface>
+    <serial type='pty'>
+    <source path='/dev/pts/5'/>
+    <target port='0'/>
+    <alias name='serial0'/>
+    </serial>
+    <console type='pty' tty='/dev/pts/5'>
+    <source path='/dev/pts/5'/>
+    <target type='serial' port='0'/>
+    <alias name='serial0'/>
+    </console>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+    <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
+    <listen type='address' address='0.0.0.0'/>
+    </graphics>
+    <video>
+    <model type='cirrus' vram='16384' heads='1'/>
+    <alias name='video0'/>
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x02'
+    function='0x0'/>
+    </video>
+    <memballoon model='virtio'>
+    <alias name='balloon0'/>~/kvm_python# virsh list --all
+    <address type='pci' domain='0x0000' bus='0x00' slot='0x04'
+    function='0x0'/>
+    </memballoon>
+    </devices>
+    </domain>
+    """
+    ```
+    *   Kết nối với hypervisor
+    `In [3]: conn = libvirt.open('qemu:///system')`
+    *   Tạo máy ảo nhưng k khở i động 
+    `In [4]: instance = conn.defineXML(xmlconfig)`
+    *   Liệt kê máy ảo 
+    ```
+    In [5]: instances = conn.listDefinedDomains()
+    In [6]: print 'Defined instances: {}'.format(instances)
+    Defined instances: ['kvm_python']
+    ```
+**Khởi động, dừng, xóa máy ảo với Python**
+*   Gọi phương thức `create()` trên đối tượng
+```
+In [1]: instance.create()
+Out[1]: 0
+```
+*   Đảm báo máy ảo chạy bằng cách gọi phương thức `isActive()` trên đối tượng 
+```
+In [2]: instance.isActive()
+Out[2]: 1
+```
+*   Dừng máy ảo với phương thức  `destroy()`
+```
+In [3]: instance.destroy()
+Out[3]: 0
+```
+
+*   Đảm bảo máy ảo đã dừng: 
+```
+In [4]: instance.isActive()
+Out[4]: 0
+```
+*   Xóa máy ảo
+```
+In [5]: instance.undefine()In [5]: instance.undefine()
+Out[5]: 0
+In [6]: conn.listDefinedDomains()
+Out[6]: []
+In [7]:
+```
+
+**Kiểm tra máy ảo với  Python**
+*   Lấy tên của máy ảo: 
+```
+In [1]: instance.name()
+Out[1]: 'kvm_python'
+```
+*   Kiểm tra hoạt động 
+```
+In [2]: instance.isActive()
+Out[2]: 1
+```
+*   Lấy thông kê tài nguyên
+```
+In [3]: instance.info()
+Out[3]: [1, 1048576L, 1048576L, 1, 10910000000L]
+```
+*   Lấy số lượng bộ nhớ tối đa phân bổ cho máy ảo **
+```
+In [4]: instance.maxMemory()
+Out[4]: 1048576L
+```
+*   Lấy thông kê CPU 
+```
+In [5]: instance.getCPUStats(1)
+Out[5]:
+[{'cpu_time': 10911545901L,
+'system_time': 1760000000L,
+'user_time': 1560000000L}]
+```
+*   Xem máy ảo có dùng tăng tốc phân cứng không 
+```
+In [6]: instance.OSType()
+Out[6]: 'hvm'
+```
+*   Kiểm tra trạng thái:
+```
+In [82]: state, reason = instance.state()
+In [83]: if state == libvirt.VIR_DOMAIN_NOSTATE:
+....:
+print('The state is nostate')
+....: elif state == libvirt.VIR_DOMAIN_RUNNING:
+....:
+print('The state is running')
+....: elif state == libvirt.VIR_DOMAIN_BLOCKED:
+....:
+print('The state is blocked')
+....: elif state == libvirt.VIR_DOMAIN_PAUSED:
+....:
+print('The state is paused')
+....: elif state == libvirt.VIR_DOMAIN_SHUTDOWN:
+....:
+print('The state is shutdown')
+....: elif state == libvirt.VIR_DOMAIN_SHUTOFF:
+....:
+print('The state is shutoff')
+....: elif state == libvirt.VIR_DOMAIN_CRASHED:
+....:
+print('The state is crashed')
+....: elif state == libvirt.VIR_DOMAIN_PMSUSPENDED:
+....:
+print('The state is suspended')
+....: else:
+....:
+print('The state is unknown')
+....:
+The state is running
+```
+**Tạo 1 REST API server đơn giản với libvirt và bottle**
+*   Cài `bottle` module
+`~/kvm_python# pip install bottle`
+*   Tạo file `.py`, import libvirt, bottle module và phương thức kết nối libvirt
+```
+~/kvm_python# vim kvm_api.py
+import libvirt
+from bottle import run, request, get, post, HTTPResponse
+def libvirtConnect():
+try:
+conn = libvirt.open('qemu:///system')
+except libvirt.libvirtError:
+conn = None
+return conn
+```
+*   Triên khai  hàm và lộ trình API `/define`
+```
+def defineKVMInstance(template):
+    conn = libvirtConnect()
+    
+    if conn == None:
+        return HTTPResponse(status=500, body='Error defining instance\n')
+    else:
+        try:
+            conn.defineXML(template)
+            return HTTPResponse(status=200, body='Instance defined\n')
+    except libvirt.libvirtError:
+            return HTTPResponse(status=500, body='Error defining instance\n')
+            
+@post('/define')
+def build():
+    template = str(request.headers.get('X-KVM-Definition'))
+    status = defineKVMInstance(template)
+    status = defineKVMInstance(template)
+    
+    return status
+```
+Triên khai  hàm và lộ trình API `/undefine`
+```
+def undefineKVMInstance(name):
+    conn = libvirtConnect()
+    
+    if conn == None:
+        return HTTPResponse(status=500, body='Error undefining instance\n')
+    else:
+        try:
+            instance = conn.lookupByName(name)
+            instance.undefine()
+            return HTTPResponse(status=200, body='Instance undefined\n')
+        except libvirt.libvirtError:
+            return HTTPResponse(status=500, body='Error undefining
+instance\n')
+
+@post('/undefine')
+def build():
+    name = str(request.headers.get('X-KVM-Name'))
+    status = undefineKVMInstance(name)
+    
+return status   
+```
+
+Triên khai hàm và lộ trình API `/start`
+```
+def startKVMInstance(name):
+    conn = libvirtConnect()
+        
+    if conn == None:
+        return HTTPResponse(status=500, body='Error starting instance\n')
+    else:
+        try:
+            instance = conn.lookupByName(name)
+            instance.create()
+            return HTTPResponse(status=200, body='Instance started\n')
+        except libvirt.libvirtError:
+            return HTTPResponse(status=500, body='Error starting instance\n')
+@post('/start')
+def build():
+    name = str(request.headers.get('X-KVM-Name'))
+    status = startKVMInstance(name)
+        
+    return status
+```
+Triên khai hàm và lộ trình API `/stop`
+```
+def stopKVMInstance(name):
+    conn = libvirtConnect()
+    
+    if conn == None:if conn == None:
+        return HTTPResponse(status=500, body='Error stopping instance\n')
+    else:
+    try:
+        instance = conn.lookupByName(name)
+        instance.destroy()
+        return HTTPResponse(status=200, body='Instance stopped\n')
+    except libvirt.libvirtError:
+        return HTTPResponse(status=500, body='Error stopping instance\n')
+        
+@post('/stop')
+def build():
+    name = str(request.headers.get('X-KVM-Name'))
+    status = stopKVMInstance(name)
+        
+    return status
+```
+Triên khai hàm và lộ trình API `/list`
+```
+def getLibvirtInstances():
+    conn = libvirtConnect()
+    
+    if conn == None:
+        return HTTPResponse(status=500, body='Error listing instances\n')
+    else:
+        try:
+        instances = conn.listDefinedDomains()
+        return instances
+    except libvirt.libvirtError:
+        return HTTPResponse(status=500, body='Error listing instances\n')
+        
+@get('/list')
+def list():
+    kvm_list = getLibvirtInstances()
+    
+    return "List of KVM instances: {}\n".format(kvm_list)
+```
+
+*   Gọi phương thức `run()` để khởi động WSGI server khi script dược chạy 
+`run(host='localhost', port=8080, debug=True)`
+
+Triên khai  hàm và lộ trình API `/list`
 ### Tunning hiệu năng máy ảo
 **Tunning kernel for low I/O latency**
 *   Liệt kê lịch trình I/O đang sử dụng 
