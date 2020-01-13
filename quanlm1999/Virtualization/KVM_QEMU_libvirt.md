@@ -415,7 +415,7 @@ Trong đó, 1 số thông số như:
     
     ubuntu login: 
     ```
-### Quản lý KVM sử dụng lib virt
+## Quản lý KVM sử dụng lib virt
 *   Tăng memory máy ảo lên: `virsh setmem <name> --size <size>`
 *   Tăng max mem lên: `virsh setmaxmem <name> --size <size>`
 *   Tăng vCPU lên: `virsh edit kvm1`
@@ -502,7 +502,7 @@ Trong đó, 1 số thông số như:
     </pool>
         ```
 
-### Quản lý KVM networking với libvirt
+## Quản lý KVM networking với libvirt
 **Linux bridge**
 *  Để có thể thao tác với Linux bridge, ta cần package: `bridge-utils`
     *  Liệt kê bridge: `brctl show`
@@ -584,7 +584,7 @@ Với bridge này máy ảo sẽ có thể kết nối với mạng cùng subnet
    *   Liệt kê tất cả thiết bị trên máy chủ: `virsh nodedev-list --tree`
 *   Liệt kê các PCI enternet adapter
 
-### Di chuyển KVM 
+## Di chuyển KVM 
 
 **Di chuyển thủ công ngoại tuyến sử dụng iSCSI storage pool**
 * Trên iSCSI target cần package `iscsitarget` `iscsitarget-dkms`
@@ -689,7 +689,7 @@ Domain kvm_gfs defined from kvm_gfs.xml
     *   `virsh migrate --live --persistent --verbose --copy-storage-inc kvm_no_sharedfs qemu+ssh://kvm/system`
     Nếu có lỗi xảy ra xem lại  **1 số lỗi có thể gặp phải ở trên**KVM
 
-### Giám sát và sao lưu máy ảo KVM
+## Giám sát và sao lưu máy ảo KVM
 **Thu thập tài nguyên sử dụng bằng libvirt**
 *   Thông tin về lượng CPU sử dụng của hypervisor `virsh nodecpustats --percent`
 *   Thông tin về lượng bộ nhớ sử dụng của hypervisor  `virsh nodememstats`
@@ -944,7 +944,7 @@ hình ảnh được tạo ra để theo dõi bất kỳ thay đổi trong tươ
 * Xóa snapshot gàn nhất: `virsh snapshot-delete kvm1 --current`
 
 ****
-### Triển khai máy ảo KVM với OpenStack
+## Triển khai máy ảo KVM với OpenStack
 *   Cài đặt và cấu hình Openstack: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/install_config_OpenStack.md
 **Tạo máy ảo KVM sử dụng Opensack**
     *   Đảm báo đã có Glance image để dùng : `openstack image list`
@@ -957,7 +957,7 @@ hình ảnh được tạo ra để theo dõi bất kỳ thay đổi trong tươ
 **Dừng máy ảo KVM với OpenStack**: `openstack server stop ubuntu_instance`
 **Xóa máy ảo KVM với OpenStack**: `openstack server delete ubuntu_instance`
 
-### Sử dụng python để tạo và  quản lý máy ảo KVM 
+## Sử dụng python để tạo và  quản lý máy ảo KVM 
 ***
 **Cài đặt và sử dụng thư viện Python libvirt** 
 *   Cài đặt Python development packages `pip` và `virtualenv`
@@ -1296,7 +1296,7 @@ def list():
 `run(host='localhost', port=8080, debug=True)`
 
 Triên khai  hàm và lộ trình API `/list`
-### Tunning hiệu năng máy ảo
+## Tunning hiệu năng máy ảo
 **Tunning kernel for low I/O latency**
 *   Liệt kê lịch trình I/O đang sử dụng 
     ```
