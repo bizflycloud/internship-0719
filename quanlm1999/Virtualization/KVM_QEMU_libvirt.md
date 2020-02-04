@@ -674,7 +674,8 @@ Domain kvm_gfs defined from kvm_gfs.xml
         * Giải pháp:    Bị trùng UUID, kiểm tra `virsh sysinfo | grep -B5 -A3 uuid` và đổi lại UUID của máy đích đến 
     *   **Unable to resolve address kvm2.localdomain service 49152: Name or service is not known**
         * Giải pháp: không phân giải được tên miền, sửa trong file hosts hoặc dùng ip  
-    
+    *   **error: internal error: unable to execute QEMU command 'drive-mirror': Failed to connect socket: Connection timed out**
+        * Giải pháp:  Sửa trong file host và sử dụng lệnh `qemu+ssh://hostname` thay vì `qemu+ssh://ip`
 **Di chuyển ngoại tuyến sử dụng bộ lệnh virsh với local image**
 *   Đảm bảo có 1 VM đang chạy
 *   2 server có thể liên lạc đươcj với nhau   
