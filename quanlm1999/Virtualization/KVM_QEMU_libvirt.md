@@ -921,11 +921,27 @@ gem install sensu-plugins-cpu-checks
 root@kvm:/etc/sensu/conf.d# cat check_memory.json
 {
     "checks": {
-        "memory_check": {
+        "cpu_check": {
             "command": "/usr/local/bin/check-cpu.rb -w 80 -c 90",
             "subscribers": ["base"],
             "handlers": ["default"],
             "interval": 300
+        }
+    }
+}
+```
+*   Cài check uptime 
+```
+gem install sensu-plugins-uptime-checks
+
+root@kvm:/etc/sensu/conf.d# cat check_memory.json
+{
+    "checks": {
+        "memory_check": {
+            "command": "/usr/local/bin/check-uptime.rb",
+            "subscribers": ["base"],
+            "handlers": ["default"],
+            "interval": 30
         }
     }
 }
