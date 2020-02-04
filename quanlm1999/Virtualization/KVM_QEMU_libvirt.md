@@ -1295,6 +1295,8 @@ def list():
 *   Gọi phương thức `run()` để khởi động WSGI server khi script dược chạy 
 `run(host='localhost', port=8080, debug=True)`
 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-32-39.png) 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-32-09.png)
 Triên khai  hàm và lộ trình API `/list`
 ## Tunning hiệu năng máy ảo
 **Tunning kernel for low I/O latency**
