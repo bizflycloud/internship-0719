@@ -664,6 +664,9 @@ virsh --connect qemu+ssh://kvm2/system define kvm_gfs.xml
 Domain kvm_gfs defined from kvm_gfs.xml
 ```
 
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2010-19-20.png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2010-19-23.png)
+
 **Di chuyển trực tuyến sử dụng bộ lệnh virsh với shared storage**
 *   Di chuyển trực tiếp  đến server 2  (đã cấu hình iSCSI ở trên )
 `virsh migrate --live iscsi_kvm qemu+ssh://kvm2/system`
@@ -676,18 +679,27 @@ Domain kvm_gfs defined from kvm_gfs.xml
         * Giải pháp: không phân giải được tên miền, sửa trong file hosts hoặc dùng ip  
     *   **error: internal error: unable to execute QEMU command 'drive-mirror': Failed to connect socket: Connection timed out**
         * Giải pháp:  Sửa trong file host và sử dụng lệnh `qemu+ssh://hostname` thay vì `qemu+ssh://ip`
+        
 **Di chuyển ngoại tuyến sử dụng bộ lệnh virsh với local image**
 *   Đảm bảo có 1 VM đang chạy
 *   2 server có thể liên lạc đươcj với nhau   
-*   Sư dụng lệnh `   virsh migrate --offline --persistent kvm_no_sharedfs`
+*   Sư dụng lệnh `   virsh migrate --offline --persistent kvm_no_sharedfs qemu+ssh://kvm2/system`
     *   Khi đó thì server 1 vẫn chạy, khi di chuyển xong thì máy ảo server 2 sẽ k khởi động luôn 
+
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-57-33.png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-57-36.png)
       
-**Di chuyển ngoại tuyến sử dụng bộ lệnh virsh với local image**
+**Di chuyển trực tuyến sử dụng bộ lệnh virsh với local image**
 *   Đảm bảo cả 2 server đều đang có VM đang chạy sử dụng local image 
 *   2 server đều liên lạc được với nhau
 *   Chuyển file đến server: `scp /tmp/kvm_no_sharedfs.img kvm2:/tmp/kvm_no_sharedfs.img`
 *   Di chuyển VM đến server mới `virsh migrate --live --persistent --verbose --copy-storage-all kvm_no_sharedfs qemu+ssh://kvm2/system`
-    *   `virsh migrate --live --persistent --verbose --copy-storage-inc kvm_no_sharedfs qemu+ssh://kvm/system`
+
+*   Di chuyển trở lại: `virsh migrate --live --persistent --verbose --copy-storage-inc kvm_no_sharedfs qemu+ssh://kvm/system`
+
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-45-11.png)
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-44-55.png)
+
     Nếu có lỗi xảy ra xem lại  **1 số lỗi có thể gặp phải ở trên**KVM
 
 ## Giám sát và sao lưu máy ảo KVM
@@ -1296,9 +1308,10 @@ def list():
 *   Gọi phương thức `run()` để khởi động WSGI server khi script dược chạy 
 `run(host='localhost', port=8080, debug=True)`
 
+
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-32-39.png) 
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2009-32-09.png)
-Triên khai  hàm và lộ trình API `/list`
+
 ## Tunning hiệu năng máy ảo
 **Tunning kernel for low I/O latency**
 *   Liệt kê lịch trình I/O đang sử dụng 
