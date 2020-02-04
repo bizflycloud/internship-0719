@@ -912,7 +912,23 @@ root@kvm:/etc/sensu/conf.d# cat check_memory.json
         }
     }
 }
-root@kvm:/et
+root@kvm:/etc
+```
+*   Cài đặt Cpu check cho máy ảo: 
+```
+gem install sensu-plugins-cpu-checks
+
+root@kvm:/etc/sensu/conf.d# cat check_memory.json
+{
+    "checks": {
+        "memory_check": {
+            "command": "/usr/local/bin/check-cpu.rb -w 80 -c 90",
+            "subscribers": ["base"],
+            "handlers": ["default"],
+            "interval": 300
+        }
+    }
+}
 ```
 **Sao lưu KVM với tar và rsync**
 *   Tạo thư mục back up
