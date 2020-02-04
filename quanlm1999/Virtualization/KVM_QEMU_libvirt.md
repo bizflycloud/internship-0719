@@ -946,6 +946,8 @@ root@kvm:/etc/sensu/conf.d# cat check_memory.json
     }
 }
 ```
+![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-04%2012-12-27.png)
+
 **Sao lưu KVM với tar và rsync**
 *   Tạo thư mục back up
 *   copy file `*.xml` và `.img` của máy ảo vào thư mục này 
