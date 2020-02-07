@@ -587,7 +587,7 @@ Với bridge này máy ảo sẽ có thể kết nối với mạng cùng subnet
 ## Di chuyển KVM 
 
 **Di chuyển thủ công ngoại tuyến sử dụng iSCSI storage pool**
-* Trên iSCSI target cần package `iscsitarget` `iscsitarget-dkms`
+* Trên iSCSI target cần package `tgt`
 * Kích hoạt chức năng   `sed -i 's/ISCSITARGET_ENABLE=false/ISCSITARGET_ENABLE=true/g' /etc/default/iscsitarge``
 ```
 cat /etc/default/iscsitarget
