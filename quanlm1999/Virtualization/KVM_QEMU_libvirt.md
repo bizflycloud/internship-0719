@@ -1778,7 +1778,7 @@ root@kvm:~# sysctl net.ipv4.tcp_synack_retries=1
 net.ipv4.tcp_synack_retries = 1
 ```
 
-*   increase the max file descriptors, execute the following:
+*   increase the max file descriptors, execute the following:.
 ```
 root@kvm:~# sysctl fs.file-max=10000000
 fs.file-max = 10000000
