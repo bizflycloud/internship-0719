@@ -88,3 +88,25 @@ Less moving parts: được hiểu như LB hoạt động 1 cách đơn giản, 
 Để sử dụng ở mức user space phải cài đặt thêm các gói. VD vlan, ifenslave. Không hỗ trợ openflow và các giao thức điều khiển khác.
 Không có được sự linh hoạt
 
+ # Một vài câu lệnh với Open vSwitch
+
+* ovs-vsctl : là câu lệnh để cài đặt và thay đổi một số cấu hình ovs. Nó cung cấp interface cho phép người dùng tương tác với Database để truy vấn và thay đổi dữ liệu.
+  * ovs-vsctl show: Hiển thị cấu hình hiện tại của switch.
+  * ovs-vsctl list-br: Hiển thị tên của tất cả các bridges.
+  * ovs-vsctl list-ports <bridge> : Hiển thị tên của tất cả các port trên bridge.
+  * ovs-vsctl list interface <bridge>: Hiển thị tên của tất cả các interface trên bridge.
+  * ovs-vsctl add-br <bridge> : Tạo bridge mới trong database.
+  * ovs-vsctl add-port <bridge> : <interface> : Gán interface (card ảo hoặc card vật lý) vào Open vSwitch bridge.
+
+* ovs-ofctl và ovs-dpctl : Dùng để quản lí và kiểm soát các  flow entries. OVS quản lý 2 loại flow:
+  * OpenFlows : flow quản lí control plane
+  * Datapath : là kernel flow.
+  * ovs-ofctl giao tiếp với OpenFlow module, ovs-dpctl
+giao tiếp với Kernel module.
+
+* ovs-ofctl show <BRIDGE> : hiển thị thông tin ngắn gọn về switch bao gồm port number và port mapping.
+* ovs-ofctl dump-flows <Bridge> : Dữ liệu trong OpenFlow tables
+* ovs-dpctl show : Thông tin cơ bản về logical datapaths (các bridges) trên switch.
+* ovs-dpctl dump-flows : Hiển thị flow cached trong datapath.
+* ovs-appctl bridge/dumpflows <br> : thông tin trong flow tables và offers kết nối trực tiếp cho VMs trên cùng hosts.
+* ovs-appctl fdb/show <br> : Hiển thị các cặp mac/vlan.
