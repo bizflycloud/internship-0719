@@ -19,7 +19,7 @@
 *   IP bridge đã được tạo sẵn: 192.168.123.1/24
 Sử dụng GRE tunnel
 **GRE tunnel**
-*   Ta tạo GRE endpoit (remote đến ip của host 2)
+*   Ta tạo GRE endpoint (remote đến ip của host 2)
     ```
     ip link add tun-1 type gretap remote 192.168.122.132 ttl 64
     ip link set dev tun-1 up
