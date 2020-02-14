@@ -85,7 +85,7 @@
 
 ## Cài đặt
 
-### Host 1 (192.168.122.100)
+### Host 1 (192.168.122.132)
 #### Cấu hình
 **Host 1 sử dụng Linux bridge (LB)**
 
@@ -103,7 +103,7 @@ Sử dụng GRE tunnel
 **GRE tunnel**
 *   Ta tạo GRE endpoit (remote đến ip của host 2)
     ```
-    ip link add tun-1 type gretap remote 192.168.122.132 ttl 64
+    ip link add tun-1 type gretap remote 192.168.122.100 ttl 64
     ip link set dev tun-1 up
     ```
 *   Gán vào bridge mặc định của LB
@@ -115,7 +115,7 @@ Sử dụng GRE tunnel
 
 P/s: vì sử dụng network mặc định nên bỏ qua bước gắn vnet0 vào bridge
 
-### Host 2 (192.168.122.132)
+### Host 2 (192.168.122.100)
 
 #### Cấu hình HOST
 
@@ -155,7 +155,7 @@ P/s: vì sử dụng network mặc định nên bỏ qua bước gắn vnet0 và
 
 Sử dụng GRE tunnel
 **GRE tunnel**
-*   Thêm cổng cho GRE tunnel vào OVS switch ` ovs-vsctl add-port virbr1 gre0 -- set interface gre0 type=gre options:remote_ip=192.168.122.100`
+*   Thêm cổng cho GRE tunnel vào OVS switch ` ovs-vsctl add-port virbr1 gre0 -- set interface gre0 type=gre options:remote_ip=192.168.122.132`
 *   Kết quả:
     ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-13%2016-38-09.png)
     ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-13%2016-39-09.png)
