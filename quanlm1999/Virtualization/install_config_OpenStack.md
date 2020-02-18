@@ -1,735 +1,566 @@
-# Cài đặt và cấu hình Openstack
-****
-### Các bước chuẩn bị triển khai 
-*   Cài đặt package sau:
+#   Cài đặt và tạo máy ảo sử dụng Openstack  Stein trên Ubuntu 18.04 
+#   Mô hình
+*   Mô hình cài đặt Openstack-Stein này dùng tối thiểu 2 node
+
+  | Name 	| Provider network 	| Management network  	|   	 	
+|---	|---	|---	|
+|   Controller	|   192.168.122.206	|   10.0.0.73	|   	
+|   Compute1	|  192.168.122.144 	|  10.0.0.68 	|   	
+ 
+
+#   Cài đặt môi trường
+
+## Cài đặt cho node controller
+
+#### Cập nhật gói phần mềm: 
+* `apt update -y && apt upgrade -y`
+
+#### Cấu hình hostname: 
+*   `hostnamectl set-hostname controller`
+
+#### Cài đặt repos để cài OpenStack
+*   Cài đặt repos
+`
+    add-apt-repository cloud-archive:stein -y
+`
+
+*   Cài đặt gói client của Openstack
+    `apt install python3-openstackclient`
+
+#### Cài đặt SQL database
+*   Cài đặt MariaDB
+    `apt install mariadb-server python-pymysql`
+
+*   Tạo và cấu hình file `/etc/mysql/mariadb.conf.d/99-openstack.cnf` 
+    *   Nội dung
+        ```
+        [mysqld]
+        bind-address = 10.0.0.73
+        
+        default-storage-engine = innodb
+        innodb_file_per_table = on
+        max_connections = 4096
+        collation-server = utf8_general_ci
+        character-set-server = utf8
+        ```
+
+*   Khởi động lại MariaDB
+    `service mysql restart`
+
+####    Cài đặt Message queue (RabbitMQ)
+- Cài đặt gói
+`
+  apt install rabbitmq-server -y
+`
+-  Cấu hình RabbitMQ, tạo user `openstack` với mật khẩu là ` RABBIT_PASS`
+`
+      rabbitmqctl add_user openstack RABBIT_PASS
+`
+- Gán quyền cho tài khoản openstack trong RabbitMQ
+`
+  rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+`
+  
+ #### Cài đặt Memcached
+*   Cài đặt các gói cần thiết cho memcached
+      `apt install memcached python-memcache -y`
+- Dùng vi sửa file `/etc/memcached.conf`, thay dòng `-l 127.0.0.1` bằng dòng dưới.
+`
+  -l 10.0.0.73
+`
+- Khởi động lại memcache.
+`
+  service memcached restart
+`
+  
+#### Cài đặt Etcd
+* Cài đặt gói
+  `
+  apt install etcd
+  `
+
+*   Cấu hình file `/etc/default/etcd `
+    ```
+    ETCD_NAME="controller"
+    ETCD_DATA_DIR="/var/lib/etcd"
+    ETCD_INITIAL_CLUSTER_STATE="new"
+    ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster-01"
+    ETCD_INITIAL_CLUSTER="controller=http://10.0.0.73:2380"
+    ETCD_INITIAL_ADVERTISE_PEER_URLS="http://10.0.0.73:2380"
+    ETCD_ADVERTISE_CLIENT_URLS="http://10.0.0.73:2379"
+    ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
+    ETCD_LISTEN_CLIENT_URLS="http://10.0.0.73:2379"
+    ```
+    
+*   Kích hoạt và khởi động lại dịch vụ
+    ```
+    systemctl enable etcd
+    systemctl restart etcd
+    ```
+
+## Cài đặt cho node compute1
+
+#### Cập nhật các gói phần mềm
+  * `
+  apt-get update
+  `
+
+#### Cài đặt repos để cài OpenStack
+*   Cài đặt repos
+`
+    add-apt-repository cloud-archive:stein -y
+`
+
+*   Cài đặt gói client của Openstack
+    `apt install python3-openstackclient`
+
+#   Cài đặt dịch vụ Openstack
+
+## Dịch vụ Identity (Keystone) 
+*   Cài trên node **controller**
+
+####    Tạo DB cho keystone
+
+*   Truy cập vào MariaDB: `mysql`
+*   Tạo DB cho keystone: 
+    ```
+    MariaDB [(none)]> CREATE DATABASE keystone;
+    Query OK, 1 row affected (0.00 sec)
+    ```
+*   Cấp quyền truy cập vào keystone DB:
+    ```
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+    -> IDENTIFIED BY 'KEYSTONE_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+        -> IDENTIFIED BY 'KEYSTONE_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    ```
+
+####    Cài đặt và cấu hình keystone
+
+*   Cài đặt gói: `apt install keystone`
+*   Cấu hình file `/etc/keystone/keystone.conf`
+    *   Trong `[database]`
+        *   Comment dòng: `connection = sqlite:////var/lib/keystone/keystone.db`
+        *   Thêm dòng: `connection = mysql+pymysql://keystone:KEYSTONE_DBPASS@controller/keystone`
+    *   Trong `[token]`
+        *   Bỏ comment dòng: `provider = fernet`
+*   Đồng bộ DB cho keystone `su -s /bin/sh -c "keystone-manage db_sync" keystone`
+*   Thiết lập Fernet key:
+    ```
+    keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+    keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+    ```
+*   Bootstrap the Identity service:
+    ```
+     keystone-manage bootstrap --bootstrap-password ADMIN_PASS \
+      --bootstrap-admin-url http://controller:5000/v3/ \
+      --bootstrap-internal-url http://controller:5000/v3/ \
+      --bootstrap-public-url http://controller:5000/v3/ \
+      --bootstrap-region-id RegionOne
+    ```
+####   Cấu hình Apache HTTP Server 
+
+*   File: `/etc/apache2/apache2.conf` 
+    *   Cấu hình ServerName: `ServerName controller`
+    
+####   Kết thúc cài đặt
+*   Restart Apache `service apache2 restart`
+*   Cấu hình cho tài khoản quản trị:
+    ```
+    export OS_USERNAME=admin
+    export OS_PASSWORD=ADMIN_PASS
+    export OS_PROJECT_NAME=admin
+    export OS_USER_DOMAIN_NAME=Default
+    export OS_PROJECT_DOMAIN_NAME=Default
+    export OS_AUTH_URL=http://controller:5000/v3
+    export OS_IDENTITY_API_VERSION=3
+    ```
+#### Tạo domain, projects, users, và roles
+*   Tạo domain "example"
+    `openstack domain create --description "An Example Domain" example`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | An Example Domain                |
+    | enabled     | True                             |
+    | id          | 519b225c218b424b997e744c7c42327a |
+    | name        | example                          |
+    | tags        | []                               |
+    +-------------+----------------------------------+
+    ```
+*   Tạo project serive:
+    `openstack project create --domain default \
+  --description "Service Project" service`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | Service Project                  |
+    | domain_id   | default                          |
+    | enabled     | True                             |
+    | id          | 6c57c69a38a44e32b76accdedad8a583 |
+    | is_domain   | False                            |
+    | name        | service                          |
+    | parent_id   | default                          |
+    | tags        | []                               |
+    +-------------+----------------------------------+
+    ```
+*   Tạo project demo
+    `openstack project create --domain default \
+  --description "Demo Project" myproject`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | Demo Project                     |
+    | domain_id   | default                          |
+    | enabled     | True                             |
+    | id          | b8f0691595f2488ebdfeb3252486b27c |
+    | is_domain   | False                            |
+    | name        | myproject                        |
+    | parent_id   | default                          |
+    | tags        | []                               |
+    +-------------+----------------------------------+
+    ```
+*   Tạo user demo
+    `openstack user create --domain default \
+  --password-prompt myuser`
+    ```
+    User Password:
+    Repeat User Password:
+    +---------------------+----------------------------------+
+    | Field               | Value                            |
+    +---------------------+----------------------------------+
+    | domain_id           | default                          |
+    | enabled             | True                             |
+    | id                  | 62ea51b811304609ac42e51a2698c25f |
+    | name                | myuser                           |
+    | options             | {}                               |
+    | password_expires_at | None                             |
+    +---------------------+----------------------------------+
+    ```
+    `
+*  Tạo role demo
+    `openstack role create myrole`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | None                             |
+    | domain_id   | None                             |
+    | id          | bd9ee546cd5e4062863fa27e94fe6063 |
+    | name        | myrole                           |
+    +-------------+----------------------------------+
+    ```
+*   Thêm role user cho user demo trên project demo:
+      `openstack role add --project myproject --user myuser myrole`
+
+#### Kiểm chứng lại các bước cài đặt keystone
+*   Bỏ thiết lập trong biến môi trường của OS_AUTH_URL và OS_PASSWORD bằng lệnh:
+    `unset OS_AUTH_URL OS_PASSWORD` 
+*   Kiểm tra mã thông báo xác thức:
+`openstack --os-auth-url http://controller:5000/v3    --os-project-domain-name Default --os-user-domain-name Default    --os-project-name admin --os-username admin token issue` Password là password ADMIN ở trên
+
 ```
-apt install software-properties-common
-add-apt-repository cloud-archive:newton
-apt install python-openstackclient
+Password: 
+
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field      | Value                                                                                                                                                                                   |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| expires    | 2020-02-18T08:21:24+0000                                                                                                                                                                |
+| id         | gAAAAABeS5B0rpepHn396gk0liJq8UNrNj7Riq46Ibfvphyfb1OdaFmFF4Q8O3XYMGD0-1G_Nydykp5td9dLo2W0b6SpQfnrwcBM-LiB56w_ilemQjcQTWNUoRA_AWOmCGk0WRFhNPV5WVBl-UTaLEB9yCkEWKsZJFx5c0OMx6nQJIid47yvrag |
+| project_id | 67febc37693344b29481aa41325bc68b                                                                                                                                                        |
+| user_id    | 30086afd36e0419397b11c636674666a                                                                                                                                                        |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-*   Cài đặt `MariaDB` server:
-```
-apt install mariadb-server python-pymysql
-root@controller:~# cat /etc/mysql/mariadb.conf.d/99-openstack.cnf
-[mysqld]
-bind-address = 10.208.130.36
-default-storage-engine = innodb
-innodb_file_per_table
-max_connections = 4096
-collation-server = utf8_general_ci
-character-set-server = utf8
-```
-
-*   Cài đặt `rabbitMQ` và tạo user cho openstack
-```
-apt install rabbitmq-server
-root@controller:~# rabbitmqctl add_user openstack lxcpassword
-Creating user "openstack" ...
-root@controller:~# rabbitmqctl set_permissions openstack ".*" ".*" ".*"
-Setting permissions for user "openstack" in vhost "/" ...
-```
-
-*   Cài đặt và cấu hình `memcached` 
-```
-apt install memcached python-memcache
-root@controller:~# sed -i 's/127.0.0.1/10.208.130.36/g'
-/etc/memcached.conf
-root@controller:~# cat /etc/memcached.conf | grep -vi "#" | sed
-'/^$/d'
--d
-logfile /var/log/memcached.log
--m 64
--p 11211
--u memcache
--l 10.208.130.36
-```
-
-****
-### Cài đặt và cấu hình OpenStack Keystone identity service
-*   Tạo CSDL cho keystone và gán quyền
-```
-mysql -u root -plxcpassword
-MariaDB [(none)]> CREATE DATABASE keystone;
-Query OK, 1 row affected (0.01 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON keystone.* TO
-'keystone'@'localhost' IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON keystone.* TO
-'keystone'@'%' IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.01 sec)
-MariaDB [(none)]> exit
-Bye
-```
-*   Cài đặt keystone
-*   Cấu hình tối thiểu cho keystone như sau
-```
-cat /etc/keystone/keystone.conf
-[DEFAULT]
-log_dir = /var/log/keystone
-[assignment]
-[auth]
-[cache]
-[catalog]
-[cors]
-[cors.subdomain]
-[credential]
-[database]
-connection = mysql+pymysql://keystone:lxcpassword@controller/keystone
-[domain_config]
-[endpoint_filter]
-[endpoint_policy]
-[eventlet_server]
-[federation]
-[fernet_tokens]
-[identity]
-[identity_mapping][kvs]
-[ldap]
-[matchmaker_redis]
-[memcache]
-[oauth1]
-[os_inherit]
-[oslo_messaging_amqp]
-[oslo_messaging_notifications]
-[oslo_messaging_rabbit]
-[oslo_messaging_zmq]
-[oslo_middleware]
-[oslo_policy]
-[paste_deploy]
-[policy]
-[profiler]
-[resource]
-[revoke]
-[role]
-[saml]
-[security_compliance]
-[shadow_users]
-[signing]
-[token]
-provider = fernet
-[tokenless_auth]
-[trust]
-[extra_headers]
-Distribution = Ubuntu
-```
-
-*   Populate the Keystone database `su -s /bin/sh -c "keystone-manage db_sync" keystone`
-*   Khởi tạo Fernet key repositories: `keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone` `keystone-manage credential_setup --keystone-user keystone --keystone-group keystone`
-*  Bootstrap the Keystone service: `keystone-manage bootstrap --bootstrap-password lxcpassword --bootstrap-admin-url http://controller:35357/v3/ -- bootstrap-internal-url http://controller:35357/v3/ --bootstrap-public- url http://controller:5000/v3/ --bootstrap-region-id RegionOne`
-*  Thêm dòng cấu hình Apache
-```
-root@controller:~# cat /etc/apache2/apache2.conf
-...
-ServerName controller
-...
-root@controller:~# service apache2 restart
-```
-*   Xóa CSDL mặc định của keystone `rm -f /var/lib/keystone/keystone.db`
-*   Cài đặt tài khoản quản trị với biến môi trường như sau:
-```
-root@controller:~# export OS_USERNAME=admin
-root@controller:~# export OS_PASSWORD=lxcpassword
-root@controller:~# export OS_PROJECT_NAME=admin
-root@controller:~# export OS_USER_DOMAIN_NAME=default
-root@controller:~# export OS_PROJECT_DOMAIN_NAME=default
-root@controller:~# export OS_AUTH_URL=http://controller:35357/v3
-root@controller:~# export OS_IDENTITY_API_VERSION=3
+*   Tiếp tục kiểm tra 
+`openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name Default --os-user-domain-name Default --os-project-name myproject --os-username myuser token issue` Password là password userdemo vừa tạo
 
 ```
-* Tạo project trong Keystone `openstack project create --domain default -- description "KVM Project" service`
-* Tạo project không có đặc quyền và user `openstack project create --domain default -- description "KVM User Project" kvm`
+Password: 
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field      | Value                                                                                                                                                                                   |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| expires    | 2020-02-18T08:24:16+0000                                                                                                                                                                |
+| id         | gAAAAABeS5EgGQ9OZ7HD1D0UeX-CtUAzhsc5m1mNrfowHD194p1oHCwTrpYju7JTMCJqxyhfVnuQecDjLCCnaqlcmCaiPj4c6YLpUwD0fVcXK8mHn-xkbgQtg_iKmgyYsSej4nE5kh_tAS_iZwXegus-oQDOsoMWQQlHYJh0TIoLen0rlsGINnc |
+| project_id | b8f0691595f2488ebdfeb3252486b27c                                                                                                                                                        |
+| user_id    | 62ea51b811304609ac42e51a2698c25f                                                                                                                                                        |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
-openstack user create --domain default --password-
-prompt kvm
-User Password:
-Repeat User Password:
-```
-*   Tạo role user và gán nó với KVM project `openstack role create user` `openstack role add --project kvm --user kvm user`
-*   Cấu hình Web Service Gateway Interface (WSGI) làm đường nối trung gian cho Keystone 
-```
-cat /etc/keystone/keystone-paste.ini
-# Keystone PasteDeploy configuration file.
-[filter:debug]
-use = egg:oslo.middleware#debug
-[filter:request_id]
-use = egg:oslo.middleware#request_id
-[filter:build_auth_context]
-use = egg:keystone#build_auth_context
-[filter:token_auth]
-use = egg:keystone#token_auth
-[filter:admin_token_auth]
-use = egg:keystone#admin_token_auth
-[filter:json_body]
-use = egg:keystone#json_body
-[filter:cors]use = egg:oslo.middleware#cors
-oslo_config_project = keystone
-[filter:http_proxy_to_wsgi]
-use = egg:oslo.middleware#http_proxy_to_wsgi
-[filter:ec2_extension]
-use = egg:keystone#ec2_extension
-[filter:ec2_extension_v3]
-use = egg:keystone#ec2_extension_v3
-[filter:s3_extension]
-use = egg:keystone#s3_extension
-[filter:url_normalize]
-use = egg:keystone#url_normalize
-[filter:sizelimit]
-use = egg:oslo.middleware#sizelimit
-[filter:osprofiler]
-use = egg:osprofiler#osprofiler
-[app:public_service]
-use = egg:keystone#public_service
-[app:service_v3]
-use = egg:keystone#service_v3
-[app:admin_service]
-use = egg:keystone#admin_service
-[pipeline:public_api]
-pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize
-request_id build_auth_context token_auth json_body ec2_extension
-public_service
-[pipeline:admin_api]
-pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize
-request_id build_auth_context token_auth json_body ec2_extension
-s3_extension admin_service
-[pipeline:api_v3]
-pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize
-request_id build_auth_context token_auth json_body ec2_extension_v3
-s3_extension service_v3
-[app:public_version_service]
-use = egg:keystone#public_version_service
-[app:admin_version_service]
-use = egg:keystone#admin_version_service
-[pipeline:public_version_api]
-pipeline = cors sizelimit osprofiler url_normalize
-public_version_service
-[pipeline:admin_version_api]
-pipeline = cors sizelimit osprofiler url_normalize admin_version_service
-[composite:main]
-use = egg:Paste#urlmap
-/v2.0 = public_api
-/v3 = api_v3
-/ = public_version_api
-[composite:admin]
-use = egg:Paste#urlmap
-/v2.0 = admin_api
-/v3 = api_v3
-/ = admin_version_api
-```
+#### Tạo script biến môi trường cho client
+*   Tạo file `admin-openrc` với nội dung sau: 
+    ```
+    export OS_PROJECT_DOMAIN_NAME=Default
+    export OS_USER_DOMAIN_NAME=Default
+    export OS_PROJECT_NAME=admin
+    export OS_USERNAME=admin
+    export OS_PASSWORD=ADMIN_PASS
+    export OS_AUTH_URL=http://controller:5000/v3
+    export OS_IDENTITY_API_VERSION=3
+    export OS_IMAGE_API_VERSION=2
+    ```
+    
+*   Tạo file `demo-openrc` với nội dung sau:
+    ```
+    export OS_PROJECT_DOMAIN_NAME=Default
+    export OS_USER_DOMAIN_NAME=Default
+    export OS_PROJECT_NAME=myproject
+    export OS_USERNAME=myuser
+    export OS_PASSWORD=MYUSER_PASS
+    export OS_AUTH_URL=http://controller:5000/v3
+    export OS_IDENTITY_API_VERSION=3
+    export OS_IMAGE_API_VERSION=2
+    ```
 
-* Yêu cầu token từ admin và KVM user: `openstack --os-auth-url http://controller:35357/v3 --os-project-domain-name default --os-user-domain-name default --os- project-name admin --os-username admin token issue` `openstack --os-auth-url http://controller:5000/v3 --os-project-domain-name default --os-user-domain-name default --os- project-name kvm --os-username kvm token issue`
-* Tạo file lưu trữ thông tin xác thực của admin và user 
-```
-cat rc.admin
-export OS_PROJECT_DOMAIN_NAME=default
-export OS_USER_DOMAIN_NAME=default
-export OS_PROJECT_NAME=admin
-export OS_USERNAME=admin
-export OS_PASSWORD=lxcpassword
-export OS_AUTH_URL=http://controller:35357/v3
-export OS_IDENTITY_API_VERSION=3
-export OS_IMAGE_API_VERSION=2
-root@controller:~#
-root@controller:~# cat rc.kvm
-export OS_PROJECT_DOMAIN_NAME=default
-export OS_USER_DOMAIN_NAME=default
-export OS_PROJECT_NAME=kvm
-export OS_USERNAME=kvm
-export OS_PASSWORD=lxcpassword
-export OS_AUTH_URL=http://controller:5000/v3
-export OS_IDENTITY_API_VERSION=3
-export OS_IMAGE_API_VERSION=2
-```
-*   Source the admin credentials file: `. rc.admin`
-*   Yêu cầu token xác nhân cho admin user: `openstack token issue`
+*   Chạy scripts: 
+    `. admin-openrc `
+*   Yêu cầu thông báo xác thực `openstack token issue`
+    ```
+        +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | Field      | Value                                                                                                                                                                                   |
+    +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | expires    | 2020-02-18T08:28:55+0000                                                                                                                                                                |
+    | id         | gAAAAABeS5I39WZ3a3w5nBDjNUZvUFcBxdT1HW36VEHdckQzyW0Ql-miPzKkVkW6K0dEzkMP5sVJpEMpf-0Hypy60wiNcKxJ9VwfLqtBy24pp6bh7cK0gjmdzIILvz7ctSjo64wQy8e4zOKyWZIUdRVomadyqX1scSbPRANZENFqNGLA9GeZK7I |
+    | project_id | 67febc37693344b29481aa41325bc68b                                                                                                                                                        |
+    | user_id    | 30086afd36e0419397b11c636674666a                                                                                                                                                        |
+    +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    ```
 
-****
-### Cài đặt và cấu hình OpenStack Glance image service
-* Tạo CSDL cho Glance
-```
-mysql -u root -plxcpassword
-MariaDB [(none)]> CREATE DATABASE glance;
-Query OK, 1 row affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON glance.* TO
-'glance'@'localhost' IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%'
-IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> exit
-Bye
-```
-*   Tạo người dùng Glance và gán quyền quản trị 
-```
-openstack user create --domain default --password-prompt glance
-User Password:
-Repeat User Password:
+## Cài dịch vụ Image (Glance)
+*   Cài trên node **controller**
+    
+#### Tạo database cho glance
+*   Truy cập vào MariaDB: `mysql`
+*   Tạo DB cho glance:
+    ```
+    MariaDB [(none)]> CREATE DATABASE glance;
+    Query OK, 1 row affected (0.00 sec)
+    ```
+*   Cấp quyền truy cập cho glance:
+    ```
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' \
+        ->   IDENTIFIED BY 'GLANCE_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' \
+        ->   IDENTIFIED BY 'GLANCE_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    ```
 
-openstack role add --project service --user glance admin
-```
-*   Tạo Glance service definition:
-```
-openstack service create --name glance --description "OpenStack Image" image
-```
-*   Tạo Glance API endpoint trong Keystone
-```
-openstack endpoint create --region RegionOne image public http://controller:9292
-openstack endpoint create --region RegionOne image internal http://controller:9292
-openstack endpoint create --region RegionOne image admin http://controller:9292
-```
-*   Cài đặt Glance `apt install glance`
-*   Cầu hình: 
-```
-cat /etc/glance/glance-api.conf
-[DEFAULT]
-[cors]
-[cors.subdomain]
-[database]
-connection = mysql+pymysql://glance:lxcpassword@controller/glance
-[glance_store]
-stores = file,http
-default_store = file
-filesystem_store_datadir = /var/lib/glance/images/
-[image_format]
-disk_formats = ami,ari,aki,vhd,vhdx,vmdk,raw,qcow2,vdi,iso,root-tar
-[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = glance
-password = lxcpassword
-[matchmaker_redis]
-[oslo_concurrency]
-[oslo_messaging_amqp]
-[oslo_messaging_notifications]
-[oslo_messaging_rabbit]
-[oslo_messaging_zmq]
-[oslo_middleware]
-[oslo_policy]
-[paste_deploy]
-flavor = keystone
-[profiler]
-[store_type_location_strategy]
-[task]
-[taskflow_executor]
-root@controller:~#
+*   Chạy scripts `. admin-openrc` 
+####   Tạo thông tin đăng nhập cho service
+*   Tạo user glance:
+`openstack user create --domain default --password-prompt glance`
+    ```
+    User Password:
+    Repeat User Password:
+    +---------------------+----------------------------------+
+    | Field               | Value                            |
+    +---------------------+----------------------------------+
+    | domain_id           | default                          |
+    | enabled             | True                             |
+    | id                  | 3f4e777c4062483ab8d9edd7dff829df |
+    | name                | glance                           |
+    | options             | {}                               |
+    | password_expires_at | None                             |
+    +---------------------+----------------------------------+
+    ```
+*   Thêm role admin cho user glance trên project service
+`openstack role add --project service --user glance admin`
 
-root@controller:~# cat /etc/glance/glance-registry.conf
-[DEFAULT]
-[database]
-connection = mysql+pymysql://glance:lxcpassword@controller/glance
-[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = serviceusername = glance
-password = lxcpassword
-[matchmaker_redis]
-[oslo_messaging_amqp]
-[oslo_messaging_notifications]
-[oslo_messaging_rabbit]
-[oslo_messaging_zmq]
-[oslo_policy]
-[paste_deploy]
-flavor = keystone
-[profiler]
-```
-*   Populate the Glance database: `su -s /bin/sh -c "glance-manage db_sync" glance`
-*   Start the Glance service daemons: `service glance-registry restart` `service glance-api restart`
-*   Tải 1 qcow2 img cho Ubuntu `wget https://uec-images.ubuntu.com/releases/16.04/release-20170330/ubuntu-16.04-server-cloudimg-amd64-disk1.img`
-*   Thêm img đó vào dịch vụ Glance `Openstack image create "ubuntu_16.04" --file ubuntu-16.04-server-cloudimg-amd64-disk1.img --disk-format qcow2 --container-format bare --public`
-*   Liệt kê img `openstack image list`
+*   Tạo dịch vụ glance
+`openstack service create --name glance --description "OpenStack Image" image`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | OpenStack Image                  |
+    | enabled     | True                             |
+    | id          | 5f55cd9876b244f68c3700616c32df6d |
+    | name        | glance                           |
+    | type        | image                            |
+    +-------------+----------------------------------+
+    ```
+*   Tạo các API endpoint cho dịch vụ glance:
+    `openstack endpoint create --region RegionOne image public http://controller:9292`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 7081b8f837244270b7aa9fe4ef6312bf |
+    | interface    | public                           |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 5f55cd9876b244f68c3700616c32df6d |
+    | service_name | glance                           |
+    | service_type | image                            |
+    | url          | http://controller:9292           |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne image internal http://controller:9292`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 9173d8fe7dfe43b6a94a3e700f19db27 |
+    | interface    | internal                         |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 5f55cd9876b244f68c3700616c32df6d |
+    | service_name | glance                           |
+    | service_type | image                            |
+    | url          | http://controller:9292           |
+    +--------------+----------------------------------+
+    ```
+    ` openstack endpoint create --region RegionOne image admin http://controller:9292`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 13413bd85b594ca29164bf9fb3cf4dcb |
+    | interface    | admin                            |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 5f55cd9876b244f68c3700616c32df6d |
+    | service_name | glance                           |
+    | service_type | image                            |
+    | url          | http://controller:9292           |
+    +--------------+----------------------------------+
+    ```
 
-****
-### Cài đặt và cấu hình OpenStack Nova compute service
-* Tạo database và user cho Nova 
-```
-mysql -u root -plxcpassword
-MariaDB [(none)]> CREATE DATABASE nova_api;
-Query OK, 1 row affected (0.00 sec)
-MariaDB [(none)]> CREATE DATABASE nova;
-Query OK, 1 row affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_api.* TO
-'nova'@'localhost' IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.03 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'%'
-IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost'
-IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%'
-IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB
-```
-*   Tạo Nova user và gán quyền 
-````
-openstack user create --domain default --password-prompt nova
-User Password:
-Repeat User Password:
+#### Cài đặt và cấu hình cho dịch vụ glance
+*   Cài đặt gói glance
+    `apt install glance -y`
+*   Cấu hình file: ` /etc/glance/glance-api.conf` và `/etc/glance/glance-registry.conf`
+    * Trong `[database]`
+    Comment dòng `sqlite_db = /var/lib/glance/glance.sqlite`
+    Thêm dòng: `connection = mysql+pymysql://glance:GLANCE_DBPASS@controller/glance`
+    *   Trong `[keystone_authtoken]`
+    Thêm vào: 
+        ```
+        www_authenticate_uri = http://controller:5000
+        auth_url = http://controller:5000
+        memcached_servers = controller:11211
+        auth_type = password
+        project_domain_name = Default
+        user_domain_name = Default
+        project_name = service
+        username = glance
+        password = GLANCE_PASS
+        ```
+    *   Trong `[paste_deploy]`
+    Thêm vào:  
+        `flavor = keystone`
+    *   Trong `[glance_store]` , cấu hình lưu trữ file trên hệ thống (local file system store) và vị trí của file image .  không phải làm trong file /etc/glance/glance-registry.conf):
+    Thêm vào: 
+        ```
+        stores = file,http
+        default_store = file
+        filesystem_store_datadir = /var/lib/glance/images/
+        ```
+*   Đồng bộ database cho glance
+`su -s /bin/sh -c "glance-manage db_sync" glance`
 
-openstack role add --project service --user nova admin
-````
+*   Restart dịch vụ Glance.
+    ```
+    service glance-registry restart
+    service glance-api restart
+    ```
 
-*   Tạo Nova service và endpoints
-`openstack service create --name nova --description"OpenStack Compute" compute`
-`openstack endpoint create --region RegionOne compute public http://controller:8774/v2.1/%(tenant_id)s`
-`openstack endpoint create --region RegionOne compute internal http://controller:8774/v2.1/%(tenant_id)s`
-`openstack endpoint create --region RegionOne compute admin http://controller:8774/v2.1/%(tenant_id)s`
+#### Kiểm chứng lại việc cài đặt glance
+*   Chạy script `. admin-openrc`
+*   Tải file image: 
+`wget http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img`
+*   Upload file image vừa tải:
+`openstack image create "cirros" --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public`
+    ```
+        +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+        | Field            | Value                                                                                                                                                                                      |
+        +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+        | checksum         | 443b7623e27ecf03dc9e01ee93f67afe                                                                                                                                                           |
+        | container_format | bare                                                                                                                                                                                       |
+        | created_at       | 2020-02-18T07:52:10Z                                                                                                                                                                       |
+        | disk_format      | qcow2                                                                                                                                                                                      |
+        | file             | /v2/images/f41b9438-bb2d-4815-b25d-f695b830b5cf/file                                                                                                                                       |
+        | id               | f41b9438-bb2d-4815-b25d-f695b830b5cf                                                                                                                                                       |
+        | min_disk         | 0                                                                                                                                                                                          |
+        | min_ram          | 0                                                                                                                                                                                          |
+        | name             | cirros                                                                                                                                                                                     |
+        | owner            | 67febc37693344b29481aa41325bc68b                                                                                                                                                           |
+        | properties       | os_hash_algo='sha512', os_hash_value='6513f21e44aa3da349f248188a44bc304a3653a04122d8fb4535423c8e1d14cd6a153f735bb0982e2161b5b5186106570c17a9e58b64dd39390617cd5a350f78', os_hidden='False' |
+        | protected        | False                                                                                                                                                                                      |
+        | schema           | /v2/schemas/image                                                                                                                                                                          |
+        | size             | 12716032                                                                                                                                                                                   |
+        | status           | active                                                                                                                                                                                     |
+        | tags             |                                                                                                                                                                                            |
+        | updated_at       | 2020-02-18T07:52:10Z                                                                                                                                                                       |
+        | virtual_size     | None                                                                                                                                                                                       |
+        | visibility       | public                                                                                                                                                                                     |
+        +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    ```
 
-*   Cài đặt Nova package `apt install nova-api nova-conductor nova-consoleauth nova-novncproxy nova-scheduler`
+*   Xác nhận lại việc upload `openstack image list`
+    ```
+    +--------------------------------------+--------+--------+
+    | ID                                   | Name   | Status |
+    +--------------------------------------+--------+--------+
+    | f41b9438-bb2d-4815-b25d-f695b830b5cf | cirros | active |
+    +--------------------------------------+--------+--------+
+    ```
 
-*   Tạo file cấu hình Nova 
-```
-cat /etc/nova/nova.conf
-[DEFAULT]
-dhcpbridge_flagfile=/etc/nova/nova.conf
-dhcpbridge=/usr/bin/nova-dhcpbridge
-log-dir=/var/log/nova
-state_path=/var/lib/nova
-force_dhcp_release=True
-verbose=True
-ec2_private_dns_show_ip=True
-enabled_apis=osapi_compute,metadata
-transport_url = rabbit://openstack:lxcpassword@controller
-auth_strategy = keystone
-my_ip = 10.208.132.45
-use_neutron = True
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
-[database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova
-[api_database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova_api
-[oslo_concurrency]
-lock_path = /var/lib/nova/tmp
-[libvirt]
-use_virtio_for_bridges=True
-[wsgi]
-api_paste_config=/etc/nova/api-paste.ini
-[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = nova
-password = lxcpassword
-[vnc]
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
-[glance]
-api_servers = http://controller:9292
-```
-*   Khởi động các dịch vụ sau của Nova
-```
-nova-api 
-nova-consoleauth 
-nova-scheduler 
-nova-conductor 
-nova-novncproxy 
-```
-*   Cài đặt Nova compute `nova-compute`
-*   Cập nhật file cấu hình Nova
-```
-cat /etc/nova/nova.conf
-[DEFAULT]
-dhcpbridge_flagfile=/etc/nova/nova.conf
-dhcpbridge=/usr/bin/nova-dhcpbridge
-log-dir=/var/log/nova
-state_path=/var/lib/nova
-force_dhcp_release=True
-verbose=True
-ec2_private_dns_show_ip=True
-enabled_apis=osapi_compute,metadata
-transport_url = rabbit://openstack:lxcpassword@controller
-auth_strategy = keystone
-my_ip = 10.208.132.45
-use_neutron = True
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
-compute_driver = libvirt.LibvirtDriver
-[database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova
-[api_database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova_api
-[oslo_concurrency]
-lock_path = /var/lib/nova/tmp
-[libvirt]
-use_virtio_for_bridges=True
-[wsgi]
-api_paste_config=/etc/nova/api-paste.ini[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = nova
-password = lxcpassword
-[vnc]
-enabled = True
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
-novncproxy_base_url = http://controller:6080/vnc_auto.html
-[glance]
-api_servers = http://controller:9292
-```
-*   Chỉ định drive ảo hóa cho Nova
-```
-cat /etc/nova/nova-compute.conf
-[DEFAULT]
-compute_driver=libvirt.LibvirtDriver
-[libvirt]
-virt_type=kvm
-```
+## Cài đặt dịch vụ Placement
 
-****
-### Cài đặt và cấu hình OpenStack Neutron networking service
-*   Tạo CSDL
-```
-mysql -u root -plxcpassword
-MariaDB [(none)]> CREATE DATABASE neutron;
-Query OK, 1 row affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON neutron.* TO
-'neutron'@'localhost' IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%'
-IDENTIFIED BY 'lxcpassword';
-Query OK, 0 rows affected (0.00 sec)
-MariaDB [(none)]> exit
-Bye
-```
-*   Tạo user và role admin
-```
-openstack user create --domain default --password-prompt neutron
-User Password:
-Repeat User Password: 
+*   Cài đặt trên ndoe **controller**
 
-openstack role add --project service --user neutron admin
-```
-*   Tạo service và endpoints
-`openstack service create --name neutron --description "OpenStack Networking" network`
-`openstack endpoint create --region RegionOne network public http://controller:9696`
-`openstack endpoint create --region RegionOne network internal http://controller:9696`
-`openstack endpoint create --region RegionOne network admin http://controller:9696`
+*   Tạo DB cho placement:
+    ```
+    MariaDB [(none)]> CREATE DATABASE placement;
+    Query OK, 1 row affected (0.00 sec)
+    ```
+*   Cấp quyền truy cập cho placement
 
-*   Cài đặt Neutron package:`apt install neutron-server neutron-plugin-ml2 neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent neutron-metadata-agen`
+    ```
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'localhost' \
+        ->   IDENTIFIED BY 'PLACEMENT_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'%' \
+        ->   IDENTIFIED BY 'PLACEMENT_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    ```
+*   Chạy scripts ` . admin-openrc`
 
-* Tạo file cấu hình Neutron:
-```
-cat /etc/neutron/neutron.conf
-[DEFAULT]
-core_plugin = ml2
-service_plugins = router
-allow_overlapping_ips = True
-transport_url = rabbit://openstack:lxcpassword@controller
-auth_strategy = keystone
-notify_nova_on_port_status_changes = True
-notify_nova_on_port_data_changes = True
-[agent]
-root_helper = sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
-[cors]
-[cors.subdomain]
-[database]
-connection = mysql+pymysql://neutron:lxcpassword@controller/neutron
-[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = neutron
-password = lxcpassword
-[matchmaker_redis]
-[nova]
-auth_url = http://controller:35357
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-region_name = RegionOne
-project_name = service
-username = nova
-password = lxcpassword
-[oslo_concurrency]
-[oslo_messaging_amqp]
-[oslo_messaging_notifications]
-[oslo_messaging_rabbit]
-[oslo_messaging_zmq]
-[oslo_policy]
-[qos]
-[quotas]
-[ssl]
-```
-*   Định nghĩa loại mạng và extensions dùng cho Neutron
-```
-cat /etc/neutron/plugins/ml2/ml2_conf.ini[DEFAULT]
-[ml2]
-type_drivers = flat,vlan,vxlan
-tenant_network_types = vxlan
-mechanism_drivers = linuxbridge,l2population
-extension_drivers = port_security
-[ml2_type_flat]
-flat_networks = provider
-[ml2_type_geneve]
-[ml2_type_gre]
-[ml2_type_vlan]
-[ml2_type_vxlan]
-vni_ranges = 1:1000
-[securitygroup]
-enable_ipset = True
-```
+#### Tạo thông tin đăng nhập cho service:
+*   Tạo user placement
+    ` openstack user create --domain default --password-prompt placement`
+    ```
+    User Password:
+    Repeat User Password:
+    +---------------------+----------------------------------+
+    | Field               | Value                            |
+    +---------------------+----------------------------------+
+    | domain_id           | default                          |
+    | enabled             | True                             |
+    | id                  | fc946519434a4415866bc281389f8b38 |
+    | name                | placement                        |
+    | options             | {}                               |
+    | password_expires_at | None                             |
+    +---------------------+----------------------------------+
+    ```
+*   Thêm role admin cho user placement trên project service
+    `openstack role add --project service --user placement admin`
 
-*   ĐỊnh nghĩa interface sẽ gán cho bridge và IP mà brigde đc gasnws vào 
-```
-cat /etc/neutron/plugins/ml2/linuxbridge_agent.ini
-[DEFAULT]
-[agent]
-[linux_bridge]
-physical_interface_mappings = provider:eth1
-[securitygroup]
-enable_security_group = True
-firewall_driver =
-neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
-[vxlan]
-enable_vxlan = True
-local_ip = 10.208.132.45
-l2_population = True
-```
-*   Cấu hình Layer 3 Agent
-```
-cat /etc/neutron/l3_agent.ini
-[DEFAULT]
-interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
-[AGENT]
-```
 
-*   Cấu hình DHCP
-```
-cat /etc/neutron/dhcp_agent.ini
-[DEFAULT]
-interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriverdhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
-enable_isolated_metadata = True
-[AGENT]
-```
-*   Tạo file cấu hình cho metadata agents
-```
-cat /etc/neutron/metadata_agent.ini
-[DEFAULT]
-nova_metadata_ip = controller
-metadata_proxy_shared_secret = lxcpassword
-[AGENT]
-[cache]
-```
-*   Cập nhật cấu hình file cho Nova để bao gồm cả Neutron
-```
-cat /etc/nova/nova.conf
-[DEFAULT]
-dhcpbridge_flagfile=/etc/nova/nova.conf
-dhcpbridge=/usr/bin/nova-dhcpbridge
-log-dir=/var/log/nova
-state_path=/var/lib/nova
-force_dhcp_release=True
-verbose=True
-ec2_private_dns_show_ip=True
-enabled_apis=osapi_compute,metadata
-transport_url = rabbit://openstack:lxcpassword@controller
-auth_strategy = keystone
-my_ip = 10.208.132.45
-use_neutron = True
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
-compute_driver = libvirt.LibvirtDriver
-scheduler_default_filters = RetryFilter, AvailabilityZoneFilter,
-RamFilter, ComputeFilter, ComputeCapabilitiesFilter,
-ImagePropertiesFilter, ServerGroupAntiAffinityFilter,
-ServerGroupAffinityFilter
-[database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova
-[api_database]
-connection = mysql+pymysql://nova:lxcpassword@controller/nova_api
-[oslo_concurrency]
-lock_path = /var/lib/nova/tmp
-[libvirt]
-use_virtio_for_bridges=True
-[wsgi]
-api_paste_config=/etc/nova/api-paste.ini[keystone_authtoken]
-auth_uri = http://controller:5000
-auth_url = http://controller:35357
-memcached_servers = controller:11211
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-project_name = service
-username = nova
-password = lxcpassword
-[vnc]
-enabled = True
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
-novncproxy_base_url = http://controller:6080/vnc_auto.html
-[glance]
-api_servers = http://controller:9292
-[libvirt]
-virt_type = kvm
-[neutron]
-url = http://controller:9696
-auth_url = http://controller:35357
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-region_name = RegionOne
-project_name = service
-username = neutron
-password = lxcpassword
-service_metadata_proxy = True
-metadata_proxy_shared_secret = lxcpassword
-```
 
-*   Populate CSDL Neutron
-```
-su -s /bin/sh -c "neutron-db-manage --config-file
-/etc/neutron/neutron.conf --config-file
-/etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-INFO [alembic.runtime.migration] Context impl MySQLImpl.
-INFO [alembic.runtime.migration] Will assume non-transactional DDL.
-Running upgrade for neutron ...
-INFO [alembic.runtime.migration] Context impl MySQLImpl.
-INFO [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO [alembic.runtime.migration] Running upgrade -> kilo, kilo_initial  
-```
-*   Khởi động lại các dịch vụ của Nova nà Neutron
-```
-neutron-server
-neutron-linuxbridge-agent
-neutron-dhcp-agent
-neutron-metadata-agent
-neutron-l3-agent
-nova-api
-nova-compute
-```
-*   Tạo mạng  `openstack network create nat`
-*   Chỉ định DNS server, default gateway, subnet range: `openstack subnet create --network nat --dns-nameserver 8.8.8.8 --gateway 192.168.0.1 --subnet-range 192.168.0.0/24 nat`
-*   Cập nhật thông tin về subnet: `neutron net-update nat --router:external Updated network: nat`
-*   Tạo  software router: `openstack router create router`
+    
 
-*   Với quyền admin, gán subnet vào router vừa tạo
-```
-. rc.admin
-root@controller:~# neutron router-interface-add router nat
-Added interface 2e1e2fd3-1819-489b-a21f-7005862f9de7 to router router.
-```
 
-*   Liệt kê không gian tên mạng vừa tạo
-`ip netns`
-*   Liệt kê các port trên router `neutron router-port-list router`
-*   Liệt kê các mạng: `openstack network list`
+  
