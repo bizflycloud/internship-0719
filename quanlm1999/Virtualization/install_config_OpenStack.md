@@ -838,3 +838,373 @@ Password:
  *  Create the cell1 cell: `su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova`      1643b2dd-ed63-4364-bd11-9eb4560b2363
  *  Populate the nova database: `su -s /bin/sh -c "nova-manage db sync" nova`
  *  Kiểm tra cell0 và cell1 đã đăng kí đúng chưa: 
+    ```
+    +-------+--------------------------------------+------------------------------------+-------------------------------------------------+----------+
+    |  Name |                 UUID                 |           Transport URL            |               Database Connection               | Disabled |
+    +-------+--------------------------------------+------------------------------------+-------------------------------------------------+----------+
+    | cell0 | 00000000-0000-0000-0000-000000000000 |               none:/               | mysql+pymysql://nova:****@controller/nova_cell0 |  False   |
+    | cell1 | 1643b2dd-ed63-4364-bd11-9eb4560b2363 | rabbit://openstack:****@controller |    mysql+pymysql://nova:****@controller/nova    |  False   |
+    +-------+--------------------------------------+------------------------------------+-------------------------------------------------+----------+
+    ```
+####  Kết thúc bước cài đặt 
+*   Restart lại các dịch vụ: 
+    ```
+    service nova-api restart
+    service nova-consoleauth restart
+    service nova-scheduler restart
+    service nova-conductor restart
+    service nova-novncproxy restart 
+    ```
+
+# Tới đây, đã cài đặt xong nova trên controller node, tiếp tục cài đặt trên node compute1
+
+### Cài trên node **Compute1**
+*   Cài gói: `apt install nova-compute`
+*   Cấu hình file: `/etc/nova/nova.conf`
+    *   Trong `[DEFAULT]`
+    Thêm dòng: 
+        ```
+        transport_url = rabbit://openstack:RABBIT_PASS@controller
+        my_ip = 10.0.0.68
+        use_neutron = True
+        firewall_driver = nova.virt.firewall.NoopFirewallDriver
+        ```
+    *   Trong `[keystone_authtoken]`
+    Thêm dòng:
+        ```
+        auth_url = http://controller:5000/v3
+        memcached_servers = controller:11211
+        auth_type = password
+        project_domain_name = Default
+        user_domain_name = Default
+        project_name = service
+        username = nova
+        password = NOVA_PASS
+        ```
+    *   Trong `[api]`
+    Thêm dòng: `auth_strategy = keystone`
+    *   Trong `[vnc]`
+    Thêm dòng: 
+        ```
+         enabled = true
+        server_listen = 0.0.0.0
+        server_proxyclient_address = $my_ip
+        novncproxy_base_url = http://controller:6080/vnc_auto.html
+        ```
+    *   Trong `[glance]`
+    Thêm dòng: `api_servers = http://controller:9292`
+    *   Trong `[oslo_concurrency]`
+    Thêm dòng: `lock_path = /var/lib/nova/tmp`
+    *   Trong `[placement]`
+    Thêm dòng: 
+        ```
+        region_name = RegionOne
+        project_domain_name = Default
+        project_name = service
+        auth_type = password
+        user_domain_name = Default
+        auth_url = http://controller:5000/v3
+        username = placement
+        password = PLACEMENT_PASS
+        ```
+#### Kết thúc bước cài đặt
+*   Xác định xem compute1 node có hỗ trợ tăng tóc phần cứng ảo hóa hay không ( nếu > 1 là có)
+    `egrep -c '(vmx|svm)' /proc/cpuinfo`
+    4
+Vậy là có, nếu như không thì cấu hình file `/etc/nova/nova-compute.conf` chuyển  `virt_type = kvm` thành `virt_type = qemu`
+
+*   Restart the Compute service: `service nova-compute restart`
+### Bước tiếp theo sẽ tiến hành trên node **Controller**
+#### Thêm compute node vào trong database cell 
+*   Chạy scripts:  . admin-openrc
+*   Xác nhận xem có compute host trong database: `openstack compute service list --service nova-compute`
+    ```
+    +----+--------------+----------+------+---------+-------+----------------------------+
+    | ID | Binary       | Host     | Zone | Status  | State | Updated At                 |
+    +----+--------------+----------+------+---------+-------+----------------------------+
+    |  7 | nova-compute | compute1 | nova | enabled | up    | 2020-02-18T09:04:51.000000 |
+    +----+--------------+----------+------+---------+-------+----------------------------+
+    ```
+*   Discover compute hosts:
+    `su -s /bin/sh -c "nova-manage cell_v2 discover_hosts --verbose" nova`
+    ```
+    Skipping cell0 since it does not contain hosts.
+    Getting computes from cell 'cell1': 1643b2dd-ed63-4364-bd11-9eb4560b2363
+    Checking host mapping for compute host 'compute1': b8d2cf6b-fcc9-4075-b5e9-adc7917314ca
+    Creating host mapping for compute host 'compute1': b8d2cf6b-fcc9-4075-b5e9-adc7917314ca
+    Found 1 unmapped computes in cell: 1643b2dd-ed63-4364-bd11-9eb4560b2363 
+    ```
+####  Kiểm tra kết quả cài đặt nova.
+*   Chạy scripts: `. admin-openrc`
+*   Liệt kê ra các dịch vụ:
+    `openstack compute service list`
+    ```
+    +----+------------------+------------+----------+---------+-------+----------------------------+
+    | ID | Binary           | Host       | Zone     | Status  | State | Updated At                 |
+    +----+------------------+------------+----------+---------+-------+----------------------------+
+    |  1 | nova-scheduler   | controller | internal | enabled | up    | 2020-02-18T09:06:23.000000 |
+    |  2 | nova-consoleauth | controller | internal | enabled | up    | 2020-02-18T09:06:32.000000 |
+    |  3 | nova-conductor   | controller | internal | enabled | up    | 2020-02-18T09:06:24.000000 |
+    |  7 | nova-compute     | compute1   | nova     | enabled | up    | 2020-02-18T09:06:31.000000 |
+    +----+------------------+------------+----------+---------+-------+----------------------------+
+    ```
+    
+    `nova-status upgrade check`
+    ```
+    +--------------------------------+
+    | Upgrade Check Results          |
+    +--------------------------------+
+    | Check: Cells v2                |
+    | Result: Success                |
+    | Details: None                  |
+    +--------------------------------+
+    | Check: Placement API           |
+    | Result: Success                |
+    | Details: None                  |
+    +--------------------------------+
+    | Check: Ironic Flavor Migration |
+    | Result: Success                |
+    | Details: None                  |
+    +--------------------------------+
+    | Check: Request Spec Migration  |
+    | Result: Success                |
+    | Details: None                  |
+    +--------------------------------+
+    | Check: Console Auths           |
+    | Result: Success                |
+    | Details: None                  |
+    +--------------------------------+
+    ```
+
+## Cài đặt Networking service (NEUTRON)
+*   Cài đặt trên cả 2 node **controller** và **compute1**
+### Cài đặt trên node Controller.
+#### Tạo database cho neutron
+*   Truy cập vào MariaDB: `mysql`
+*   Tạo DB neutron: 
+    ```
+    MariaDB [(none)]> CREATE DATABASE neutron;
+    Query OK, 1 row affected (0.00 sec)
+    ```
+*   Cấp quyền truy cập vào neutron database
+    ```
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' \
+    ->   IDENTIFIED BY 'NEUTRON_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' \
+        ->   IDENTIFIED BY 'NEUTRON_DBPASS';
+    Query OK, 0 rows affected (0.01 sec)
+    ```
+*   Chạy scripts: `. admin-openrc`
+#### Tạo user, dịch vụ và các endpoint API cho neutron
+*   Tạo user neutron 
+    ` openstack user create --domain default --password-prompt neutron`
+    ```
+    User Password:
+    Repeat User Password:
+    +---------------------+----------------------------------+
+    | Field               | Value                            |
+    +---------------------+----------------------------------+
+    | domain_id           | default                          |
+    | enabled             | True                             |
+    | id                  | 8f4fbc0020314017854169d4fb6d3f6d |
+    | name                | neutron                          |
+    | options             | {}                               |
+    | password_expires_at | None                             |
+    +---------------------+----------------------------------+
+    ```
+*   Gán role admin cho tài khoản neutron
+    `openstack role add --project service --user neutron admin`
+*   Tạo dịch vụ tên là neutron
+    ` openstack service create --name neutron --description "OpenStack Networking" network`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | OpenStack Networking             |
+    | enabled     | True                             |
+    | id          | 680bb3c3b38d4ca3b88c5b52bb48fa63 |
+    | name        | neutron                          |
+    | type        | network                          |
+    +-------------+----------------------------------+
+    ```
+*   Tạo API endpoint cho dịch vụ neutron
+    ` openstack endpoint create --region RegionOne network public http://controller:9696`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 3e5b3889796c48f9b543aa988fb20d82 |
+    | interface    | public                           |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 680bb3c3b38d4ca3b88c5b52bb48fa63 |
+    | service_name | neutron                          |
+    | service_type | network                          |
+    | url          | http://controller:9696           |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne  network internal http://controller:9696`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 837e540eeda34622952dca8d7e1a7971 |
+    | interface    | internal                         |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 680bb3c3b38d4ca3b88c5b52bb48fa63 |
+    | service_name | neutron                          |
+    | service_type | network                          |
+    | url          | http://controller:9696           |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne network admin http://controller:9696`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 891e8ec3c69842fd9cbd577a83fddefe |
+    | interface    | admin                            |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | 680bb3c3b38d4ca3b88c5b52bb48fa63 |
+    | service_name | neutron                          |
+    | service_type | network                          |
+    | url          | http://controller:9696           |
+    +--------------+----------------------------------+
+    ```
+#### Cài đặt và cấu hình neutron
+*   Sử dụng **self-service network**
+*   Cài đặt gói: `apt install neutron-server neutron-plugin-ml2 neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent neutron-metadata-agent`
+*   Cấu hình file: `/etc/neutron/neutron.conf`
+    *  Trong  `[database]`
+    Comment dòng:`connection = sqlite:////var/lib/neutron/neutron.sqlite`
+    Thêm dòng: `mysql+pymysql://neutron:NEUTRON_DBPASS@controller/neutron`
+    * Trong `[DEFAULT]`
+    Thêm dòng(nếu dòng nào có rồi k cần thêm):
+        ```
+        core_plugin = ml2
+        service_plugins = router
+        allow_overlapping_ips = true
+        transport_url = rabbit://openstack:RABBIT_PASS@controller
+        auth_strategy = keystone
+        notify_nova_on_port_status_changes = true
+        notify_nova_on_port_data_changes = true
+        ```
+    *   Trong `[keystone_authtoken]`
+    Thêm dòng: 
+    ```
+    www_authenticate_uri = http://controller:5000
+    auth_url = http://controller:5000
+    memcached_servers = controller:11211
+    auth_type = password
+    project_domain_name = default
+    user_domain_name = default
+    project_name = service
+    username = neutron
+    password = NEUTRON_PASS
+    ```
+    *   Trong `[nova]`
+    Thêm dòng: 
+    ```
+    auth_url = http://controller:5000
+    auth_type = password
+    project_domain_name = default
+    user_domain_name = default
+    region_name = RegionOne
+    project_name = service
+    username = nova
+    password = NOVA_PASS
+    ```
+    *   Trong `[oslo_concurrency]`
+    Thêm dòng: `lock_path = /var/lib/neutron/tmp`
+
+*   Cài đặt và cấu hình plug-in Modular Layer 2 (ML2) file: `/etc/neutron/plugins/ml2/ml2_conf.ini`
+    *   Trong `[ml2] `
+    Thêm dòng:
+        ```
+        type_drivers = flat,vlan,vxlan
+        tenant_network_types = vxlan
+        mechanism_drivers = linuxbridge,l2population
+        extension_drivers = port_security
+        ```
+    *   Trong `[ml2_type_flat]`
+    Thêm dòng:
+    `flat_networks = provider`
+
+    *   Trong `[ml2_type_vxlan]`
+    Thêm dòng:
+    `vni_ranges = 1:1000`
+
+    *   Trong ` [securitygroup]`
+    Thêm dòng: 
+    `enable_ipset = true`
+
+*   Cấu hình linuxbridge agent: file `/etc/neutron/plugins/ml2/linuxbridge_agent.ini`
+*   Trong `[linux_bridge]`
+    Thêm dòng:
+    `physical_interface_mappings = provider:ens3`
+
+*   Trong `[vxlan]`
+    Thêm dòng: 
+    ```
+    enable_vxlan = true
+    local_ip = 10.0.0.73
+    l2_population = true
+    ```
+    
+*   Trong `[securitygroup] `
+    Thêm dòng: 
+    ```
+    enable_security_group = true
+    firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+    ```
+* Cấu hình L3 Agent file: ` /etc/neutron/l3_agent.ini`
+    *   Trong `[DEFAULT]`
+    Thêm dòng: 
+    `interface_driver = linuxbridge`
+
+*   Cấu hình DHCP Agent file ` /etc/neutron/dhcp_agent.ini`
+    *   Trong `[DEFAULT] `
+    Thêm dòng:
+        ```
+        interface_driver = linuxbridge
+        dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+        enable_isolated_metadata = true
+        ```
+*   Cấu hình metadata agent file `/etc/neutron/metadata_agent.ini`
+*   Trong `[DEFAULT]`
+    Thêm dòng:
+    ```
+    nova_metadata_host = controller
+    metadata_proxy_shared_secret = METADATA_SECRET
+    ``` 
+#### Cấu hình compute Service sử dụng Network service 
+File cấu hình: ` /etc/nova/nova.conf `
+*   Trong `[neutron]`
+    Thêm dòng:
+    ```
+    url = http://controller:9696
+    auth_url = http://controller:5000
+    auth_type = password
+    project_domain_name = default
+    user_domain_name = default
+    region_name = RegionOne
+    project_name = service
+    username = neutron
+    password = NEUTRON_PASS
+    service_metadata_proxy = true
+    metadata_proxy_shared_secret = METADATA_SECRET
+    ```
+
+####  Đồng bộ database cho neutron
+`su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
+  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron`
+
+
+
