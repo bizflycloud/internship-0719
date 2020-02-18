@@ -557,10 +557,284 @@ Password:
     ```
 *   Thêm role admin cho user placement trên project service
     `openstack role add --project service --user placement admin`
+*   Tạo serivce Placement: 
+    `openstack service create --name placement --description "Placement API" placement`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | Placement API                    |
+    | enabled     | True                             |
+    | id          | ea21c40499724bbe8549baaaf02bd3ce |
+    | name        | placement                        |
+    | type        | placement                        |
+    +-------------+----------------------------------+
+    ```
+*   Tạo các API endpoint cho dịch vụ placement:
+    `openstack endpoint create --region RegionOne placement public http://controller:8778`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | fe16ade6e8c4438e9e57745ff6f5c627 |
+    | interface    | public                           |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | ea21c40499724bbe8549baaaf02bd3ce |
+    | service_name | placement                        |
+    | service_type | placement                        |
+    | url          | http://controller:8778           |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne placement internal http://controller:8778`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 05ad3211214f4c4ca231660b736ef2ce |
+    | interface    | internal                         |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | ea21c40499724bbe8549baaaf02bd3ce |
+    | service_name | placement                        |
+    | service_type | placement                        |
+    | url          | http://controller:8778           |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne placement admin http://controller:8778`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 5398087d23394e1da083aac41c30eefa |
+    | interface    | admin                            |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | ea21c40499724bbe8549baaaf02bd3ce |
+    | service_name | placement                        |
+    | service_type | placement                        |
+    | url          | http://controller:8778           |
+    +--------------+----------------------------------+
+    ```
 
+####  Cài đặt và cấu hình placement
+*   Cài đặt gói: `apt install placement-api`
+*   Cấu hình file: `/etc/placement/placement.conf`
+    * Trong `[placement_database]`
+    Comment dòng: `#connection = sqlite:////var/lib/placement/placement.sqlite`
+    Thêm dòng: `connection = mysql+pymysql://placement:PLACEMENT_DBPASS@controller/placement`
+    *   Trong `[api]`
+    Thêm dòng: `auth_strategy = keystone`
+    *   Trong `[keystone_authtoken]`
+    Thêm dòng: 
+        ```
+        auth_url = http://controller:5000/v3
+        memcached_servers = controller:11211
+        auth_type = password
+        project_domain_name = Default
+        user_domain_name = Default
+        project_name = service
+        username = placement
+        password = PLACEMENT_PASS
+        ```
+*    Import database 
+    `su -s /bin/sh -c "placement-manage db sync" placement`
 
-
+#### Restart apache
+    `service apache restart`
     
+#### Kiểm chứng việc cài đặt placement
+*   Chạy scripts: `. admin-openrc`
+*   Thực hiển kiểm tra trạng thái đảm bảo mọi thứ vẫn hoạt động đúng: 
+    `placement-status upgrade check`
+    ```
+    +----------------------------------+
+    | Upgrade Check Results            |
+    +----------------------------------+
+    | Check: Missing Root Provider IDs |
+    | Result: Success                  |
+    | Details: None                    |
+    +----------------------------------+
+    | Check: Incomplete Consumers      |
+    | Result: Success                  |
+    | Details: None                    |
+    +----------------------------------+
+    ```
+    
+## Cài dịch vụ Compute (Nova)
+* cài trên cả node `controller` và `compute1`
+### Cài trên node **Controller**
+#### Tạo database cho nova
+*   Truy cập vào MariaDB: `mysql`
+* Tạo database nova_api, nova, và nova_cell0:
+    ```
+    MariaDB [(none)]>  CREATE DATABASE nova_api;
+    Query OK, 1 row affected (0.00 sec)
+    
+    MariaDB [(none)]> CREATE DATABASE nova;
+    Query OK, 1 row affected (0.00 sec)
+    
+    MariaDB [(none)]>  CREATE DATABASE nova_cell0;
+    Query OK, 1 row affected (0.00 sec)
+    ```
+*   Cấp quyền truy cập database:
+    ```
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'localhost' \
+    ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'%' \
+        ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' \
+        ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' \
+        ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.00 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_cell0.* TO 'nova'@'localhost' \
+        ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.01 sec)
+    
+    MariaDB [(none)]> GRANT ALL PRIVILEGES ON nova_cell0.* TO 'nova'@'%' \
+        ->   IDENTIFIED BY 'NOVA_DBPASS';
+    Query OK, 0 rows affected (0.01 sec)
+    ```
+*   Chạy scripts: `. admin-openrc`
+####   Tạo thông tin đăng nhập cho compute service
+*   Tạo user nova: 
+    `openstack user create --domain default --password-prompt nova`
+    ```
+    User Password:
+    Repeat User Password:
+    +---------------------+----------------------------------+
+    | Field               | Value                            |
+    +---------------------+----------------------------------+
+    | domain_id           | default                          |
+    | enabled             | True                             |
+    | id                  | ef6e4bf972d74cd79f2dd5d28cf39972 |
+    | name                | nova                             |
+    | options             | {}                               |
+    | password_expires_at | None                             |
+    +---------------------+----------------------------------+
+    ```
 
+*   Thêm role admin cho user nova trên project service:
+    `openstack role add --project service --user nova admin`
+*   Tạo dịch vụ nova:
+    `openstack service create --name nova --description "OpenStack Compute" compute`
+    ```
+    +-------------+----------------------------------+
+    | Field       | Value                            |
+    +-------------+----------------------------------+
+    | description | OpenStack Compute                |
+    | enabled     | True                             |
+    | id          | a72d6c859589467292947ccfc9c81520 |
+    | name        | nova                             |
+    | type        | compute                          |
+    +-------------+----------------------------------+
+    ```
 
-  
+*   Tạo các API endpoint cho dịch vụ compute
+`openstack endpoint create --region RegionOne compute public http://controller:8774/v2.1`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | f7a81c39072f4b159b50963462bea0ea |
+    | interface    | public                           |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | a72d6c859589467292947ccfc9c81520 |
+    | service_name | nova                             |
+    | service_type | compute                          |
+    | url          | http://controller:8774/v2.1      |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne compute internal http://controller:8774/v2.1`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 1c77cb897a8a4dce904d35e353ada4e9 |
+    | interface    | internal                         |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | a72d6c859589467292947ccfc9c81520 |
+    | service_name | nova                             |
+    | service_type | compute                          |
+    | url          | http://controller:8774/v2.1      |
+    +--------------+----------------------------------+
+    ```
+    `openstack endpoint create --region RegionOne compute admin http://controller:8774/v2.1`
+    ```
+    +--------------+----------------------------------+
+    | Field        | Value                            |
+    +--------------+----------------------------------+
+    | enabled      | True                             |
+    | id           | 3e106d75e0184b5f8844dff7acd3bac6 |
+    | interface    | admin                            |
+    | region       | RegionOne                        |
+    | region_id    | RegionOne                        |
+    | service_id   | a72d6c859589467292947ccfc9c81520 |
+    | service_name | nova                             |
+    | service_type | compute                          |
+    | url          | http://controller:8774/v2.1      |
+    +--------------+----------------------------------+
+    ```
+####  Cài đặt và cấu hình Nova
+*   Cài đặt gói: 
+    `apt install nova-api nova-conductor nova-consoleauth nova-novncproxy nova-scheduler`
+*   Cấu hình file: `/etc/nova/nova.conf`
+    *   Trong `[api_database]`
+    Comment: `#connection = sqlite:////var/lib/nova/nova_api.sqlite`
+    Thêm dòng: `connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova_api`
+    *   Trong `[database]`
+    Comment: `#connection = sqlite:////var/lib/nova/nova.sqlite`
+    Thêm dòng: `connection = mysql+pymysql://nova:NOVA_DBPASS@controller/nova`
+    *   Trong `[DEFAULT]`
+    Thêm dòng: 
+        ```
+        use_neutron = True
+        firewall_driver = nova.virt.firewall.NoopFirewallDriver
+        my_ip = 10.10.10.73
+        transport_url = rabbit://openstack:Welcome123@controller
+        ```
+    *   Trong [vnc]:
+    Thêm dòng
+        ```
+        enabled = true
+        # ...
+        vncserver_listen = $my_ip
+        vncserver_proxyclient_address = $my_ip
+         ```
+    *   Trong [glance]
+    Thêm dòng :`api_servers = http://controller:9292`
+    *   Trong [oslo_concurrency]
+    Thêm dòng: `lock_path = /var/lib/nova/tmp`
+    *   Trong [placement]
+    Thêm dòng: 
+        ```
+        region_name = RegionOne
+        project_domain_name = Default
+        project_name = service
+        auth_type = password
+        user_domain_name = Default
+        auth_url = http://controller:5000/v3
+        username = placement
+        password = PLACEMENT_PASS
+        ```
+ #### Import database cho nova
+ *  Populate the nova-api database: `su -s /bin/sh -c "nova-manage api_db sync" nova`
+ *  Register the cell0 database: `su -s /bin/sh -c "nova-manage cell_v2 map_cell0" nova`
+ *  Create the cell1 cell: `su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova`      1643b2dd-ed63-4364-bd11-9eb4560b2363
+ *  Populate the nova database: `su -s /bin/sh -c "nova-manage db sync" nova`
+ *  Kiểm tra cell0 và cell1 đã đăng kí đúng chưa: 
