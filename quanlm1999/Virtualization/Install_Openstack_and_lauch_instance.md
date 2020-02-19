@@ -1492,3 +1492,58 @@ P/s: truy cập vào link, nếu như k sửa file host cho tên miền controll
     Warning: Permanently added '192.168.122.235' (ECDSA) to the list of known hosts.
     $ 
     ```
+    
+*   Vì máy ảo vừa tạo ở được tạo trên node compute1 nên ở node compute1, có thể dùng libvirt để theo dõi 
+    ```
+    root@compute1:~# virsh list --all
+     Id   Name                State
+    -----------------------------------
+     2    instance-00000002   running
+    ```
+
+#### Tắt máy ảo
+*   Liệt kê máy ảo đang hoạt động
+    `openstack server list`
+    ```
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | ID                                   | Name                 | Status | Networks                 | Image  | Flavor  |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | d1efeab5-bb3b-46d1-b1d1-6c8c7abacb78 | selfservice-instance | ACTIVE | provider=192.168.122.235 | cirros | m1.nano |
+    | 199e8c57-71d4-4c8b-80a8-89020a7bc29f | selfservice-instance | ACTIVE |                          | cirros | m1.nano |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    ```
+*   Tắt máy ảo: `openstack server stop 199e8c57-71d4-4c8b-80a8-89020a7bc29f`
+*   Kiểm tra trạng thái: 
+    `openstack server list`
+    ```
+    +--------------------------------------+----------------------+---------+--------------------------+--------+---------+
+    | ID                                   | Name                 | Status  | Networks                 | Image  | Flavor  |
+    +--------------------------------------+----------------------+---------+--------------------------+--------+---------+
+    | d1efeab5-bb3b-46d1-b1d1-6c8c7abacb78 | selfservice-instance | ACTIVE  | provider=192.168.122.235 | cirros | m1.nano |
+    | 199e8c57-71d4-4c8b-80a8-89020a7bc29f | selfservice-instance | SHUTOFF |                          | cirros | m1.nano |
+    +--------------------------------------+----------------------+---------+--------------------------+--------+---------+
+    ```
+    Ta có thể thấy máy ảo đã tắt
+*   Bật lại sử dụng lệnh:  `openstack server start 199e8c57-71d4-4c8b-80a8-89020a7bc29f`
+*   Kiểm tra trạng thái: `openstack server list`
+    ```
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | ID                                   | Name                 | Status | Networks                 | Image  | Flavor  |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | d1efeab5-bb3b-46d1-b1d1-6c8c7abacb78 | selfservice-instance | ACTIVE | provider=192.168.122.235 | cirros | m1.nano |
+    | 199e8c57-71d4-4c8b-80a8-89020a7bc29f | selfservice-instance | ACTIVE |                          | cirros | m1.nano |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    ```
+#### Xóa máy ảo
+*   Xóa máy ảo sử dụng lệnh:
+    `openstack server delete 199e8c57-71d4-4c8b-80a8-89020a7bc29f`
+*   Kiểm tra
+    `openstack server list`
+    ```
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | ID                                   | Name                 | Status | Networks                 | Image  | Flavor  |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    | d1efeab5-bb3b-46d1-b1d1-6c8c7abacb78 | selfservice-instance | ACTIVE | provider=192.168.122.235 | cirros | m1.nano |
+    +--------------------------------------+----------------------+--------+--------------------------+--------+---------+
+    ```
+    Ta đã thấy máy ảo bị xóa.
