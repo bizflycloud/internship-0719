@@ -1,5 +1,5 @@
 # Horizon
-Horizon là dashboard của openstack 
+Horizon là dashboard của openstack.
 
 ## Cài đặt
 
