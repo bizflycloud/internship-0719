@@ -4,6 +4,7 @@
 
 ## Cài đặt ceph 3 node
 https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Storage/Ceph_storage.md
+
 ## Tích hợp ceph với openstack
 Trên node ceph1 tạo 3 pool cho Glance, Cinder, Nova sử dụng:
 ```
