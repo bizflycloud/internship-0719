@@ -426,8 +426,8 @@ Kiểm tra:
 root@ceph1:~# rbd -p images list
 ee2c580a-775c-41a8-9129-f2bbf2776144
 
-root@ceph1:~# rbd -p images list
-ee2c580a-775c-41a8-9129-f2bbf2776144
+root@ceph1:~# rbd -p volumes list
+volume-6bab153d-ca84-426a-86a1-d65ceadf645b
 
 root@ceph1:~# rbd -p vms list
 d82aff21-0310-40b0-bae0-fb12dd64688a_disk
