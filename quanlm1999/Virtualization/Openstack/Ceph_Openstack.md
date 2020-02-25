@@ -420,3 +420,15 @@ root@controller:~# openstack volume list
 ```
 Kiểm tra: 
 ![](https://raw.githubusercontent.com/bizflycloud/internship-0719/master/quanlm1999/pic/Screenshot%20from%202020-02-25%2015-01-39.png)
+
+
+```
+root@ceph1:~# rbd -p images list
+ee2c580a-775c-41a8-9129-f2bbf2776144
+
+root@ceph1:~# rbd -p images list
+ee2c580a-775c-41a8-9129-f2bbf2776144
+
+root@ceph1:~# rbd -p vms list
+d82aff21-0310-40b0-bae0-fb12dd64688a_disk
+```
