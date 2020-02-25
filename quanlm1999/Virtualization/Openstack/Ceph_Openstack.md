@@ -2,7 +2,8 @@
 ## Mô hình: 
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/Ceph_openstack.jpg)
 
-#### Cài đặt ceph 3 node
+## Cài đặt ceph 3 node
+https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Storage/Ceph_storage.md
 ## Tích hợp ceph với openstack
 Trên node ceph1 tạo 3 pool cho Glance, Cinder, Nova sử dụng:
 ```
