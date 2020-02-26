@@ -23,9 +23,10 @@ brqf1f60d52-5a		8000.b61ea1bccad8	no		tap232c0493-3a
 
 **Kết nối khác node khác mạng** 
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_6.jpg)
-```
+
 **Kết nối ra Internet**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_2.jpg)
+
 *   Gói tin đi đến brqhttps://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_3.jpg
 *   gói tin đi qua VXLAN tunnel
 *   Đén interface `tap` gói tin được đưa đến interface `qr` của qrouter namspace,
@@ -53,8 +54,8 @@ root@controller:~# ip netns exec qrouter-c798c2f8-6a21-4c82-8b65-d269a4f1eff8 ip
        valid_lft forever preferred_lft forever
     inet6 fe80::f816:3eff:fea9:a74e/64 scope link 
        valid_lft forever preferred_lft forever
-
 ```
+
 **Cấp phát DHCP**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_3.jpg)
 *   Gói tin đi theo đường tương tự, nhưng sau khi đến  `tap` của `brq`  nối với `ens4`, gói tin được đẩy đến `ns` của qDHCP namcespace.
