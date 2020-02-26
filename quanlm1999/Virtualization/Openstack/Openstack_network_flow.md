@@ -18,7 +18,7 @@ brqf1f60d52-5a		8000.b61ea1bccad8	no		tap232c0493-3a
 **Kết nối cùng node khác mạng:**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_4.jpg)
 
-**Kết nối cùng node cùng mạng**
+**Kết nối khác node cùng mạng**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_5.jpg)
 
 **Kết nối khác node khác mạng** 
