@@ -84,6 +84,7 @@ nobody    5839     1  0 07:12 ?        00:00:00 dnsmasq --no-hosts --no-resolv -
 nobody    5852     1  0 07:12 ?        00:00:00 dnsmasq --no-hosts --no-resolv --pid-file=/var/lib/neutron/dhcp/f1f60d52-5ace-4f28-a229-d0020f5da4d6/pid --dhcp-hostsfile=/var/lib/neutron/dhcp/f1f60d52-5ace-4f28-a229-d0020f5da4d6/host --addn-hosts=/var/lib/neutron/dhcp/f1f60d52-5ace-4f28-a229-d0020f5da4d6/addn_hosts --dhcp-optsfile=/var/lib/neutron/dhcp/f1f60d52-5ace-4f28-a229-d0020f5da4d6/opts --dhcp-leasefile=/var/lib/neutron/dhcp/f1f60d52-5ace-4f28-a229-d0020f5da4d6/leases --dhcp-match=set:ipxe,175 --dhcp-userclass=set:ipxe6,iPXE --local-service --bind-dynamic --dhcp-range=set:subnet-7bd43d34-da5d-45d0-9ecb-46c8aeb35b19,10.0.0.0,static,255.255.255.0,86400s --dhcp-option-force=option:mtu,1450 --dhcp-lease-max=256 --conf-file= --domain=openstacklocal
 root      9154  6564  0 09:06 pts/1    00:00:00 grep --color=auto dns
 ```
+Trên mỗi subnet tạo ra thì có 1 qDHCP namespace cho n
 
 ## Openvswitch
 #### Thành phần:
