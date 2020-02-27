@@ -115,4 +115,22 @@ qvoa71ca823-6b@qvba71ca823-6b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc 
 
 **DHCP**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_5.jpg)
-Trên qDHCP namespace khi sử dụng OVS sử dụng port tap thay vì port ns như trên LB
+Trên qDHCP namespace khi sử dụng OVS sử dụng port `tap` thay vì port `ns` như trên LB
+```
+root@controller:~# ip netns exec qdhcp-edeafb45-23ce-4fde-9ae9-be0dd9651886 ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+11: tap1984f1bd-49: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/ether fa:16:3e:be:30:da brd ff:ff:ff:ff:ff:ff
+    inet 10.0.0.2/24 brd 10.0.0.255 scope global tap1984f1bd-49
+       valid_lft forever preferred_lft forever
+    inet 169.254.169.254/16 brd 169.254.255.255 scope global tap1984f1bd-49
+       valid_lft forever preferred_lft forever
+    inet6 fe80::f816:3eff:febe:30da/64 scope link 
+       valid_lft forever preferred_lft forever
+
+```
