@@ -115,3 +115,4 @@ qvoa71ca823-6b@qvba71ca823-6b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc 
 
 **DHCP**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_5.jpg)
+Trên qDHCP namespace khi sử dụng OVS sử dụng port tap thay vì port ns như trên LB
