@@ -1,4 +1,4 @@
-#   Openstack network componet
+#   Openstack network componet and packet flow
 ## Linux bridge
 #### Thành phần: 
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack.jpg)
