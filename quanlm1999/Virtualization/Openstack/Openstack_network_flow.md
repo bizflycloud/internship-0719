@@ -101,6 +101,59 @@ qvoa71ca823-6b@qvba71ca823-6b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc 
        valid_lft forever preferred_lft forever
 
 ```
+Trên node manager
+```
+root@controller:~# ovs-vsctl show
+1097b8a6-f7a6-463b-8e78-ab6278c9e436
+    Manager "ptcp:6640:127.0.0.1"
+        is_connected: true
+    Bridge br-provider
+        Controller "tcp:127.0.0.1:6633"
+            is_connected: true
+        fail_mode: secure
+        Port phy-br-provider
+            Interface phy-br-provider
+                type: patch
+                options: {peer=int-br-provider}
+        Port br-provider
+            Interface br-provider
+                type: internal
+        Port "ens4"
+            Interface "ens4"
+    Bridge br-int
+        Controller "tcp:127.0.0.1:6633"
+            is_connected: true
+        fail_mode: secure
+        Port "tap1984f1bd-49"
+            tag: 1
+            Interface "tap1984f1bd-49"
+                type: internal
+        Port patch-tun
+            Interface patch-tun
+                type: patch
+                options: {peer=patch-int}
+        Port br-int
+            Interface br-int
+                type: internal
+        Port int-br-provider
+            Interface int-br-provider
+                type: patch
+                options: {peer=phy-br-provider}
+    Bridge br-tun
+        Controller "tcp:127.0.0.1:6633"
+            is_connected: true
+        fail_mode: secure
+        Port patch-int
+            Interface patch-int
+                type: patch
+                options: {peer=patch-tun}
+        Port br-tun
+            Interface br-tun
+                type: internal
+    ovs_version: "2.11.0"
+
+```
+
 #### Packet flow
 **Cùng node cùng mạng** 
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_1.jpg)
