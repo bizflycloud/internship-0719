@@ -88,12 +88,25 @@ root      9154  6564  0 09:06 pts/1    00:00:00 grep --color=auto dns
 ## Openvswitch
 #### Thành phần:
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs.jpg)
+Mỗi VM sẽ có cặp qvo và qvb đi với nh
+```
+qvoa71ca823-6b@qvba71ca823-6b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master ovs-system state UP group default qlen 1000
+    link/ether fe:9e:cd:5b:50:67 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::fc9e:cdff:fe5b:5067/64 scope link 
+       valid_lft forever preferred_lft forever
+17: qvba71ca823-6b@qvoa71ca823-6b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master qbra71ca823-6b state UP group default qlen 1000
+    link/ether a2:31:c5:85:29:fb brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::a031:c5ff:fe85:29fb/64 scope link 
+       valid_lft forever preferred_lft forever
 
+```
 #### Packet flow
 **Cùng node cùng mạng** 
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_1.jpg)
+
 **Khác node cùng mạng**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_4.jpg)
+
 **Internet**
 ![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_2.jpg)
 
