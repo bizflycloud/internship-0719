@@ -86,3 +86,19 @@ root      9154  6564  0 09:06 pts/1    00:00:00 grep --color=auto dns
 ```
 
 ## Openvswitch
+#### Thành phần:
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs.jpg)
+
+#### Packet flow
+**Cùng node cùng mạng** 
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_1.jpg)
+**Khác node cùng mạng**
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_4.jpg)
+**Internet**
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_2.jpg)
+
+**Khác node khác mạng** 
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_3.jpg)
+
+**DHCP**
+![](https://raw.githubusercontent.com/lmq1999/Mytest/master/network_flow_openstack_ovs_5.jpg)
