@@ -380,5 +380,127 @@ https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualiza
 
 #### Cấu hình HA Network Openstack.
 **Cấu hình VRRP trên 3 node controller**
+*   **Controller1** 
+    *   Cấu hình Neutron theo hướng dẫn ở trên.
+    *   Trong file `/etc/neutron/neutron.conf` kích hoạt VRRP:
+        ```
+        [DEFAULT]
+        l3_ha = True
+        ```
+*   **Controller2**
+    *   Cấu hình tương tự như trên, có thêm vào `/etc/neutron/neutron.conf`
+        ```
+        [DEFAULT]
+        l3_ha = True
+        ```
+*   **Controller3**
+    *   Cấu hình tương tự
+
+*   Khi cấu hình xong, tạo self-service network, add Router vào, trên mỗi node ta đều thấy 1 router: 
+    ```
+    root@quanlm-controller-1:~# ip netns
+    qrouter-b6206312-878e-497c-8ef7-eb384f8add96
+    
+    root@quanlm-controller-2:~# ip netns
+    qrouter-b6206312-878e-497c-8ef7-eb384f8add96
+    
+    root@quanlm-controller-3:~# ip netns
+    qrouter-b6206312-878e-497c-8ef7-eb384f8add96
+    ```
+*   Sẽ có 1 mạng tự được tạo ra để quản lý HA router: 
+    ```
+    openstack network list
+    +--------------------------------------+----------------------------------------------------+--------------------------------------+
+    | ID                                   | Name                                               | Subnets                              |
+    +--------------------------------------+----------------------------------------------------+--------------------------------------+
+    | 1b8519c1-59c4-415c-9da2-a67d53c68455 | HA network tenant f986edf55ae945e2bef3cb4bfd589928 | 6843314a-1e76-4cc9-94f5-c64b7a39364a |
+    +--------------------------------------+----------------------------------------------------+--------------------------------------+
+    ```
+
+*   Ip addr show router
+    *   Controller1:
+    ```
+        # ip netns exec qrouter-b6206312-878e-497c-8ef7-eb384f8add96 ip addr show
+    1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+        inet 127.0.0.1/8 scope host lo
+           valid_lft forever preferred_lft forever
+        inet6 ::1/128 scope host
+           valid_lft forever preferred_lft forever
+    2: ha-eb820380-40@if21: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:78:ba:99 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet 169.254.192.1/18 brd 169.254.255.255 scope global ha-eb820380-40
+           valid_lft forever preferred_lft forever
+        inet 169.254.0.1/24 scope global ha-eb820380-40
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:fe78:ba99/64 scope link
+           valid_lft forever preferred_lft forever
+    3: qr-da3504ad-ba@if24: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:dc:8e:a8 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet 192.168.2.1/24 scope global qr-da3504ad-ba
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:fedc:8ea8/64 scope link
+           valid_lft forever preferred_lft forever
+    4: qr-442e36eb-fc@if27: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:ee:c8:41 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet6 fd00:192:168:2::1/64 scope global nodad
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:feee:c841/64 scope link
+           valid_lft forever preferred_lft forever
+    5: qg-33fedbc5-43@if28: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:03:1a:f6 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet 203.0.113.21/24 scope global qg-33fedbc5-43
+           valid_lft forever preferred_lft forever
+        inet6 fd00:203:0:113::21/64 scope global nodad
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:fe03:1af6/64 scope link
+           valid_lft forever preferred_lft forever
+    ```
+    *   Controller2:
+    ```
+        # ip netns exec qrouter-b6206312-878e-497c-8ef7-eb384f8add96 ip addr show
+    1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+        inet 127.0.0.1/8 scope host lo
+           valid_lft forever preferred_lft forever
+        inet6 ::1/128 scope host
+           valid_lft forever preferred_lft forever
+    2: ha-7a7ce184-36@if8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:16:59:84 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet 169.254.192.2/18 brd 169.254.255.255 scope global ha-7a7ce184-36
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:fe16:5984/64 scope link
+           valid_lft forever preferred_lft forever
+    3: qr-da3504ad-ba@if11: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:dc:8e:a8 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    4: qr-442e36eb-fc@if14: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+    5: qg-33fedbc5-43@if15: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:03:1a:f6 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    ```
+    *   Controller3:
+    ```
+        # ip netns exec qrouter-b6206312-878e-497c-8ef7-eb384f8add96 ip addr show
+    1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+        inet 127.0.0.1/8 scope host lo
+           valid_lft forever preferred_lft forever
+        inet6 ::1/128 scope host
+           valid_lft forever preferred_lft forever
+    2: ha-7a1e7ec84-40@if21: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:16:59:84 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+        inet 169.254.192.2/18 brd 169.254.255.255 scope global ha-7a7ce184-36
+           valid_lft forever preferred_lft forever
+        inet6 fe80::f816:3eff:fe16:5984/64 scope link
+           valid_lft forever preferred_lft forever
+    3: qr-da3504ad-ba@if11: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:dc:8e:a8 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    4: qr-442e36eb-fc@if14: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default qlen 1000
+    5: qg-33fedbc5-43@if15: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+        link/ether fa:16:3e:03:1a:f6 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    ```
+** Vậy trong trường hợp node controller1 chết, thì router ở controller2 sẽ hoạt động thay thế**
+
+**Cấu hình HA DHCP**
 
 
+    
