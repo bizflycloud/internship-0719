@@ -548,7 +548,9 @@ root@controller:~# nova host-evacuate --target_host compute2 compute1
 ## Bổ sung thêm cinder và ceph 
 ![](https://raw.githubusercontent.com/lmq1999/123/master/Openstack_HA_2.jpg)
 **Cấu hình cinder và ceph như theo 2 hướng dẫn sau:**
+
 **Cinder**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Openstack_cinder.md
+
 **Ceph**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Ceph_Openstack.md
 
 *   **Chú ý** 
