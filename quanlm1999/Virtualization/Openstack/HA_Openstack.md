@@ -501,6 +501,58 @@ https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualiza
 ** Vậy trong trường hợp node controller1 chết, thì router ở controller2 sẽ hoạt động thay thế**
 
 **Cấu hình HA DHCP**
+*   Đảm bảo cả 3 node controller đều có **DHCP Agent đã được cấu hình** như hướng dẫn network ở trên.
+*   Trong file: `/etc/neutron/neutron.conf`, cấu hình `dhcp_agents_per_network = $` $ = số agent DHCP
+Khi tạo network, trên cả 3 node controller sẽ đều có 1 DHCP agent cấp IP cho :
+```
+root@quanlm-controller-1:~# ip netns
+qdhcp-b9c5383f-dd16-4020-a11a-e4991b6cd182 (id: 0)
 
+root@quanlm-controller-2:~# ip netns
+qdhcp-b9c5383f-dd16-4020-a11a-e4991b6cd182 (id: 0)
 
-    
+root@quanlm-controller-3:~# ip netns
+qdhcp-b9c5383f-dd16-4020-a11a-e4991b6cd182 (id: 0)
+
+```
+#### Evacuate instance khi node compute bị hỏng
+Sử dụng lệnh `nova evacuate` để đưa VM từ node compute vừa bị hỏng sang node đang chạy. 
+Gửi toàn bộ: `nova host-evacuate --target_host TARGET_HOST FAILED_HOST`
+Gửi 1 server: `nova evacuate EVACUATED_SERVER_NAME HOST_B`
+```
+root@controller:~# openstack compute service list --service nova-compute
++----+--------------+----------+------+---------+-------+----------------------------+
+| ID | Binary       | Host     | Zone | Status  | State | Updated At                 |
++----+--------------+----------+------+---------+-------+----------------------------+
+|  7 | nova-compute | compute1 | nova | enabled | up    | 2020-03-17T05:02:57.000000 |
+|  8 | nova-compute | compute2 | nova | enabled | up    | 2020-03-17T05:02:53.000000 |
++----+--------------+----------+------+---------+-------+----------------------------+
+root@controller:~# openstack compute service list --service nova-compute
++----+--------------+----------+------+---------+-------+----------------------------+
+| ID | Binary       | Host     | Zone | Status  | State | Updated At                 |
++----+--------------+----------+------+---------+-------+----------------------------+
+|  7 | nova-compute | compute1 | nova | enabled | down  | 2020-03-17T05:03:17.000000 |
+|  8 | nova-compute | compute2 | nova | enabled | up    | 2020-03-17T05:42:13.000000 |
++----+--------------+----------+------+---------+-------+----------------------------+
+root@controller:~# nova host-evacuate --target_host compute2 compute1
++--------------------------------------+-------------------+---------------+
+| Server UUID                          | Evacuate Accepted | Error Message |
++--------------------------------------+-------------------+---------------+
+| a04e13c0-4362-494b-bae2-72b7ffea3770 | True              |               |
+| d82aff21-0310-40b0-bae0-fb12dd64688a | True              |               |
+| 09e5e4cf-a8e5-4aee-b403-c5521fc553d9 | True              |               |
+| ac3c68d4-4e56-4369-9e4a-be185addb669 | True              |               |
++--------------------------------------+-------------------+---------------+
+
+```
+## Bổ sung thêm cinder và ceph 
+![](https://raw.githubusercontent.com/lmq1999/123/master/Openstack_HA_2.jpg)
+**Cấu hình cinder và ceph như theo 2 hướng dẫn sau:**
+**Cinder**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Openstack_cinder.md
+**Ceph**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Ceph_Openstack.md
+
+*   **Chú ý** 
+    *   Khi cấu hình **Cinder**, vẫn theo chú ý ở trên về `transport_url, endpoint, database, ...`    
+    *   Khi cấu hình **ceph** phải đưa file cấu hình ceph và cấu hình trên **tất cả** các node 
+
+Khi đã cấu hình thêm ceph, thì các node controller không lưu vào file `/var/lib/glance/images/` nữa mà lưu vào ceph, thế nên không cần phải scp hoặc shared storage cho file đó nữa. 
