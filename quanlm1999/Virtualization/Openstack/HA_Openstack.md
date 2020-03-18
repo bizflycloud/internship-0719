@@ -556,3 +556,4 @@ root@controller:~# nova host-evacuate --target_host compute2 compute1
     *   Khi cấu hình **ceph** phải đưa file cấu hình ceph và cấu hình trên **tất cả** các node 
 
 Khi đã cấu hình thêm ceph, thì các node controller không lưu vào file `/var/lib/glance/images/` nữa mà lưu vào ceph, thế nên không cần phải scp hoặc shared storage cho file đó nữa. 
+Tượng tự khi dùng ceph làm backend của cinder, khi 1 node cinder chết thì volumes đấy vẫn có thể truy cập được
