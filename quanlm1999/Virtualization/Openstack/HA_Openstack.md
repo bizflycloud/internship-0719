@@ -545,18 +545,24 @@ root@controller:~# nova host-evacuate --target_host compute2 compute1
 +--------------------------------------+-------------------+---------------+
 
 ```
+
+#### Chú ý: Nếu như không cài ceph mà lưu trên máy tại `/var/lib/"Service"/` và không dùng shared storage. Khi copy datapath sang phải cấp lại quyền truy cập cho user và group glance  nếu không sẽ bị lỗi `'Exceeded maximum number of retries. Exhausted all hosts available for retrying build failures for instance`
+
 ## Bổ sung thêm cinder và ceph 
 ![](https://raw.githubusercontent.com/lmq1999/123/master/Openstack_HA_2.jpg)
 **Cấu hình cinder và ceph như theo 2 hướng dẫn sau:**
-
 **Cinder**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Openstack_cinder.md
+
+Khi cấu hình xong Cinder, vì backend là LVM nên chưa được HA. Cần cài thêm ceph làm backend theo hướng dẫn sau:
 
 **Ceph**: https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/Virtualization/Openstack/Ceph_Openstack.md
 
 *   **Chú ý** 
     *   Khi cấu hình **Cinder**, vẫn theo chú ý ở trên về `transport_url, endpoint, database, ...`    
     *   Khi cấu hình **ceph** phải đưa file cấu hình ceph và cấu hình trên **tất cả** các node 
+    *   Trong khi cấu hình ceph đoạn **Tích hợp CEPH với Cinder**, tạo **UUID trên 1 node  compute** và các node compute khác đều **dùng chung UUID** đấy để tạo secret.
 
 Khi đã cấu hình thêm ceph, thì các node controller không lưu vào file `/var/lib/glance/images/` nữa mà lưu vào ceph, thế nên không cần phải scp hoặc shared storage cho file đó nữa. 
 
-Tượng tự khi dùng ceph làm backend của cinder, khi 1 node cinder chết thì volumes đấy vẫn có thể truy cập được
+Tương tự với volume và vms. Đều được lưu trên ceph chứ không còn lưu trên các node controller/compute/cinder nữa.
+
