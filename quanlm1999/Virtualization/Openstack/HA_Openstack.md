@@ -546,7 +546,7 @@ root@controller:~# nova host-evacuate --target_host compute2 compute1
 
 ```
 
-#### Chú ý: Nếu như không cài ceph mà lưu trên máy tại `/var/lib/"Service"/` và không dùng shared storage. Khi copy datapath sang phải cấp lại quyền truy cập cho user và group của service đó trên tất cả các node controller nếu không sẽ bị lỗi `'Exceeded maximum number of retries. Exhausted all hosts available for retrying build failures for instance` do HAproxy có thể đưa lệnh tạo qua 1 node controller khác node mình sử dụng
+#### Chú ý: Nếu như không cài ceph mà lưu trên máy tại `/var/lib/"Service"/` và không dùng shared storage. Khi copy datapath sang phải cấp lại quyền truy cập cho user và group glance  nếu không sẽ bị lỗi `'Exceeded maximum number of retries. Exhausted all hosts available for retrying build failures for instance`
 
 ## Bổ sung thêm cinder và ceph 
 ![](https://raw.githubusercontent.com/lmq1999/123/master/Openstack_HA_2.jpg)
@@ -565,4 +565,58 @@ Khi cấu hình xong Cinder, vì backend là LVM nên chưa được HA. Cần c
 Khi đã cấu hình thêm ceph, thì các node controller không lưu vào file `/var/lib/glance/images/` nữa mà lưu vào ceph, thế nên không cần phải scp hoặc shared storage cho file đó nữa. 
 
 Tương tự với volume và vms. Đều được lưu trên ceph chứ không còn lưu trên các node controller/compute/cinder nữa.
+
+Khác biệt giữa lưu vào file và vào ceph
+```
+root@quanlm-controller-1:~# openstack image list
++--------------------------------------+-------------+--------+
+| ID                                   | Name        | Status |
++--------------------------------------+-------------+--------+
+| afd81304-3560-41cb-8d36-f9b0463155d8 | cirros      | active |
+| 9d84a509-affc-4a5b-b093-b4ae162e3275 | cirros-ceph | active |
++--------------------------------------+-------------+--------+
+root@quanlm-controller-1:~# locate afd81304-3560-41cb-8d36-f9b0463155d8
+/var/lib/glance/images/afd81304-3560-41cb-8d36-f9b0463155d8
+root@quanlm-controller-1:~# locate 9d84a509-affc-4a5b-b093-b4ae162e3275
+root@quanlm-controller-1:~# 
+
+root@quanlm-ceph--1:~# rbd -p images list
+9d84a509-affc-4a5b-b093-b4ae162e3275
+```
+
+Tương tự với volume:
+```
+root@quanlm-controller-1:~# openstack volume create --size 1 --type ceph ceph_volume_1G
++---------------------+--------------------------------------+
+| Field               | Value                                |
++---------------------+--------------------------------------+
+| attachments         | []                                   |
+| availability_zone   | nova                                 |
+| bootable            | false                                |
+| consistencygroup_id | None                                 |
+| created_at          | 2020-03-19T08:36:13.000000           |
+| description         | None                                 |
+| encrypted           | False                                |
+| id                  | 9b54ba5f-cf74-4381-b710-e783227c1e54 |
+| migration_status    | None                                 |
+| multiattach         | False                                |
+| name                | ceph_volume_1G                       |
+| properties          |                                      |
+| replication_status  | None                                 |
+| size                | 1                                    |
+| snapshot_id         | None                                 |
+| source_volid        | None                                 |
+| status              | creating                             |
+| type                | ceph                                 |
+| updated_at          | None                                 |
+| user_id             | dc778547b0d646b083941ccadfc76642     |
++---------------------+--------------------------------------+
+root@quanlm-controller-1:~# updatedb
+root@quanlm-controller-1:~# locate 9b54ba5f-cf74-4381-b710-e783227c1e54
+root@quanlm-controller-1:~# 
+
+root@quanlm-ceph--1:~# rbd -p volumes list
+volume-9b54ba5f-cf74-4381-b710-e783227c1e54
+```
+Vì đã HA nên kể cả khi 1 trong 2 node cinder bị lỗi, vẫn có thể hoạt động được do backend nằm ở ceph.
 
