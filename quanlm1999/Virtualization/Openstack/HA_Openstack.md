@@ -546,7 +546,7 @@ root@controller:~# nova host-evacuate --target_host compute2 compute1
 
 ```
 
-#### Chú ý: Nếu như không cài ceph mà lưu trên máy tại `/var/lib/"Service"/` và không dùng shared storage. Khi copy datapath sang phải cấp lại quyền truy cập cho user và group glance  nếu không sẽ bị lỗi `'Exceeded maximum number of retries. Exhausted all hosts available for retrying build failures for instance`
+#### Chú ý: Nếu như không cài ceph mà lưu trên máy tại `/var/lib/"Service"/` và không dùng shared storage. Khi copy datapath sang phải cấp lại quyền truy cập cho user và group của service đó trên tất cả các node controller nếu không sẽ bị lỗi `'Exceeded maximum number of retries. Exhausted all hosts available for retrying build failures for instance` do HAproxy có thể đưa lệnh tạo qua 1 node controller khác node mình sử dụng
 
 ## Bổ sung thêm cinder và ceph 
 ![](https://raw.githubusercontent.com/lmq1999/123/master/Openstack_HA_2.jpg)
