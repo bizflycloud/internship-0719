@@ -129,6 +129,7 @@ Lợi ích của docker bao gồm:
 
 ![](https://raw.githubusercontent.com/hocchudong/ghichep-docker/master/images/docker-native-network-inhost.png)
 
+![](https://image.slidesharecdn.com/containernetworkingdeepdive-170414164547/95/container-networking-deep-dive-19-1024.jpg?cb=1492188410)
 *   Các interface, bridges trên máy labs
 ```
 root@docker-labs:~# ip a
@@ -185,3 +186,76 @@ docker0         8000.0242fb28eb5d       no              veth2b43262
     * `anonymous volume`- tương tự như `named volume`. Tuy nhiên rất khó để có thể tham vấn tới cùng một volume theo thời gian khi volume là một đối tượng vô danh. Lưu trữ các tập tin mà Docker xử lý.
 
 ____
+
+# Cài đặt Docker Community Engine
+****
+####    Cài đặt sử dụng repository
+
+Cập nhật chỉ mục:  `apt update`
+
+Cài đắt gói cho phép sử dụng repository qua HTTPS
+`sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common`
+
+Thêm GPG key của Docker
+`curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
+
+Kiểm tra keyprint có giống không: `9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88`
+Kiểm tra 8 ký tự ở cuối sử dụng câu lệnh: 
+```
+sudo apt-key fingerprint 0EBFCD88
+    
+pub   rsa4096 2017-02-22 [SCEA]
+      9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
+sub   rsa4096 2017-02-22 [S]
+```
+
+Thêm repository:
+```
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+```
+####   Cài đặt Docker Engine - Community
+Cập nhât chỉ mục `sudo apt-get update`
+
+Cài Docker engine community
+`sudo apt-get install docker-ce docker-ce-cli containerd.io`
+
+Sau khi cài xong, chạy `sudo docker run hello-world` để kiểm tra 
+Kết quả:
+```
+root@docker-labs:~# docker run hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+```
+
+#### Cài đặt sử dụng gói
+Truy cập https://download.docker.com/linux/ubuntu/dists/
+Chọn phiên bản ubuntu, dẫn đến `pool/stable/`
+Chọn bản phù hợ với phần cứng, chọn bản muốn cài đặt download về
+
+Cài đặt gói sử dụng: `sudo dpkg -i  <vị trí file>.deb`
+
+Kiểm tra sử dụng câu lệnh ` sudo docker run hello-world`
+
