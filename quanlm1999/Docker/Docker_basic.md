@@ -259,3 +259,489 @@ Cài đặt gói sử dụng: `sudo dpkg -i  <vị trí file>.deb`
 
 Kiểm tra sử dụng câu lệnh ` sudo docker run hello-world`
 
+****
+# Một số thao tác với docker
+
+#### Chạy một container
+
+**Chạy một container tức là khởi chạy một ứng dụng nào đó trong container**
+```
+root@docker-labs:~# docker run busybox echo 'TEST'
+TEST
+```
+
+Ta có thể thấy khi chạy lệnh `docker ps`
+```
+CONTAINER ID        IMAGE                       COMMAND                  CREATED             STATUS                      PORTS               NAMES
+5a21162c7441        busybox                     "echo TEST"              27 seconds ago      Exited (0) 26 seconds ago                       suspicious_blackwell
+
+```
+```
+root@docker-labs:~# docker run busybox route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         172.17.0.1      0.0.0.0         UG    0      0        0 eth0
+172.17.0.0      *               255.255.0.0     U     0      0        0 eth0
+
+root@docker-labs:~# docker ps --all
+CONTAINER ID        IMAGE                       COMMAND                  CREATED              STATUS                          PORTS               NAMES
+e85442b0d827        busybox                     "route"                  5 seconds ago        Exited (0) 3 seconds ago                            clever_swirles
+```
+
+Ta có thể thấy:
+
+Cú pháp của câu lệnh là `docker run <image> <commands >`. Trong đó:
+
+*   docker: là tên lệnh để máy cài docker thực hiện thao tác với docker bằng CLI.
+*   run: là tùy chọn để thực hiện, ngoài run còn nhất nhiều các tùy chọn khác như images, pull, rm..., chúng ta sẽ khám phá sau.
+*   busybox: là tên images dùng để tạo các container.
+*   echo, route: là các lệnh sẽ được truyền vào trong container thực hiện.
+
+Khi thực hiện lệnh `docker run` thì máy sẽ tiến hành tìm kiếm images được chỉ định trong **localhost**, nếu không có thì mặc nó sẽ thực hiện pulled từ **registry Docker Hub** về máy cài docker. Registry Docker Hub là một kho lưu trữ các images. Ta cũng có thể sử dụng một registry local - tức là một registry offline trong nội bộ mạng LAN.
+
+**Thao tác với một container với chế độ tương tác**
+`
+root@docker-labs:~# docker run -i busybox
+`
+```
+ls
+bin
+dev
+etc
+home
+proc
+root
+sys
+tmp
+usr
+var
+route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         172.17.0.1      0.0.0.0         UG    0      0        0 eth0
+172.17.0.0      *               255.255.0.0     U     0      0        0 eth0
+```
+`docker run -t busybox`
+```
+root@docker-labs:~# docker run -t busybox
+/ # ls
+
+^C
+/ # 
+```
+
+`docker run -it busybox`
+```
+root@docker-labs:~# docker run -it busybox
+/ # ls
+bin   dev   etc   home  proc  root  sys   tmp   usr   var
+/ # route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         172.17.0.1      0.0.0.0         UG    0      0        0 eth0
+172.17.0.0      *               255.255.0.0     U     0      0        0 eth0
+/ # 
+```
+
+Ta có thể thấy trong phần trên ta đã sử dụng tùy chọn -it, trong đó -i là tùy chọn sử dụng để tạo container với chế độ tương tác, tùy chọn -t là tùy chọn mở ra một phiên làm việc. Nếu chỉ sử dụng tùy chọn -i thì chúng ta sẽ mở ra một section và đóng lại luôn. Nếu sử dụng chỉ tùy chọn -t thì sẽ mở ra một section và không thao tác được.
+
+**Tạo một container với chế độ deamon,**sử dụng tùy chọn `-d`
+
+Thông thường, khi tạo một container với các tùy chọn trước thì sau khi tạo xong hoặc thoát container thì ngay lập tức container đó sẽ dừng hoạt động. Trong một số trường hợp ta sẽ cần các container chạy ngầm, trong trường hợp này ta sử dụng tùy chọn -d.
+
+`docker run -d httpd`
+```
+root@docker-labs:~# docker run -d httpd
+e1d5d40f31ffcfe2a0abf095073b924c924fdd02a4235e431a94173eb644fe7a
+```
+Ta kiểm tra trên `docker ps`
+```
+root@docker-labs:~# docker ps
+CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS              PORTS               NAMES
+e1d5d40f31ff        httpd               "httpd-foreground"   5 seconds ago       Up 4 seconds        80/tcp              modest_rubin
+root@docker-labs:~# docker ps -a
+CONTAINER ID        IMAGE                       COMMAND                  CREATED             STATUS                      PORTS               NAMES
+e1d5d40f31ff        httpd                       "httpd-foreground"       14 seconds ago      Up 12 seconds               80/tcp              modest_rubin
+e51fa6676e32        busybox                     "sh"                     6 minutes ago       Exited (0) 5 minutes ago                        hopeful_elbakyan
+f4623dbb61b4        busybox                     "sh"                     6 minutes ago       Exited (0) 6 minutes ago                        quirky_black
+182606f0cb2e        busybox                     "sh"                     12 minutes ago      Exited (0) 10 minutes ago                       keen_hoover
+e85442b0d827        busybox                     "route"                  20 minutes ago      Exited (0) 20 minutes ago                       clever_swirles
+5a21162c7441        busybox                     "echo TEST"              21 minutes ago      Exited (0) 21 minutes ago                       suspicious_blackwell
+
+```
+Ở cột `STATUS` ta có thế thấy  container vừa tạo vẫn **Up**, trong khi những container trước đó đã **Exited**
+
+**Tạo một container với port chỉ định** sử dụng tùy chọn `-p`
+
+Nếu không chỉ định tùy chọn `-p` cho container thì thường container sinh ra sẽ có một port mặc định nào đó, lúc đó ta muốn sử dụng container đó thì phải đứng ở máy chứa container và thao tác.
+
+Do vậy, để ánh xạ port của container ra bên ngoài - giúp các máy ngoài container có thể sử dụng được thì ta cần dùng tùy chọn -p
+
+Tạo ra một container chạy web và ánh xạ **port 4000 của máy host** tới **port 80 của container** được sinh ra.
+
+`docker run -d -p 4000:80 httpd`
+```
+root@docker-labs:~# docker run -d -p 4000:80 httpd
+d191f46b282ec5047c86db1168fd10f785c56fa9d22568ce9e532817c2ccc01f
+root@docker-labs:~# docker ps
+CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS              PORTS                  NAMES
+d191f46b282e        httpd               "httpd-foreground"   5 seconds ago       Up 3 seconds        0.0.0.0:4000->80/tcp   funny_knuth
+```
+
+Tra trên `netstat`
+```
+root@docker-labs:~# netstat -tupln | grep 4000
+tcp6       0      0 :::4000                 :::*                    LISTEN      6198/docker-proxy   
+```
+
+Sử dụng lên **curl** ở trên máy host:
+```
+quanlm@quanlm-desktop:~$ curl 192.168.122.131:4000
+<html><body><h1>It works!</h1></body></html>
+```
+
+Sử dụng tùy chọn `-P` để ánh xạ 1 port ngẫu nhiên:
+```
+root@docker-labs:~# docker run -d -P nginx
+Unable to find image 'nginx:latest' locally
+latest: Pulling from library/nginx
+68ced04f60ab: Already exists 
+28252775b295: Pull complete 
+a616aa3b0bf2: Pull complete 
+Digest: sha256:2539d4344dd18e1df02be842ffc435f8e1f699cfc55516e2cf2cb16b7a9aea0b
+Status: Downloaded newer image for nginx:latest
+cc2febe0f23e83468904cb4cbdb7d2a3df17324d85ccf00e37359bdd46573df1
+
+root@docker-labs:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                   NAMES
+cc2febe0f23e        nginx               "nginx -g 'daemon of…"   59 seconds ago      Up 56 seconds       0.0.0.0:32768->80/tcp   vigorous_dewdney
+
+```
+
+Sử dụng lên **curl**
+```
+quanlm@quanlm-desktop:~$ curl 192.168.122.131:32768
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at 
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+```
+**Thao tác với container đang chạy**
+
+Để thảo tác với 1 container đang chạy, ta sử dụng câu lệnh `docker exec -it <container_ID> /bin/bash`
+`docker exec -it cc2febe0f23e /bin/bash`
+```
+root@docker-labs:~# docker exec -it cc2febe0f23e /bin/bash
+root@cc2febe0f23e:/# ls
+bin  boot  dev	etc  home  lib	lib64  media  mnt  opt	proc  root  run  sbin  srv  sys  tmp  usr  var
+root@cc2febe0f23e:/# exit
+exit
+root@docker-labs:~# 
+
+```
+
+**Chỉ định RAM và CPU cho một container**
+Một container có thể chỉ định lượng RAM và CPU và đặt tên kia tạo.  
+
+`docker run -d -p 4000:80 --name webserver --memory 400m --cpus 0.5 httpd`
+```
+root@docker-labs:~# docker run -d -p 4000:80 --name webserver --memory 400m --cpus 0.5 httpd
+WARNING: Your kernel does not support swap limit capabilities or the cgroup is not mounted. Memory limited without swap.
+e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe
+
+```
+
+**Kiểm tra nội dung, logs, port của container**
+Sử dụng `docker inspect <ID>`
+```
+root@docker-labs:~# docker inspect e5aee4533dd8
+[
+    {
+        "Id": "e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe",
+        "Created": "2020-03-26T03:31:01.129220747Z",
+        "Path": "httpd-foreground",
+        "Args": [],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 7192,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2020-03-26T03:31:02.870459386Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:c5a012f9cf45ce0634f5686cfb91009113199589bd39b683242952f82cf1cec1",
+        "ResolvConfPath": "/var/lib/docker/containers/e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe/hostname",
+        "HostsPath": "/var/lib/docker/containers/e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe/hosts",
+        "LogPath": "/var/lib/docker/containers/e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe/e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe-json.log",
+        "Name": "/webserver",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "default",
+            "PortBindings": {
+                "80/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "4000"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "Capabilities": null,
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 419430400,
+            "NanoCpus": 500000000,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "KernelMemory": 0,
+            "KernelMemoryTCP": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": -1,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/527b2d25d2ba2ad27d01854c76ee8f48a7f7c3bc9444cbb0ef8f6cc8605b22c6-init/diff:/var/lib/docker/overlay2/61e44c63359e1ef6789f47b24ffa758473238a47d4f6b9c4791921d19c10acf6/diff:/var/lib/docker/overlay2/d7c8b54cdbfb26c9b56b7a8f44a5dd2dc349db5ec9b7b3ea1c614bb01406971b/diff:/var/lib/docker/overlay2/f7385ebb7c88d048ebdff3499326cbbe8438967aa58d0219b830fb56da92417b/diff:/var/lib/docker/overlay2/5acd055ba3e48a949e9213c3a1abd4f41abfd31262d1f303923fbae8f536196e/diff:/var/lib/docker/overlay2/e8b1b2cfd59d821aca48795ac8bdd5ec2c1a6b6971a6acb10ce8d9a8a73a116a/diff",
+                "MergedDir": "/var/lib/docker/overlay2/527b2d25d2ba2ad27d01854c76ee8f48a7f7c3bc9444cbb0ef8f6cc8605b22c6/merged",
+                "UpperDir": "/var/lib/docker/overlay2/527b2d25d2ba2ad27d01854c76ee8f48a7f7c3bc9444cbb0ef8f6cc8605b22c6/diff",
+                "WorkDir": "/var/lib/docker/overlay2/527b2d25d2ba2ad27d01854c76ee8f48a7f7c3bc9444cbb0ef8f6cc8605b22c6/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "e5aee4533dd8",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/apache2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "HTTPD_PREFIX=/usr/local/apache2",
+                "HTTPD_VERSION=2.4.41",
+                "HTTPD_SHA256=133d48298fe5315ae9366a0ec66282fa4040efa5d566174481077ade7d18ea40",
+                "HTTPD_PATCHES="
+            ],
+            "Cmd": [
+                "httpd-foreground"
+            ],
+            "Image": "httpd",
+            "Volumes": null,
+            "WorkingDir": "/usr/local/apache2",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {},
+            "StopSignal": "SIGWINCH"
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "3e64cebdae101d0c0ad63c408ba31ff6a061f9d96a98a20020cd98074716da8b",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {
+                "80/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "4000"
+                    }
+                ]
+            },
+            "SandboxKey": "/var/run/docker/netns/3e64cebdae10",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "ae22d90d67399ef53c8e4e7be760975b81e866272d51536d7523a4cda87593d2",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.2",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "02:42:ac:11:00:02",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "277e740aa807c2512da6172da98fc975da2711e9b4ea359b35a53e592ee158ab",
+                    "EndpointID": "ae22d90d67399ef53c8e4e7be760975b81e866272d51536d7523a4cda87593d2",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:02",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]
+
+```
+
+Kiểm tra **logs** của containers sử dụng lệnh `docker logs -f <ID>`
+```
+root@docker-labs:~# docker logs -f e5aee4533dd8
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+[Thu Mar 26 03:31:02.936195 2020] [mpm_event:notice] [pid 1:tid 140127243449472] AH00489: Apache/2.4.41 (Unix) configured -- resuming normal operations
+[Thu Mar 26 03:31:02.936362 2020] [core:notice] [pid 1:tid 140127243449472] AH00094: Command line: 'httpd -D FOREGROUND'
+
+```
+
+Kiểm tra **port** của container sử dụng câu lệnh: `docker port <ID>`
+```
+root@docker-labs:~# docker port e5aee4533dd8
+80/tcp -> 0.0.0.0:4000
+```
+
+Dừng, khởi động,xóa Container 
+Sử dụng lệnh `Docker stop/start/rm (rm -f)` để dừng, xóa các container
+```
+root@docker-labs:~# docker ps
+CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS              PORTS                  NAMES
+e5aee4533dd8        httpd               "httpd-foreground"   13 minutes ago      Up 13 minutes       0.0.0.0:4000->80/tcp   webserver
+root@docker-labs:~# docker stop e5aee4533dd8
+e5aee4533dd8
+root@docker-labs:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS                     PORTS               NAMES
+e5aee4533dd8        httpd               "httpd-foreground"   14 minutes ago      Exited (0) 3 seconds ago                       webserver
+root@docker-labs:~# docker start e5aee4533dd8
+e5aee4533dd8
+root@docker-labs:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS              PORTS                  NAMES
+e5aee4533dd8        httpd               "httpd-foreground"   14 minutes ago      Up 4 seconds        0.0.0.0:4000->80/tcp   webserver
+
+```
+Để xóa containter với lệnh `docker rm <ID>` thì container phải stop trước
+```
+root@docker-labs:~# docker rm e5aee4533dd8
+Error response from daemon: You cannot remove a running container e5aee4533dd8ed5e901a88d8d9b4e8ba9ce61fab3a998e20a3e819413ab81cbe. Stop the container before attempting removal or force remove
+```
+Nếu như dùng lệnh `docker rm -f` thì không cần thiết phải stop 
+```
+root@docker-labs:~# docker rm -f e5aee4533dd8
+e5aee4533dd8
+root@docker-labs:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+```
