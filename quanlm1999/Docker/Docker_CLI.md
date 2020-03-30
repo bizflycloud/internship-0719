@@ -6,6 +6,7 @@ Câu lệnh `docker search`:
 * Cú pháp:
     `docker search [OPTIONS] TERM`
     trong đó:
+    
     | Options | Mặc định | Mô tả |
     | ------------- | ------------- | ------------- |
     | --limit | 25 | Max number of search results |
