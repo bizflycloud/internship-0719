@@ -1,14 +1,14 @@
 # nova-scheduler
 
 
-# Filter Scheduler
+## Filter Scheduler
 
-## Khái niệm
+### Khái niệm
 - **Filter Scheduler** hỗ trợ *filtering* và *weighting* để quyết định instance mới được tạo trên node Compute nào. Scheduler chỉ hỗ trợ nodes Compute.  
 
 
-## 1.2.Filtering
-<img src="../images/nova-scheduler1.png" />
+### Filtering
+![](https://github.com/hocchudong/thuctap012017/raw/master/XuanSon/OpenStack/Nova/images/nova-scheduler1.png)
 
 \- Trong quá trính làm việc, Filter Scheduler lặp đi lặp lại trên nodes Compute được tìm thấy, đánh giá lại đói với mỗi thiết lập của filters. Dánh sách kết quả các hosts được sắp xếp bởi weighers. Scheduler sau đó chọn hosts có weighted cao nhất cho instance..  
 \- Nếu Scheduler không thể tìm thấy host phù hợp cho instance, nó có nghĩa là không có hosts thích hợp cho việc tạo instance.  
@@ -47,24 +47,21 @@
 - `MetricsFilter` 
 - `NUMATopologyFilter`
 
-<a name="1.3"></a>
-## 1.3.Weights
-\- Filter Scheduler sử udngj lời gọi đến weights để làm việc. Weigher là phương pháp để chọn host phù hợp nhất từ nhóm các host có hiệu lực.  
+### Weights
+\- Filter Scheduler sử dụng lời gọi đến weights để làm việc. Weigher là phương pháp để chọn host phù hợp nhất từ nhóm các host có hiệu lực.  
 \- Để ưu tiên 1 weigher só với weigher khác, tất cả các weigher cần phải xác định multiplier sẽ được áp dụng trước khi tính toán weight cho node. Tất cả weights được chuẩn hóa trước khi multiplier có thể được áp dụng. Do đó, weight cuối dùng của object sẽ là :  
-```
+`
 weight = w1_multiplier * norm(w1) + w2_multiplier * norm(w2) + ...
-```
+`
 
-<img src="../images/nova-scheduler2.png" />
+![](https://github.com/hocchudong/thuctap012017/raw/master/XuanSon/OpenStack/Nova/images/nova-scheduler2.png)
 
-<img src="../images/nova-scheduler3.png" />
+![](https://github.com/hocchudong/thuctap012017/raw/master/XuanSon/OpenStack/Nova/images/nova-scheduler3.png)
 
-<a name="2"></a>
-# 2.Compute scheduler
+## Compute scheduler
 \- Compute sử dụng `nova-scheduler` service để xác định host chó việc tạo instance dự trên cơ chế filtering và weighting.  
 
-<a name="2.2"></a>
-## 2.1.Cấu hình filtering
+### Cấu hình filtering
 \- Compute được cấu hình với tùy chọn scheduler mặc định trong file `/etc/nova/nova.conf` trên node Controller :  
 ```
 scheduler_driver_task_period = 60
@@ -101,8 +98,7 @@ scheduler_available_filters = myfilter.MyFilter
 scheduler_default_filters = RetryFilter, AvailabilityZoneFilter, RamFilter, ComputeFilter, ComputeCapabilitiesFilter, ImagePropertiesFilter, ServerGroupAntiAffinityFilter, ServerGroupAffinityFilter
 ```
 
-<a name="2.2"></a>
-## 2.2.Cấu hình weighting
+### Cấu hình weighting
 \- Nếu cells được sử dụng, cells được weighted bởi scheduler tương tự như các hosts.  
 \- Hosts và cells được weighted dựa trên tùy chọn trong file /etc/nova/nova.conf :  
 
