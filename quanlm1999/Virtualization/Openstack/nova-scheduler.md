@@ -60,8 +60,15 @@ weight = w1_multiplier * norm(w1) + w2_multiplier * norm(w2) + ...
 
 ## Compute scheduler
 \- Compute sử dụng `nova-scheduler` service để xác định host chó việc tạo instance dự trên cơ chế filtering và weighting.  
-\- Vị trí:
+**\- Vị trí:**
 ![](https://github.com/hocchudong/thuctap012017/raw/master/DucPX/OpenStack/Nova/images/computeservice.png)
+
+**Biểu đồ tuần tự hoạt động nova**
+![](https://github.com/hocchudong/thuctap012017/raw/master/XuanSon/OpenStack/Nova/images/nova-quatrinhboot1.png)
+
+![](https://github.com/hocchudong/thuctap012017/raw/master/XuanSon/OpenStack/Nova/images/nova-quatrinhboot2.png)
+
+
 ### Cấu hình filtering
 \- Compute được cấu hình với tùy chọn scheduler mặc định trong file `/etc/nova/nova.conf` trên node Controller :  
 ```
