@@ -32,3 +32,5 @@ Kiến trúc và giới hạn của cell V1
 
 ### Cell v2
 ![](https://github.com/bizflycloud/internship-0719/blob/master/quanlm1999/pic/Annotation%202020-04-22%20105707.png?raw=true)
+
+![](https://docs.openstack.org/nova/latest/_images/graphviz-17c429adfdf6632f4cae2b5f8b88669039646ea3.png)
