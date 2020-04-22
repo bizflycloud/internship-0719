@@ -29,23 +29,7 @@
 - `DiskFilter`: filters host bởi disk. Chỉ hosts có đủ không gian disk được duyệt. 
 - `AggregateDiskFilter`: filters hosts bởi disk với mỗi aggregate `disk_allocation_ratio` được thiết lập.
 - `NumInstancesFilter`: filters node computes bởi số instance đang chạy. Nodes có quá nhiều instances sẽ được filter, thiếp lập `max_instances_per_host` . Số instance max được cho phép chạy trên hosts. Host sẽ phớt lờ đi scheduer nếu nhiều hơn `max_instances_per_host` sẵn sàng trên hosts. 
-- `AggregateNumInstancesFilter` :
-- `IoOpsFilter` :
-- `AggregateIoOpsFilter` :
-- `PciPassthroughFilter` :
-- `SimpleCIDRAffinityFilter` :
-- `DifferentHostFilter`:
-- `SameHostFilter`:
 - `RetryFilter`: filter hosts đã được duyệt bởi scheduler. Bộ lọc này ngăn chặn scheduler lọc thử lại với các hosts không phù hợp với các bộ lọc trước.
-- `TrustedFilter`:
-- `TypeAffinityFilter`: 
-- `AggregateTypeAffinityFilter` 
-- `ServerGroupAntiAffinityFilter` 
-- `ServerGroupAffinityFilter` 
-- `AggregateMultiTenancyIsolation` 
-- `AggregateImagePropertiesIsolation` 
-- `MetricsFilter` 
-- `NUMATopologyFilter`
 
 ### Weights
 \- Filter Scheduler sử dụng lời gọi đến weights để làm việc. Weigher là phương pháp để chọn host phù hợp nhất từ nhóm các host có hiệu lực.  
