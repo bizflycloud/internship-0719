@@ -201,6 +201,8 @@ Sau khi cấu hình xong, thì những máy được tạo bởi flavor m1.nano 
 
 #### Thỏa mãn yêu cầu schedule các VM của project này vào 1 vài compute node riêng biệt
 
+Nhược điểm: Chỉ có user thuộc project mới có thể sử dụng nodes compute đó, nhưng user không thuộc không sử dụng được
+
 Với user admin, không thuộc project thì lúc tạo VM sẽ lỗi
 ```
 root@controller:~# . admin-openrc 
