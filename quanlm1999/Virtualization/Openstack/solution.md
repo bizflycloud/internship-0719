@@ -1,4 +1,4 @@
-# Giải pháp schedule VM của project và các node compute riêng biệt
+# Giải pháp schedule VM của project vào 1 vài các node compute riêng biệt
 
 #### Cách 1 
 Chỉ định xem VM sẽ được tạo ở node compute nào: 
